@@ -1,0 +1,136 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: #f4f7fa;
+}
+
+/* Navbar */
+.navbar {
+  background: #222;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  align-items: center;
+}
+
+.navbar .logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  gap: 1.5rem;
+}
+
+.navbar a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.navbar a:hover,
+.navbar a.active {
+  color: #ff6600;
+}
+
+/* Hero */
+.hero {
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+  color: white;
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.hero img {
+  width: 160px;
+  border-radius: 50%;
+  border: 4px solid white;
+  margin-bottom: 1rem;
+}
+
+.hero h2 {
+  font-size: 2rem;
+}
+
+.hero h3 {
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+.hero .btn {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.8rem 1.5rem;
+  background: #ff6600;
+  color: white;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.hero .btn:hover {
+  background: #e65c00;
+}
+
+/* Skills Section */
+.skills {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.skills h2 {
+  margin-bottom: 2rem;
+  color: #4f46e5;
+}
+
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.skills-grid .card {
+  background: #fff;
+  padding: 1.2rem;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+  font-weight: 500;
+}
+
+/* Content Sections */
+.content {
+  padding: 3rem 2rem;
+  max-width: 900px;
+  margin: auto;
+}
+
+.content h2, .content h3 {
+  color: #4f46e5;
+  margin-bottom: 1rem;
+}
+
+.content ul {
+  margin-top: 1rem;
+  padding-left: 1.2rem;
+  list-style: square;
+}
+
+/* Footer */
+footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+}
