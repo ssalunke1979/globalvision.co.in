@@ -4,99 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About | Santosh Salunke</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      line-height: 1.6;
-      background-color: #f8f9fa;
-    }
-
-    header {
-      background-color: #1f2937;
-      color: #fff;
-      padding: 1rem;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .navbar ul {
-      list-style: none;
-      display: flex;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar ul li {
-      margin-left: 1.5rem;
-    }
-
-    .navbar ul li a {
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .navbar ul li a.active {
-      text-decoration: underline;
-    }
-
-    .content {
-      max-width: 900px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    h2, h3 {
-      color: #1f2937;
-    }
-
-    ul li {
-      margin-bottom: 0.5rem;
-    }
-
-    .certifications {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .cert-card {
-      flex: 1 1 250px;
-      background-color: #f1f5f9;
-      padding: 1rem;
-      text-align: center;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .cert-card img {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 0.5rem;
-      border-radius: 5px;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1rem;
-      background-color: #1f2937;
-      color: #fff;
-      margin-top: 2rem;
-    }
-  </style>
 </head>
 <body>
+  <!-- Navbar -->
   <header>
     <nav class="navbar">
       <h1 class="logo">Santosh Salunke</h1>
@@ -108,54 +20,31 @@
     </nav>
   </header>
 
-  <section class="content">
-    <h2>About Me</h2>
-    <p>
-      I am <strong>Santosh Salunke</strong>, a <strong>Senior DevOps Engineer</strong> at 
-      <em>Cybage Software Pvt. Ltd.</em> with <strong>13+ years of professional experience</strong>.  
-      My expertise lies in delivering secure, scalable, and automated cloud & DevOps solutions for enterprise clients.
-    </p>
-
-    <h3>🔧 Technical Skills</h3>
-    <ul>
-      <li>☁️ Cloud: <strong>Azure, AWS</strong></li>
-      <li>🚀 Container Orchestration: <strong>Kubernetes (EKS, AKS)</strong></li>
-      <li>📦 Containers: <strong>Docker</strong></li>
-      <li>⚙️ Infrastructure as Code: <strong>Terraform, Terragrunt</strong></li>
-      <li>🔄 CI/CD: <strong>Jenkins, Codefresh Pipelines, ArgoCD</strong></li>
-      <li>🐍 Automation & Scripting: <strong>Python, Shell</strong></li>
-      <li>🖥️ Linux Administration: <strong>RHEL 5/6 (Certified)</strong></li>
-      <li>📊 Monitoring: <strong>Prometheus, Grafana, ELK</strong></li>
-    </ul>
-
-    <h3>🏆 Certifications</h3>
-    <div class="certifications">
-      <div class="cert-card">
-        <img src="assets/aws-cert.png" alt="AWS Certified Solutions Architect – Associate">
-        <p>AWS Certified Solutions Architect – Associate</p>
-      </div>
-      <div class="cert-card">
-        <img src="assets/azure-cert.png" alt="Microsoft Certified: Azure Administrator Associate">
-        <p>Microsoft Certified: Azure Administrator Associate</p>
-      </div>
-      <div class="cert-card">
-        <img src="assets/rhel-cert.png" alt="Red Hat Certified Engineer">
-        <p>Red Hat Certified Engineer – RHEL 5/6</p>
-      </div>
+  <!-- About Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>About Me</h2>
+      <p>Hello! I am <strong>Santosh Salunke</strong>, a Senior DevOps Engineer at Cybage Software Pvt. Ltd. I have 13+ years of experience in building scalable, automated, and secure cloud solutions. I specialize in cloud platforms (AWS & Azure), containerization (Docker, Kubernetes), CI/CD pipelines, infrastructure as code, and scripting (Python & Shell).</p>
+      <p>I am passionate about automating workflows, optimizing cloud infrastructure, and implementing DevOps best practices to deliver high-quality software solutions efficiently.</p>
     </div>
-
-    <h3>🏆 Career Highlights</h3>
-    <ul>
-      <li>Designed and implemented <strong>Kubernetes clusters</strong> with GitOps using ArgoCD.</li>
-      <li>Automated infrastructure deployments with <strong>Terraform & Terragrunt</strong>.</li>
-      <li>Built <strong>Codefresh CI/CD pipelines</strong> reducing deployment times by 70%.</li>
-      <li>Executed secure enterprise migrations to <strong>AWS & Azure</strong>.</li>
-      <li>Optimized system performance and reduced downtime through <strong>proactive monitoring</strong>.</li>
-    </ul>
   </section>
 
+  <!-- Skills Section (Optional: You can reuse same as index) -->
+  <section class="skills">
+    <h2>Certifications & Expertise</h2>
+    <div class="skills-grid">
+      <div class="card">AWS Solutions Architect – Associate</div>
+      <div class="card">Microsoft Azure Administrator</div>
+      <div class="card">Linux RHEL 5 & 6 Certified</div>
+      <div class="card">Terragrunt & Infrastructure as Code</div>
+      <div class="card">CI/CD Pipelines: Codefresh, ArgoCD</div>
+      <div class="card">Python & Shell Scripting</div>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer>
-    <p>© 2025 Santosh Salunke</p>
+    <p>© 2025 Santosh Salunke | DevOps Engineer | Powered by GitHub Pages</p>
   </footer>
 </body>
 </html>
