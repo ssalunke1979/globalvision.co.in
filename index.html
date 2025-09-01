@@ -12,7 +12,7 @@
   <!-- Navbar -->
   <header>
     <nav class="navbar">
-      <h1 class="logo">Santosh Salunke</h1>
+
       <ul>
         <li><a href="index.html" class="active">Home</a></li>
         <li><a href="about.html">About</a></li>
@@ -25,6 +25,7 @@
   <section class="hero">
     <div class="hero-content">
       <img src="assets/profile.jpg" alt="Santosh Salunke">
+	  <h1>Santosh Salunke</h1> 
       <h2>Sr. DevOps Engineer</h2>
       <h3>Cybage Software Pvt. Ltd.</h3>
       <p>13+ years of experience in building scalable, automated, and secure cloud solutions.</p>
@@ -32,19 +33,67 @@
     </div>
   </section>
 
-  <!-- Skills Section -->
-  <section class="skills">
-    <h2>Core Expertise</h2>
-    <div class="skills-grid">
-      <div class="card">☁️ Cloud: Azure | AWS</div>
-      <div class="card">🐳 Docker & Containers</div>
-      <div class="card">⚙️ CI/CD Pipelines</div>
-      <div class="card">🖥️ Infrastructure as Code (Terraform & Terragruntna)</div>
-      <div class="card">🐍 Python | Shell Scripting</div>
-	  <div class="card">🚀 Amazon Elastic Kubernetes Service (EKS) </div>
-	  <div class="card">🚀 Azure Kubernetes Service (AKS) </div>	
-    </div>
-  </section>
+<section class="skills">
+  <h2>Core Expertise</h2>
+  <div class="skills-grid">
+    
+    <!-- Azure -->
+    <button class="card" onclick="window.location.href='https://azure.microsoft.com/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure Logo" width="72" height="72">
+      Cloud: Azure
+    </button>
+
+    <!-- AWS -->
+    <button class="card" onclick="window.location.href='https://aws.amazon.com/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS Logo" width="72" height="72">
+      Cloud: AWS
+    </button>
+
+    <!-- Docker -->
+    <button class="card" onclick="window.location.href='https://www.docker.com/'">
+      <img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker Logo" width="72" height="72">
+      Docker & Containers
+    </button>
+
+    <!-- CI/CD -->
+    <button class="card" onclick="window.location.href='cicd.html'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="CI/CD Logo" width="72" height="72">
+      CI/CD Pipelines
+    </button>
+
+    <!-- Terraform -->
+	<button class="card" onclick="window.location.href='https://www.terraform.io/'">
+	<img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform Logo" width="172" height="72">
+	Infrastructure as Code (Terraform & Terragrunt)
+	</button>
+
+
+    <!-- Python + Shell (separated logos) -->
+    <button class="card" onclick="window.location.href='https://www.python.org/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python Logo" width="72" height="72">
+      Python
+    </button>
+    <button class="card" onclick="window.location.href='https://www.gnu.org/software/bash/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Shell Logo" width="72" height="72">
+      Shell Scripting
+    </button>
+
+    <!-- EKS -->
+    <button class="card" onclick="window.location.href='https://aws.amazon.com/eks/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes Logo" width="72" height="72">
+      Amazon Elastic Kubernetes Service (EKS)
+    </button>
+
+    <!-- AKS -->
+    <button class="card" onclick="window.location.href='https://azure.microsoft.com/en-us/products/kubernetes-service/'">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes Logo" width="72" height="72">
+      Azure Kubernetes Service (AKS)
+    </button>
+
+  </div>
+</section>
+
+
 
   <!-- Footer -->
   <footer>
