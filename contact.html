@@ -2,14 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact | Santosh Salunke</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Make body full height and use flexbox */
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Cinzel', serif;
+      background: linear-gradient(135deg, #1e3c72, #2a5298);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header/navbar styling */
+    header {
+      padding: 20px;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .navbar ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      justify-content: center;
+      gap: 30px;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .navbar a.active {
+      text-decoration: underline;
+    }
+
+    /* Main content flex-grow */
+    section.contact {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 20px;
+      max-width: 600px;
+      margin: auto;
+      background: rgba(0,0,0,0.2);
+      border-radius: 315px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+
+    section.contact h2 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    section.contact p {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    section.contact ul {
+      list-style: none;
+      padding: 0;
+      font-size: 20px;
+    }
+
+    section.contact a {
+      color: #ffd700;
+      text-decoration: none;
+	  font-size: 20px;
+      font-weight: bold;
+    }
+
+    section.contact a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer styling */
+    footer {
+      padding: 20px;
+      text-align: center;
+      background: rgba(0,0,0,0.4);
+    }
+  </style>
 </head>
 <body>
   <header>
     <nav class="navbar">
-
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="about.html">About</a></li>
@@ -22,9 +110,9 @@
     <h2>Contact Me</h2>
     <p>Let’s connect! Feel free to reach out for collaboration, consulting, or networking.</p>
     <ul>
-      <li>📧 Email: <a href="mailto:santosh_salunke@hotmail.com">santosh_salunke@hotmail.com</a></li>
-      <li>📱 Phone: <a href="tel:+919890006975">+91 9890006975</a></li>
-      <li>💻 GitHub: <a href="https://github.com/ssalunke1979" target="_blank">github.com/ssalunke1979</a></li>
+      <li>📧 <strong>Email:</strong> <a href="mailto:santosh_salunke@hotmail.com">santosh_salunke@hotmail.com</a></li>
+      <li>📱 <strong>Phone:</strong> <a href="tel:+919890006975">+91 9890006975</a></li>
+      <li>💻 <strong>GitHub:</strong> <a href="https://github.com/ssalunke1979" target="_blank">github.com/ssalunke1979</a></li>
     </ul>
   </section>
 
