@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tambola Ticket Manager + Number Board</title>
+<style>
+:root {
+  --cell-size: 44px;
+  --gap: 8px;
+  --ticket-width: 460px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background: #f7f7fb;
+  color: #222;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Controls Panel */
+.controls {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e0d6c8;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+/* Number board container */
+.number-board-container {
+  flex: 1;
+  background: #fff;
+  border: 1px solid #e0d6c8;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Number board grid */
+.number-board {
+  display: grid;
+  grid-template-columns: repeat(8, 40px);
+  gap: 6px;
+  justify-content: center;
+}
+
+/* Ticket container */
+.tickets-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  flex: 1;
+  width: 100%;
+}
+
+/* Ticket layout */
+.ticket {
+  width: var(--ticket-width);
+  max-width: 100%;
+  background: #fff;
+  border: 1px solid #e0d6c8;
+  padding: 10px;
+  border-radius: 60px;
+  margin: 0 auto;
+}
+
+/* Ticket grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(9, var(--cell-size));
+  grid-auto-rows: var(--cell-size);
+  gap: 6px;
+  padding: 10px;
+  justify-content: center;
+}
+
+/* Cell styles */
+.cell {
+  border: 1px solid #d8c6b0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  background: #fcfbfa;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  position: relative;
+}
+
+.cell.empty { border: 1px solid rgba(216,198,176,0.3); background: rgba(252,251,250,0.5); cursor: default; }
+
+.cell.crossed {
+  background: #fcfbfa;
+  border: 2px solid #f57c00;
+  border-radius: 50%;
+  position: relative;
+  font-weight: 700;
+  color: #222;
+}
+
+.cell.crossed::after {
+  content:'';
+  position: absolute;
+  top: 50%;
+  left: 10%;
+  width: 80%;
+  height: 2px;
+  background: #f57c00;
+  transform: rotate(-45deg);
+  transform-origin: center;
+}
+
+/* Controls */
+.controls h2 { margin:0 0 12px; font-size:16px; }
+.controls button {
+  display:block;
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #caa97f;
+  background:#fff;
+  cursor:pointer;
+}
+.controls button.primary {
+  background:#caa97f;
+  color:#fff;
+  border-color:#b98f5f;
+}
+
+.footer { margin-top:10px; font-size:12px; color:#666; text-align:center; }
+.small { font-size:12px; }
+
+.pattern-box {
+  border:1px solid #ccc;
+  padding:6px;
+  margin:16px 0;
+  border-radius:4px;
+  font-size:13px;
+  background:#fafafa;
+  max-height:120px;
+  overflow-y:auto;
+}
+
+.pattern-box strong { display:block; margin-bottom:2px; }
+.pattern-box div.ticket-entry { display:block; margin:2px 0; }
+
+@media(max-width:1024px){
+  .container { flex-direction: column; }
+  .number-board-container { max-height:none; }
+}
+
+@media(max-width:768px){
+  .grid { --cell-size:36px; gap:4px; padding:8px; }
+  .cell { font-size:13px; }
+}
+
+@media(max-width:480px){
+  .grid { --cell-size:32px; }
+  .cell { font-size:12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="controls">
+    <h2>Controls</h2>
+	
+	<div style="margin-top:12px;">
+      <div class="pattern-box" id="early5Box"><strong>Early 5:</strong></div>
+      <div class="pattern-box" id="topRowBox"><strong>Top Row:</strong></div>
+      <div class="pattern-box" id="middleRowBox"><strong>Middle Row:</strong></div>
+      <div class="pattern-box" id="bottomRowBox"><strong>Bottom Row:</strong></div>
+      <div class="pattern-box" id="cornersBox"><strong>4 Corners:</strong></div>
+      <div class="pattern-box" id="fullHouseBox"><strong>Full House:</strong></div>
+    </div>
+	
+    <button id="clearAll">Clear All (Reset)</button>
+    <button id="undo">Undo Last</button>
+    <button id="export" class="primary">Export Crossed Numbers</button>
+
+    <div style="margin-top:12px">
+      <label class="small">Filter tickets:</label>
+      <select id="ticketFilter" style="width:100%;padding:8px;border-radius:6px;margin-top:6px">
+        <option value="all">All tickets</option>
+      </select>
+    </div>
+
+    <div style="margin-top:14px">
+      <label class="small">Click cells to toggle crossing. Use Undo or Clear All if clicked accidentally.</label>
+    </div>
+
+    <div style="margin-top:12px">
+      <label class="small">Enter number:</label>
+      <input type="number" id="numberInput" style="width:60px;padding:6px;margin-left:6px" min="1" max="99">
+      <button id="strikeBtn">Strike</button>
+      <button id="unstrikeBtn">Unstrike</button>
+    </div>
+
+    <div style="margin-top:12px;font-size:12px;color:#444">
+      <strong>Shortcuts</strong><br>
+      Click = toggle &nbsp; • &nbsp; U = Undo &nbsp; • &nbsp; C = Clear All
+    </div>
+
+
+  </div>
+
+  <div class="number-board-container">
+    <h2>Number Board 1-99</h2>
+    <div class="number-board" id="numberBoard"></div>
+  </div>
+</div>
+
+<div class="tickets-wrap" id="ticketsWrap"></div>
+
+<script>
+// ---------- Ticket & Strike Logic ----------
+const ticketData = {
+"1581. - Santosh Salunke - 9552":[[null,12,23,36,49,null,null,null,80],[null,16,24,null,null,50,67,72,null],[6,19,29,null,null,null,68,73,null]],
+"1582. - Santosh Salunke - 9552":[[null,null,20,33,null,51,null,73,85],[null,15,null,35,44,null,61,null,88],[3,null,null,38,45,58,68,null,null]],
+"1583. - Santosh Salunke - 9552":[[3,12,null,null,null,null,62,70,84],[7,17,null,null,44,null,66,null,89],[null,18,28,33,49,55,null,null,null]],
+"1584. - Santosh Salunke - 9552":[[null,10,24,null,41,53,null,null,80],[5,null,25,null,null,null,63,72,85],[null,null,26,32,48,55,69,null,null]],
+"1585. - Santosh Salunke - 9552":[[1,null,27,30,40,null,null,70,null],[null,18,null,33,null,52,64,null,80],[null,null,null,37,null,57,69,76,82]],
+"1586. - Santosh Salunke - 9552":[[null,10,null,35,41,51,null,71,null],[null,null,28,38,null,56,67,null,87],[6,null,null,null,43,null,69,78,89]],
+"1587. - Santosh Salunke - 9552":[[null,null,23,36,null,50,null,70,86],[4,null,null,37,42,57,65,null,null],[5,19,27,null,49,null,68,null,null]],
+"1588. - Santosh Salunke - 9552":[[2,null,25,null,null,52,64,70,null],[4,14,27,null,46,null,null,null,81],[9,17,null,30,null,53,69,null,null]],
+"1589. - Santosh Salunke - 9552":[[null,null,null,32,40,null,65,74,89],[null,13,23,null,null,51,66,77],[7,15,26,37,null,53,null,null]],
+"2565. - Santosh Salunke - 9552":[[9,10,null,null,null,50,null,70,82],[null,11,26,32,null,null,65,null,88],[null,null,29,38,45,55,69,null,null]],
+"2566. - Santosh Salunke - 9552":[[6,17,null,null,41,null,null,70,80],[null,null,23,32,48,51,null,78,null],[null,19,27,34,null,53,66,null,null]],
+"1590. - Santosh Salunke - 9552":[[null,null,24,null,41,50,61,null,81],[3,null,29,null,42,null,62,74,null],[null,10,null,32,43,null,67,76,null]],
+"1726. - Umesh Worlikar - 3827":[[null,null,null,35,null,50,64,70,82],[4,12,null,null,null,null,67,78,88],[5,19,29,38,42,null,null,null,null]],
+"1727. - Umesh Worlikar - 3827":[[null,10,20,null,null,53,63,78,null],[5,null,21,34,44,null,null,null,81],[null,null,25,38,48,null,66,null,89]],
+"1728. - Umesh Worlikar - 3827":[[null,13,null,30,40,50,null,null,80],[4,null,28,35,null,56,65,null,null],[8,16,null,null,null,null,68,77,82]],
+"1729. - Umesh Worlikar - 3827":[[null,null,20,null,43,50,60,null,80],[1,11,null,32,null,null,null,76,87],[4,14,null,34,null,null,64,79,null]],
+"1730. - Umesh Worlikar - 3827":[[6,11,null,null,null,null,62,75,80],[null,12,28,30,47,54,null,null,null],[null,17,29,38,null,59,69,null,null]]
+};
+
+const ticketsWrap = document.getElementById('ticketsWrap');
+const ticketFilter = document.getElementById('ticketFilter');
+const numberBoard = document.getElementById('numberBoard');
+let actionHistory = [];
+
+// --- Render tickets ---
+function createTicketElement(title,matrix){
+  const el=document.createElement('div'); el.className='ticket'; el.dataset.title=title;
+  const h=document.createElement('h3'); h.textContent=title; el.appendChild(h);
+  const grid=document.createElement('div'); grid.className='grid';
+  for(let r=0;r<3;r++){for(let c=0;c<9;c++){
+    const cell=document.createElement('div'); const val=matrix[r][c]; cell.className='cell';
+    if(val===null||val==="") cell.classList.add('empty'); else {
+      cell.textContent=val; cell.tabIndex=0;
+      cell.addEventListener('click',()=>toggleCross(cell));
+      cell.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();toggleCross(cell);}});
+    }
+    cell.dataset.ticket=title; cell.dataset.number=val; grid.appendChild(cell);
+  }}
+  el.appendChild(grid);
+  const footer=document.createElement('div'); footer.className='footer'; footer.textContent='Click a number to cross it off'; el.appendChild(footer);
+  return el;
+}
+
+function renderTickets(filter="all"){
+  ticketsWrap.innerHTML=''; ticketFilter.innerHTML='<option value="all">All tickets</option>';
+  Object.keys(ticketData).forEach(title=>{const option=document.createElement('option'); option.value=title; option.textContent=title; ticketFilter.appendChild(option);});
+  Object.entries(ticketData).forEach(([title,matrix])=>{if(filter!=='all' && filter!==title) return; ticketsWrap.appendChild(createTicketElement(title,matrix));});
+  updatePatternBoxes();
+}
+
+// --- Cross/strike logic ---
+function toggleCross(cell){if(cell.classList.contains('empty')) return; cell.classList.toggle('crossed'); actionHistory.push({el:cell}); updatePatternBoxes();}
+
+function strikeNumber(cross=true){
+  const val=document.getElementById('numberInput').value; if(!val) return alert(`Enter a number to ${cross?'strike':'unstrike'}.`);
+  const num=Number(val); const cells=document.querySelectorAll(`.cell[data-number="${num}"]`);
+  if(cells.length===0) return alert('Number not found.');
+  cells.forEach(cell=>{ if(cross){ if(!cell.classList.contains('crossed')){cell.classList.add('crossed'); actionHistory.push({el:cell,crossed:true});}}
+    else{ if(cell.classList.contains('crossed')){cell.classList.remove('crossed'); actionHistory.push({el:cell,crossed:false});}}});
+  document.getElementById('numberInput').value=''; updatePatternBoxes();
+}
+
+function strikeNumberByCell(cell){
+  const num=Number(cell.dataset.number); const allCells=document.querySelectorAll(`.cell[data-number="${num}"]`);
+  allCells.forEach(c=>{c.classList.toggle('crossed'); actionHistory.push({el:c});}); updatePatternBoxes();
+}
+
+function undoLast(){if(actionHistory.length===0) return alert('Nothing to undo'); const last=actionHistory.pop(); if(!last.el) return; last.el.classList.toggle('crossed'); updatePatternBoxes();}
+function clearAll(){if(!confirm('Clear all crossed marks?')) return; document.querySelectorAll('.cell.crossed').forEach(c=>c.classList.remove('crossed')); actionHistory=[]; updatePatternBoxes();}
+function exportCrossed(){const crossed=Array.from(document.querySelectorAll('.cell.crossed')).map(c=>c.dataset.number); if(crossed.length===0) return alert('No numbers crossed yet.'); alert('Crossed Numbers: '+crossed.join(', '));}
+
+// --- Pattern boxes ---
+function updatePatternBoxes(){
+  const boxIds=['early5Box','topRowBox','middleRowBox','bottomRowBox','cornersBox','fullHouseBox'];
+  boxIds.forEach(id=>{const box=document.getElementById(id); box.querySelectorAll('.ticket-entry').forEach(e=>e.remove()); box.dataset.count=0;});
+  const tickets=Array.from(document.querySelectorAll('.ticket'));
+  tickets.forEach(ticketEl=>{
+    const title=ticketEl.dataset.title;
+    const allCells=Array.from(ticketEl.querySelectorAll('.grid>.cell')).filter(c=>!c.classList.contains('empty'));
+    const crossedCells=allCells.filter(c=>c.classList.contains('crossed'));
+    const addEntry=(boxId,numbers)=>{const box=document.getElementById(boxId); let count=parseInt(box.dataset.count||"0")+1; box.dataset.count=count; const span=document.createElement('div'); span.className='ticket-entry'; span.textContent=`(${count}) ${title} → ${numbers.join(', ')}`; box.appendChild(span);};
+    const early5=crossedCells.slice(0,5).map(c=>c.dataset.number); if(early5.length===5) addEntry('early5Box',early5);
+    const rowCells=r=>Array.from(ticketEl.querySelectorAll('.grid>.cell')).slice(r*9,(r+1)*9).filter(c=>!c.classList.contains('empty'));
+    if(rowCells(0).length>0 && rowCells(0).every(c=>c.classList.contains('crossed'))) addEntry('topRowBox',rowCells(0).map(c=>c.dataset.number));
+    if(rowCells(1).length>0 && rowCells(1).every(c=>c.classList.contains('crossed'))) addEntry('middleRowBox',rowCells(1).map(c=>c.dataset.number));
+    if(rowCells(2).length>0 && rowCells(2).every(c=>c.classList.contains('crossed'))) addEntry('bottomRowBox',rowCells(2).map(c=>c.dataset.number));
+    const topRow=rowCells(0), bottomRow=rowCells(2);
+    if(topRow.length>=2 && bottomRow.length>=2){ const corners=[topRow[0],topRow[topRow.length-1],bottomRow[0],bottomRow[bottomRow.length-1]]; if(corners.every(c=>c.classList.contains('crossed'))) addEntry('cornersBox',corners.map(c=>c.dataset.number));}
+    if(allCells.length>0 && allCells.every(c=>c.classList.contains('crossed'))) addEntry('fullHouseBox',allCells.map(c=>c.dataset.number));
+  });
+}
+
+// --- Render number board 1-99 ---
+for(let i=1;i<=99;i++){ const cell=document.createElement('div'); cell.className='cell'; cell.textContent=i; cell.dataset.number=i; cell.tabIndex=0;
+  cell.addEventListener('click',()=>strikeNumberByCell(cell));
+  cell.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();strikeNumberByCell(cell);}});
+  numberBoard.appendChild(cell);
+}
+
+// --- Event listeners ---
+document.getElementById('strikeBtn').addEventListener('click',()=>strikeNumber(true));
+document.getElementById('unstrikeBtn').addEventListener('click',()=>strikeNumber(false));
+document.getElementById('clearAll').addEventListener('click',clearAll);
+document.getElementById('undo').addEventListener('click',undoLast);
+document.getElementById('export').addEventListener('click',exportCrossed);
+ticketFilter.addEventListener('change',e=>renderTickets(e.target.value));
+document.addEventListener('keydown',ev=>{ if(ev.key==='u'||ev.key==='U') undoLast(); if(ev.key==='c'||ev.key==='C') clearAll();});
+
+// --- Initial render ---
+renderTickets();
+</script>
+</body>
+</html>
