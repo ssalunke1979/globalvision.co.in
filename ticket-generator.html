@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Premium Tambola Tickets</title>
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
+  background: #f0f4f8;
+}
+h2, h3 { color: #222; text-align: center; }
+input[type="file"], button {
+  margin: 10px auto;
+  display: block;
+  font-size: 16px;
+  padding: 8px 15px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+#ticketsContainer { display: flex; flex-wrap: wrap; gap: 25px; justify-content: center; }
+.ticket-container {
+  display: flex; flex-direction: column; align-items: center;
+  background: linear-gradient(145deg,#ffffff,#dfe6ef);
+  border-radius: 18px;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+  padding: 20px;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.ticket-container:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.2);
+}
+.ticket-header {
+  font-weight: bold;
+  margin-bottom: 12px;
+  padding: 12px 30px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  color: #fff;
+  font-size: 20px;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+.ticket {
+  border-radius: 15px;
+  display: grid;
+  grid-template-columns: repeat(9, 55px);
+  grid-auto-rows: 55px;
+  gap: 4px;
+  background: #cfd8e6;
+  padding: 6px;
+}
+.cell {
+  border-radius: 10px;
+  border: 1px solid #999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  cursor: grab;
+  user-select: none;
+  background: linear-gradient(145deg,#f7f9fc,#e0e5f0);
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
+.cell:hover {
+  transform: scale(1.1);
+  background: linear-gradient(145deg,#e0e5f0,#f7f9fc);
+}
+.cell.struck {
+  background-color: #ff4d4d;
+  color: #fff;
+  font-weight: bold;
+  text-decoration: line-through;
+  box-shadow: 0 0 10px rgba(255,0,0,0.6);
+}
+.cell.dragging { opacity: 0.5; transform: scale(0.95); }
+button#saveJSONBtn { background: linear-gradient(90deg,#36d1dc,#5b86e5); color:#fff; border:none; }
+button#saveJSONBtn:hover { background: linear-gradient(90deg,#5b86e5,#36d1dc); transform: scale(1.05);}
+button#showHelpBtn { background: linear-gradient(90deg,#ffb347,#ffcc33); color:#fff; border:none; }
+button#showHelpBtn:hover { transform: scale(1.05);}
+pre {
+  background: #f0f0f0;
+  padding: 15px;
+  margin-top: 20px;
+  overflow-x: auto;
+  white-space: pre;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+#helpModal {
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  justify-content:center; align-items:center;
+  z-index:1000;
+}
+#helpModalContent {
+  background:#fff;
+  padding:25px;
+  border-radius:15px;
+  max-width:800px;
+  width:90%;
+  max-height:80%;
+  overflow-y:auto;
+  position:relative;
+}
+#closeHelpBtn { margin-top:15px; padding:8px 20px; border:none; background:#5b86e5; color:white; border-radius:10px; cursor:pointer; }
+@media (max-width: 768px) {
+  .ticket { grid-template-columns: repeat(9, 40px); grid-auto-rows: 40px; }
+  .cell { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<h2>Upload CSV to Generate Premium Tambola Tickets</h2>
+<input type="file" id="csvFile" accept=".csv">
+<button id="showHelpBtn">Show CSV Example</button>
+<div id="ticketsContainer"></div>
+<button id="saveJSONBtn">Save JSON as TXT</button>
+
+<h3>JavaScript Ticket Data:</h3>
+<pre id="jsonOutput"></pre>
+
+<!-- Help Modal -->
+<div id="helpModal">
+  <div id="helpModalContent">
+    <h2>Tambola CSV Example</h2>
+    <pre>
+1581. - Santosh Salunke - 9552
+null,12,23,36,49,null,null,null,80
+null,16,24,null,null,50,67,72,null
+6,19,29,null,null,null,68,73,null
+
+1582. - Santosh Salunke - 9552
+null,null,20,33,null,51,null,73,85
+null,15,null,35,44,null,61,null,88
+3,null,null,38,45,58,68,null,null
+    </pre>
+    <button id="closeHelpBtn">Close</button>
+  </div>
+</div>
+
+<script>
+let ticketData = {};
+
+document.getElementById('csvFile').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) { parseCSV(e.target.result); };
+  reader.readAsText(file);
+});
+
+document.getElementById('saveJSONBtn').addEventListener('click', function() {
+  const blob = new Blob([document.getElementById('jsonOutput').textContent], {type: "text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "ticketData.txt";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Help modal
+document.getElementById('showHelpBtn').addEventListener('click', ()=>document.getElementById('helpModal').style.display='flex');
+document.getElementById('closeHelpBtn').addEventListener('click', ()=>document.getElementById('helpModal').style.display='none');
+
+function parseCSV(text) {
+  const container = document.getElementById('ticketsContainer');
+  container.innerHTML = '';
+  ticketData = {};
+
+  const lines = text.split(/\r?\n/).map(l => l.trim());
+  let ticketCount = {};
+  let i = 0;
+
+  while (i < lines.length) {
+    const header = lines[i];
+    if (!header) { i++; continue; }
+
+    const rows = [];
+    for (let j = 1; j <= 3; j++) {
+      const rowLine = lines[i + j] || '';
+      const row = rowLine.split(/,|\t/).map(v => (v.trim() === 'null' || v.trim() === '') ? null : parseInt(v.trim(), 10));
+      rows.push(row);
+    }
+
+    const formattedRows = formatRows(rows);
+
+    ticketCount[header] = (ticketCount[header] || 0) + 1;
+    const key = ticketCount[header] > 1 ? `${header}_${ticketCount[header]}` : header;
+    ticketData[key] = formattedRows;
+
+    addTicket(header, formattedRows, container, key);
+    i += 4;
+  }
+
+  updateJSONOutput();
+}
+
+function formatRows(rows) {
+  const newRows = rows.map(row => {
+    const nr = Array(9).fill(null);
+    row.forEach(num => {
+      if (num !== null) {
+        let col = Math.floor((num - 1) / 10);
+        if (num === 90) col = 8;
+        nr[col] = num;
+      }
+    });
+    return nr;
+  });
+  return newRows;
+}
+
+function addTicket(header, rows, container, key) {
+  const ticketDiv = document.createElement('div');
+  ticketDiv.className = 'ticket-container';
+  ticketDiv.dataset.ticketKey = key;
+
+  const headerDiv = document.createElement('div');
+  headerDiv.className = 'ticket-header';
+  headerDiv.textContent = header;
+  ticketDiv.appendChild(headerDiv);
+
+  const gridDiv = document.createElement('div');
+  gridDiv.className = 'ticket';
+
+  rows.forEach((r,rowIndex) => {
+    r.forEach((num,colIndex) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = num || '';
+      cell.draggable = num !== null;
+      cell.dataset.row = rowIndex;
+      cell.dataset.col = colIndex;
+
+      cell.addEventListener('click', () => { if(num) cell.classList.toggle('struck'); });
+
+      cell.addEventListener('dragstart', e => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({num,row:rowIndex,col:colIndex}));
+        cell.classList.add('dragging');
+      });
+      cell.addEventListener('dragend', ()=>cell.classList.remove('dragging'));
+      cell.addEventListener('dragover', e => e.preventDefault());
+      cell.addEventListener('drop', e => {
+        e.preventDefault();
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+        const targetRow = parseInt(cell.dataset.row);
+        const targetCol = parseInt(cell.dataset.col);
+
+        if ((data.num===90 && targetCol===8) || (data.num<=9 && targetCol===0) || Math.floor(data.num/10)===targetCol) {
+          const tData = ticketData[key];
+          [tData[data.row][data.col], tData[targetRow][targetCol]] = [tData[targetRow][targetCol], tData[data.row][data.col]];
+
+          cell.textContent = data.num;
+          const draggedCell = gridDiv.querySelector(`.cell[data-row='${data.row}'][data-col='${data.col}']`);
+          draggedCell.textContent = tData[data.row][data.col] || '';
+
+          updateJSONOutput();
+        }
+      });
+
+      gridDiv.appendChild(cell);
+    });
+  });
+
+  ticketDiv.appendChild(gridDiv);
+  container.appendChild(ticketDiv);
+}
+
+function updateJSONOutput(){
+  const output = "const ticketData = {\n" + formatJSONOutput(ticketData) + "\n};";
+  document.getElementById('jsonOutput').textContent = output;
+}
+
+function formatJSONOutput(data){
+  let output='';
+  let first=true;
+  for(const key in data){
+    if(!first) output+=',\n';
+    output+=`  "${key}": [\n`;
+    const rows = data[key];
+    rows.forEach((row,i)=>{
+      output+='    [';
+      output+=row.map(v=>v===null?'null':v.toString().padStart(4,' ')).join(', ');
+      output+=i===rows.length-1?']':'],\n';
+    });
+    output+='\n  ]';
+    first=false;
+  }
+  return output;
+}
+</script>
+</body>
+</html>
