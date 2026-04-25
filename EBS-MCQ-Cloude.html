@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS EBS Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e2d40;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --highlight: rgba(0, 212, 255, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(0,212,255,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(255,107,53,0.05) 0%, transparent 50%);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 14px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .quiz-container {
+    width: 100%;
+    max-width: 780px;
+  }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.35s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .question {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .option:hover:not(.locked) {
+    border-color: rgba(0,212,255,0.4);
+    background: var(--highlight);
+    transform: translateX(4px);
+  }
+
+  .option-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .option.selected .option-dot {
+    border-color: var(--accent);
+    background: var(--accent);
+  }
+
+  .option.correct {
+    border-color: var(--correct);
+    background: rgba(0,229,160,0.06);
+  }
+
+  .option.correct .option-dot {
+    border-color: var(--correct);
+    background: var(--correct);
+  }
+
+  .option.wrong {
+    border-color: var(--wrong);
+    background: rgba(255,77,109,0.06);
+  }
+
+  .option.wrong .option-dot {
+    border-color: var(--wrong);
+    background: var(--wrong);
+  }
+
+  .option-label {
+    flex: 1;
+  }
+
+  .option-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .tag-correct { background: rgba(0,229,160,0.15); color: var(--correct); }
+  .tag-wrong { background: rgba(255,77,109,0.15); color: var(--wrong); }
+
+  .explanation-box {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: rgba(0,212,255,0.04);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .explanation-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .explanation-text {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 12px;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    padding: 12px 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+
+  .btn-back:hover {
+    border-color: rgba(0,212,255,0.4);
+    color: var(--text);
+  }
+
+  .btn-back:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), #0099cc);
+    color: #000;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.2);
+  }
+
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 28px rgba(0,212,255,0.35);
+  }
+
+  .btn-next:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-reset {
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent2);
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .btn-reset:hover {
+    background: rgba(255,107,53,0.2);
+  }
+
+  .dots-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+  }
+
+  .dot.answered {
+    background: rgba(0,229,160,0.5);
+  }
+
+  .dot.current {
+    border-color: var(--accent);
+  }
+
+  .result-screen {
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .result-score {
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-label {
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  .result-msg {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 24px;
+    margin-bottom: 32px;
+  }
+
+  .check-icon { color: var(--correct); font-size: 16px; }
+  .cross-icon { color: var(--wrong); font-size: 16px; }
+
+  @media (max-width: 560px) {
+    .card { padding: 24px 20px; }
+    .question { font-size: 18px; }
+    .nav-row { flex-wrap: wrap; }
+    .btn-reset { order: -1; width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Certification Prep</div>
+  <h1>Elastic Block <span>Storage</span></h1>
+  <p class="subtitle">// 10 questions · EBS fundamentals</p>
+</header>
+
+<div class="quiz-container">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-text" id="progressText">1 / 10</div>
+  </div>
+
+  <div id="quizArea"></div>
+
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What is EBS?",
+    options: [
+      "Elastic Block Storage — provides persistent block storage for EC2",
+      "A managed database service by AWS",
+      "An object storage service like S3",
+      "A load balancer for EC2 instances"
+    ],
+    correct: 0,
+    explanation: "EBS (Elastic Block Store) acts like a hard disk attached to a virtual machine — it provides persistent block storage that survives instance restarts and can be detached and reattached."
+  },
+  {
+    q: "What are the EBS volume types?",
+    options: [
+      "HDD and SSD only",
+      "gp3, io1/io2, st1, sc1 — each optimized for different workloads",
+      "Standard, Premium, and Ultra tiers",
+      "RAID 0 and RAID 1 configurations"
+    ],
+    correct: 1,
+    explanation: "EBS has multiple volume types: gp2/gp3 for general purpose SSD, io1/io2 for high-performance IOPS, st1 for throughput-optimized HDD, and sc1 for cold HDD — each designed for different workloads and cost profiles."
+  },
+  {
+    q: "What is an EBS snapshot?",
+    options: [
+      "A real-time mirror of an EBS volume",
+      "A backup of an EBS volume stored in S3",
+      "A read-only volume attached to multiple instances",
+      "An encrypted copy of EC2 instance metadata"
+    ],
+    correct: 1,
+    explanation: "Snapshots are point-in-time backups of EBS volumes stored durably in Amazon S3. They are incremental and are used for disaster recovery, data migration, and cloning volumes to new regions or accounts."
+  },
+  {
+    q: "Can an EBS volume be resized after creation?",
+    options: [
+      "No — you must create a new volume and migrate data",
+      "Only if it's encrypted with KMS",
+      "Yes, volumes can be expanded without downtime",
+      "Only when the EC2 instance is stopped"
+    ],
+    correct: 2,
+    explanation: "EBS Elastic Volumes allow you to increase size, change volume type, or adjust IOPS/throughput without detaching the volume. After resizing, you'll need to extend the filesystem (e.g., using resize2fs or xfs_growfs) to use the new space."
+  },
+  {
+    q: "What does IOPS stand for and why does it matter?",
+    options: [
+      "Internet Operations Per Second — relevant for networking",
+      "Input/Output Operations Per Second — a critical measure of disk performance",
+      "Incremental Object Processing Speed — for batch jobs",
+      "Internal OS Page Swap — for memory management"
+    ],
+    correct: 1,
+    explanation: "IOPS (Input/Output Operations Per Second) measures how many read/write operations a volume can perform per second. It is critical for databases and high-transaction workloads where latency and throughput directly impact performance."
+  },
+  {
+    q: "What is throughput in the context of EBS?",
+    options: [
+      "The number of snapshots you can create per hour",
+      "The encryption speed for KMS-managed volumes",
+      "Data transfer rate — how much data moves per second",
+      "The number of EC2 instances a volume can attach to"
+    ],
+    correct: 2,
+    explanation: "Throughput measures how much data (in MB/s) can be transferred to/from a volume per second. It's especially important for large sequential read/write workloads like log processing, ETL pipelines, or media streaming."
+  },
+  {
+    q: "Is EBS encryption supported, and how does it work?",
+    options: [
+      "No, EBS doesn't support native encryption",
+      "Yes, using AWS KMS for key management",
+      "Only available on io2 Block Express volumes",
+      "Encryption is handled entirely at the OS level"
+    ],
+    correct: 1,
+    explanation: "EBS supports encryption at rest and in transit using AWS KMS (Key Management Service). Encryption is transparent to the OS, covers data on the volume, snapshots, and data moving between the volume and the instance."
+  },
+  {
+    q: "Can an EBS volume be detached from an EC2 instance?",
+    options: [
+      "No — volumes are permanently bound to one instance",
+      "Yes, though the root volume cannot be detached while running",
+      "Only if the volume is unencrypted",
+      "Only by contacting AWS Support"
+    ],
+    correct: 1,
+    explanation: "EBS volumes can be detached from one EC2 instance and reattached to another in the same Availability Zone, making it useful for instance migrations, troubleshooting, and data portability between instances."
+  },
+  {
+    q: "What is EBS Multi-Attach?",
+    options: [
+      "Attaching multiple EBS volumes to a single EC2 instance",
+      "A snapshot that spans multiple regions simultaneously",
+      "Attaching one io1/io2 volume to multiple EC2 instances concurrently",
+      "A feature to mirror data across two volumes"
+    ],
+    correct: 2,
+    explanation: "Multi-Attach allows a single io1 or io2 EBS volume to be attached to up to 16 EC2 instances in the same Availability Zone. It's used in clustered applications (e.g., Oracle RAC) that require concurrent read/write access — the application must manage data consistency."
+  },
+  {
+    q: "What should you do when an EBS volume is full?",
+    options: [
+      "Terminate the instance and launch a new one with a larger volume",
+      "Delete old snapshots to free space on the volume",
+      "Increase the volume size and then extend the filesystem",
+      "Switch to a different volume type like sc1"
+    ],
+    correct: 2,
+    explanation: "When a volume is full, you increase its size using the AWS Console or CLI (no downtime required), then extend the OS-level filesystem with commands like 'resize2fs' (ext4) or 'xfs_growfs' (XFS) to make the new space available. This is a common production task."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+function render() {
+  const q = questions[current];
+  const ans = answers[current];
+  const isAnswered = ans !== null;
+  const total = questions.length;
+
+  // Progress
+  document.getElementById('progressFill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progressText').textContent = `${current + 1} / ${total}`;
+
+  // Dots
+  const dotsNav = document.getElementById('dotsNav');
+  dotsNav.innerHTML = questions.map((_, i) => {
+    let cls = 'dot';
+    if (i === current) cls += ' active current';
+    else if (answers[i] !== null) cls += ' answered';
+    return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+
+  // Card
+  let optionsHtml = q.options.map((opt, i) => {
+    let cls = 'option';
+    let tag = '';
+    let locked = isAnswered ? ' locked' : '';
+
+    if (isAnswered) {
+      cls += ' locked';
+      if (i === q.correct) {
+        cls += ' correct';
+        tag = `<span class="option-tag tag-correct">✓ CORRECT</span>`;
+      } else if (i === ans && ans !== q.correct) {
+        cls += ' wrong';
+        tag = `<span class="option-tag tag-wrong">✗ WRONG</span>`;
+      }
+    }
+
+    if (!isAnswered && ans === i) cls += ' selected';
+
+    return `
+      <div class="${cls}" onclick="selectAnswer(${i})">
+        <div class="option-dot"></div>
+        <span class="option-label">${opt}</span>
+        ${tag}
+      </div>`;
+  }).join('');
+
+  let explanationHtml = isAnswered ? `
+    <div class="explanation-box">
+      <div class="explanation-title">⚡ Explanation</div>
+      <div class="explanation-text">${q.explanation}</div>
+    </div>` : '';
+
+  const isLast = current === total - 1;
+  const allAnswered = answers.every(a => a !== null);
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card">
+      <div class="q-number">Question ${current + 1} of ${total}</div>
+      <div class="question">${q.q}</div>
+      <div class="options">${optionsHtml}</div>
+      ${explanationHtml}
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()" ${current === 0 ? 'disabled' : ''}>← Back</button>
+        <button class="btn btn-reset" onclick="resetQuiz()">↺ Reset</button>
+        ${isLast && allAnswered
+          ? `<button class="btn btn-next" onclick="showResults()">See Results →</button>`
+          : `<button class="btn btn-next" onclick="goNext()" ${!isAnswered ? 'disabled' : ''}>Next →</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function selectAnswer(i) {
+  if (answers[current] !== null) return; // locked
+  answers[current] = i;
+  render();
+}
+
+function goNext() {
+  if (current < questions.length - 1) { current++; render(); }
+}
+
+function goBack() {
+  if (current > 0) { current--; render(); }
+}
+
+function goTo(i) {
+  current = i;
+  render();
+}
+
+function resetQuiz() {
+  answers = new Array(questions.length).fill(null);
+  current = 0;
+  render();
+}
+
+function showResults() {
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  let msg = '';
+  if (pct === 100) msg = '🏆 Perfect score! You\'re an EBS expert!';
+  else if (pct >= 70) msg = '🎯 Solid knowledge — keep it up!';
+  else msg = '📚 Keep studying — you\'ll get there!';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card result-screen">
+      <div class="result-score">${score}/${questions.length}</div>
+      <div class="result-label">FINAL SCORE · ${pct}%</div>
+      <div class="result-msg">${msg}</div>
+      <div style="display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:320px;margin-left:auto;margin-right:auto;">
+        ${questions.map((q, i) => `
+          <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--muted)">
+            <span style="font-size:16px">${answers[i] === q.correct ? '✅' : '❌'}</span>
+            Q${i+1}: ${q.q.slice(0, 38)}…
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-next" onclick="reviewAnswers()" style="margin:0 auto">Review Answers</button>
+      <button class="btn btn-reset" onclick="resetQuiz()" style="margin:12px auto 0">↺ Try Again</button>
+    </div>`;
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = `${score} / ${questions.length} correct`;
+}
+
+function reviewAnswers() {
+  current = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

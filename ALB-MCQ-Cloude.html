@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Load Balancers Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e2d40;
+    --accent: #818cf8;
+    --accent2: #6366f1;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --highlight: rgba(129,140,248,0.07);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(129,140,248,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(99,102,241,0.06) 0%, transparent 50%);
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  .badge {
+    display: inline-block;
+    background: rgba(129,140,248,0.1);
+    border: 1px solid rgba(129,140,248,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  h1 span { color: var(--accent); }
+
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; font-family: 'Space Mono', monospace; }
+
+  .quiz-container { width: 100%; max-width: 780px; }
+
+  .progress-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+
+  .progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.35s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .q-tag {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .tag-alb  { background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.3); color: #818cf8; }
+  .tag-nlb  { background: rgba(251,146,60,0.12);  border: 1px solid rgba(251,146,60,0.3);  color: #fb923c; }
+  .tag-gen  { background: rgba(34,211,238,0.10);  border: 1px solid rgba(34,211,238,0.25); color: #22d3ee; }
+  .tag-ha   { background: rgba(0,229,160,0.10);   border: 1px solid rgba(0,229,160,0.25);  color: #00e5a0; }
+  .tag-ts   { background: rgba(255,77,109,0.10);  border: 1px solid rgba(255,77,109,0.25); color: #ff4d6d; }
+
+  .question { font-size: 21px; font-weight: 600; line-height: 1.4; margin-bottom: 28px; }
+
+  .options { display: flex; flex-direction: column; gap: 12px; }
+
+  .option {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .option:hover:not(.locked) {
+    border-color: rgba(129,140,248,0.4);
+    background: var(--highlight);
+    transform: translateX(4px);
+  }
+
+  .option-dot {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0; margin-top: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .option.correct { border-color: var(--correct); background: rgba(0,229,160,0.06); }
+  .option.correct .option-dot { border-color: var(--correct); background: var(--correct); }
+  .option.wrong   { border-color: var(--wrong); background: rgba(255,77,109,0.06); }
+  .option.wrong .option-dot { border-color: var(--wrong); background: var(--wrong); }
+
+  .option-label { flex: 1; }
+
+  .option-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px; padding: 2px 8px; border-radius: 2px;
+    margin-left: auto; flex-shrink: 0; align-self: center;
+    font-weight: 700; letter-spacing: 1px;
+  }
+
+  .tag-correct { background: rgba(0,229,160,0.15); color: var(--correct); }
+  .tag-wrong   { background: rgba(255,77,109,0.15); color: var(--wrong); }
+
+  .explanation-box {
+    margin-top: 20px; padding: 16px 20px;
+    background: rgba(129,140,248,0.04);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+  .explanation-title {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; text-transform: uppercase;
+  }
+
+  .explanation-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+
+  .btn {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    letter-spacing: 0.5px; padding: 12px 28px; border-radius: 6px;
+    border: none; cursor: pointer; transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn-back { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-back:hover { border-color: rgba(129,140,248,0.4); color: var(--text); }
+  .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-next { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(129,140,248,0.2); }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(129,140,248,0.35); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-reset { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.25); color: var(--accent2); padding: 10px 20px; font-size: 13px; }
+  .btn-reset:hover { background: rgba(99,102,241,0.18); }
+
+  .dots-nav { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+  .dot.active   { background: var(--accent); transform: scale(1.3); }
+  .dot.answered { background: rgba(0,229,160,0.5); }
+  .dot.current  { border-color: var(--accent); }
+
+  /* legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-bottom: 24px;
+  }
+
+  .legend-item {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; padding: 4px 10px; border-radius: 3px;
+    text-transform: uppercase; cursor: default;
+  }
+
+  .result-screen { text-align: center; padding: 50px 40px; }
+
+  .result-score {
+    font-size: 80px; font-weight: 800; line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .result-label { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 13px; letter-spacing: 2px; margin-top: 8px; }
+  .result-msg { font-size: 20px; font-weight: 600; margin-top: 24px; margin-bottom: 32px; }
+
+  .result-list { display: flex; gap: 8px; flex-direction: column; margin-bottom: 32px; text-align: left; max-width: 420px; margin-left: auto; margin-right: auto; }
+  .result-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .card { padding: 24px 20px; }
+    .question { font-size: 17px; }
+    .nav-row { flex-wrap: wrap; }
+    .btn-reset { order: -1; width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Certification Prep</div>
+  <h1>AWS Load <span>Balancers</span></h1>
+  <p class="subtitle">// 20 questions · ALB · NLB · High Availability</p>
+</header>
+
+<div class="quiz-container">
+
+  <div class="legend">
+    <span class="legend-item tag-alb">ALB</span>
+    <span class="legend-item tag-nlb">NLB</span>
+    <span class="legend-item tag-gen">General</span>
+    <span class="legend-item tag-ha">High Availability</span>
+    <span class="legend-item tag-ts">Troubleshoot</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">1 / 20</div>
+  </div>
+
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "What is an AWS Load Balancer?",
+    tag: "gen",
+    options: [
+      "A service that compresses and archives application logs across EC2 instances",
+      "A service that automatically distributes incoming traffic across multiple targets like EC2, containers, or IPs",
+      "A DNS resolver that maps domain names to private VPC IP addresses",
+      "A monitoring service that tracks EC2 instance health metrics"
+    ],
+    correct: 1,
+    explanation: "A Load Balancer acts as the single point of contact for clients, spreading requests across registered targets. It ensures high availability — if one target fails health checks, traffic is automatically routed only to healthy ones, preventing downtime."
+  },
+  {
+    q: "What are the three types of AWS Load Balancers?",
+    tag: "gen",
+    options: [
+      "Standard, Advanced, and Premium Load Balancers",
+      "HTTP, TCP, and UDP Load Balancers",
+      "Application (ALB), Network (NLB), and Classic (CLB) Load Balancers",
+      "Public, Private, and Hybrid Load Balancers"
+    ],
+    correct: 2,
+    explanation: "AWS offers three types: ALB (Application Load Balancer) operates at Layer 7 for HTTP/HTTPS routing; NLB (Network Load Balancer) operates at Layer 4 for TCP/UDP with ultra-low latency; CLB (Classic Load Balancer) is the legacy option, mostly deprecated and replaced by ALB/NLB."
+  },
+  {
+    q: "What is the key difference between ALB and NLB?",
+    tag: "gen",
+    options: [
+      "ALB supports TCP; NLB supports only HTTP",
+      "ALB operates at Layer 7 (application) with path/host routing; NLB operates at Layer 4 (transport) for TCP/UDP with ultra-low latency",
+      "ALB is free; NLB incurs additional charges per connection",
+      "ALB supports cross-AZ; NLB does not"
+    ],
+    correct: 1,
+    explanation: "ALB understands HTTP/HTTPS and can make routing decisions based on URL paths, hostnames, headers, or query strings — ideal for web applications and microservices. NLB works at the TCP/UDP layer, doesn't inspect content, and delivers extreme performance with millisecond latency — ideal for real-time systems."
+  },
+  {
+    q: "What is a Target Group in AWS Load Balancing?",
+    tag: "gen",
+    options: [
+      "A group of IAM roles assigned to EC2 instances for access control",
+      "A collection of resources (EC2 instances, IPs, Lambda functions) that receive traffic from the load balancer",
+      "A billing group for tracking load balancer costs per department",
+      "A set of CloudWatch alarms triggered when load exceeds a threshold"
+    ],
+    correct: 1,
+    explanation: "A Target Group is a logical grouping of targets that the load balancer routes requests to. Each target group has its own health check configuration and routing rules. You can route different URL paths or hostnames to different target groups — enabling multi-service architectures behind one LB."
+  },
+  {
+    q: "How do health checks work in AWS Load Balancers?",
+    tag: "ha",
+    options: [
+      "Health checks run once during initial registration; no ongoing checks are performed",
+      "The load balancer periodically sends requests to each target; only targets passing checks receive traffic",
+      "Health checks are performed by CloudWatch and results are sent to the LB every hour",
+      "Targets self-report their health status to the load balancer via an API call"
+    ],
+    correct: 1,
+    explanation: "The load balancer continuously polls each target at configured intervals (e.g., every 30s). If a target fails a set number of consecutive checks (unhealthy threshold), it's marked unhealthy and removed from rotation. It's re-added automatically when it passes checks again — no manual intervention needed."
+  },
+  {
+    q: "What is Cross-Zone Load Balancing?",
+    tag: "ha",
+    options: [
+      "Distributing traffic across multiple AWS regions simultaneously",
+      "Routing requests between an internal and internet-facing load balancer",
+      "Distributing traffic evenly across all registered targets in all enabled Availability Zones",
+      "A feature that copies target group configurations across zones"
+    ],
+    correct: 2,
+    explanation: "Without cross-zone load balancing, each LB node distributes traffic only to targets in its own AZ. With it enabled, each node can route to any target across all AZs — ensuring even distribution regardless of how many targets are in each AZ. ALB has it enabled by default; NLB has it disabled by default."
+  },
+  {
+    q: "What is Sticky Session (Session Affinity) in a Load Balancer?",
+    tag: "alb",
+    options: [
+      "A feature that prevents load balancer health checks from failing during deployments",
+      "A mechanism that binds a user's requests to the same specific target for the duration of a session",
+      "An encryption feature that keeps SSL sessions alive across reconnections",
+      "A setting that prioritizes traffic to the least-loaded instance"
+    ],
+    correct: 1,
+    explanation: "Sticky sessions use a cookie (generated by ALB or the application) to ensure all requests from a client go to the same target. It's useful for stateful applications storing session data locally. However, it can cause uneven load distribution and is not ideal for stateless, horizontally scalable architectures."
+  },
+  {
+    q: "What is SSL Termination at a Load Balancer?",
+    tag: "alb",
+    options: [
+      "Blocking HTTPS traffic at the load balancer level for security",
+      "Forwarding encrypted SSL traffic directly to backend instances without decryption",
+      "The load balancer decrypts incoming HTTPS traffic and forwards plain HTTP to backend targets",
+      "Renewing SSL certificates automatically on all registered EC2 instances"
+    ],
+    correct: 2,
+    explanation: "SSL termination means the load balancer handles the TLS/SSL handshake and decryption, then sends unencrypted HTTP traffic to backend instances. This offloads CPU-intensive crypto operations from your servers, centralizes certificate management (using ACM), and simplifies backend configuration."
+  },
+  {
+    q: "How does a Load Balancer improve high availability?",
+    tag: "ha",
+    options: [
+      "By creating automatic backups of EC2 instances in multiple regions",
+      "By assigning static Elastic IPs to all registered targets",
+      "By distributing traffic across multiple instances in different AZs — if one AZ fails, traffic shifts automatically",
+      "By running two load balancers in active-passive failover mode"
+    ],
+    correct: 2,
+    explanation: "By spanning multiple Availability Zones, the load balancer ensures that even if an entire AZ goes down, the remaining healthy targets in other AZs continue serving traffic. Combined with health checks, this provides automatic failover without requiring any manual intervention or DNS changes."
+  },
+  {
+    q: "What is path-based routing in an ALB?",
+    tag: "alb",
+    options: [
+      "Routing traffic based on the geographic location of the client",
+      "Routing traffic based on the URL path (e.g., /api → API service, /images → image service)",
+      "Routing traffic based on the source IP address CIDR block",
+      "Routing traffic based on the HTTP response time of each target"
+    ],
+    correct: 1,
+    explanation: "Path-based routing lets a single ALB serve multiple backend services. For example: requests to /api/* go to an API target group, /static/* go to an S3-backed group, and /* goes to a web app. This eliminates the need for separate load balancers per service and simplifies DNS management."
+  },
+  {
+    q: "What is host-based routing in an ALB?",
+    tag: "alb",
+    options: [
+      "Routing based on which EC2 host has the lowest CPU utilization",
+      "Routing traffic based on the hostname/domain in the HTTP Host header (e.g., api.example.com vs app.example.com)",
+      "Routing based on the physical host server running the EC2 instance",
+      "Routing based on the Host tag applied to EC2 instances in a target group"
+    ],
+    correct: 1,
+    explanation: "Host-based routing inspects the Host header in HTTP requests to decide which target group receives the traffic. This enables a single ALB to front multiple domains or subdomains — each pointing to a different microservice. It's a foundational pattern in microservices and multi-tenant architectures."
+  },
+  {
+    q: "What happens when all targets in a target group fail health checks?",
+    tag: "ts",
+    options: [
+      "The load balancer automatically restarts the failed EC2 instances",
+      "Traffic is rerouted to a standby load balancer in another region",
+      "The load balancer stops routing to that target group and returns 502/503 error responses to clients",
+      "The load balancer switches to a cached version of the last successful response"
+    ],
+    correct: 2,
+    explanation: "When all targets are unhealthy, the load balancer has nowhere to send traffic and returns HTTP 502 (Bad Gateway) or 503 (Service Unavailable) to clients. This indicates a complete backend failure. Some configurations allow the LB to fail open (route anyway) — but the default is to return errors and alert on this condition immediately."
+  },
+  {
+    q: "Traffic is not reaching your EC2 instances behind a load balancer — what do you check?",
+    tag: "ts",
+    options: [
+      "Check EC2 instance type compatibility with the load balancer",
+      "Check only the load balancer's CloudWatch metrics for latency",
+      "Check target group health status, security groups on instances, NACLs, and listener rules configuration",
+      "Delete and recreate the target group with fresh instances"
+    ],
+    correct: 2,
+    explanation: "Systematic troubleshooting: (1) Target group health — are instances passing checks? (2) Security groups — does the instance SG allow traffic from the LB SG on the correct port? (3) NACLs — subnet-level stateless rules might block traffic. (4) Listener rules — is the correct rule forwarding to the right target group? (5) Health check port/path — is it correctly configured?"
+  },
+  {
+    q: "What is a Listener in an AWS Load Balancer?",
+    tag: "gen",
+    options: [
+      "A CloudWatch alarm that monitors load balancer request rates",
+      "An IAM policy that permits load balancer actions on EC2 instances",
+      "A process that checks for connection requests on a specified port and protocol, then applies routing rules",
+      "A background thread that polls target group health every 30 seconds"
+    ],
+    correct: 2,
+    explanation: "A listener is configured with a protocol (HTTP, HTTPS, TCP) and port (e.g., 443). It evaluates incoming requests against its rules in priority order and forwards to the matched target group. An ALB can have multiple listeners (e.g., port 80 redirecting to 443, port 443 serving the app)."
+  },
+  {
+    q: "What is connection draining (deregistration delay)?",
+    tag: "gen",
+    options: [
+      "Closing all idle connections when a load balancer scales down",
+      "Draining SSL session caches when certificates are rotated",
+      "Allowing in-flight requests to complete before a target is fully deregistered from the load balancer",
+      "A timeout setting that disconnects users who have been idle too long"
+    ],
+    correct: 2,
+    explanation: "When you deregister a target (e.g., during a deployment or scale-in), connection draining ensures the load balancer stops sending new requests to that target but waits for existing in-flight requests to complete before fully removing it. The default delay is 300 seconds — tune it based on your typical request duration."
+  },
+  {
+    q: "How does a Load Balancer integrate with Auto Scaling?",
+    tag: "ha",
+    options: [
+      "Auto Scaling manually notifies the LB via SNS when new instances launch",
+      "The LB and Auto Scaling are independent — you must register new instances manually",
+      "The Auto Scaling group automatically registers new instances with the load balancer's target group and deregisters terminated ones",
+      "Auto Scaling only works with NLB, not ALB"
+    ],
+    correct: 2,
+    explanation: "When you attach a load balancer to an Auto Scaling group, new instances are automatically registered with the target group when launched (after passing health checks) and deregistered when terminated. This creates a seamless elastic scaling system — traffic distribution adjusts automatically without any manual steps."
+  },
+  {
+    q: "Can an ALB route traffic to AWS Lambda functions?",
+    tag: "alb",
+    options: [
+      "No — Lambda can only be triggered by API Gateway, not ALB",
+      "Yes — ALB supports Lambda as a target type in a target group",
+      "Only if the Lambda function is deployed inside a VPC",
+      "Only through a proxy EC2 instance registered in the target group"
+    ],
+    correct: 1,
+    explanation: "ALB can invoke Lambda functions directly as targets. The request is translated into a JSON event that Lambda receives. This is powerful for serverless architectures — you can route specific URL paths to Lambda while other paths go to EC2-based target groups, all behind a single ALB."
+  },
+  {
+    q: "What is the idle timeout setting on a Load Balancer?",
+    tag: "gen",
+    options: [
+      "The maximum time an instance can remain in an unhealthy state before being terminated",
+      "The duration the LB waits before retrying a failed health check",
+      "The time the load balancer keeps an idle connection open before closing it",
+      "The cooldown period after a scaling event before new health checks run"
+    ],
+    correct: 2,
+    explanation: "The idle timeout (default 60 seconds for ALB) defines how long a connection can remain idle (no data transferred) before the load balancer closes it. For applications with long-running requests or server-sent events, increase this value. Mismatched timeouts between the LB and application server cause unexpected connection drops."
+  },
+  {
+    q: "What is the difference between an internet-facing and internal Load Balancer?",
+    tag: "gen",
+    options: [
+      "Internet-facing uses IPv6; internal uses IPv4 only",
+      "Internet-facing has a public DNS name and routes traffic from the internet; internal has only a private IP and handles traffic within a VPC",
+      "Internet-facing supports ALB only; internal supports NLB only",
+      "There is no functional difference — only the naming convention differs"
+    ],
+    correct: 1,
+    explanation: "An internet-facing load balancer has a public DNS name resolving to public IP addresses, allowing external clients to reach it. An internal load balancer only has private IP addresses, accessible only within the VPC or connected networks — ideal for routing traffic between internal services (e.g., from a web tier to an application tier)."
+  },
+  {
+    q: "When would you choose NLB over ALB?",
+    tag: "nlb",
+    options: [
+      "When you need HTTP header inspection and cookie-based routing",
+      "When you want to route traffic to Lambda functions",
+      "When you need ultra-low latency, static IP addresses, high throughput, or TCP/UDP protocol support",
+      "When you need sticky sessions based on application cookies"
+    ],
+    correct: 2,
+    explanation: "NLB is the right choice when: (1) You need a static IP per AZ (useful for whitelisting), (2) You need to handle millions of requests/second with minimal latency (gaming, financial trading), (3) Your application uses non-HTTP protocols (TCP, UDP, TLS passthrough), or (4) You need to preserve the client's source IP address at the instance level."
+  },
+  {
+    q: "Which load balancer type supports routing based on HTTP headers, query strings, and request methods?",
+    tag: "alb",
+    options: [
+      "Network Load Balancer (NLB) — it inspects all packet headers",
+      "Classic Load Balancer (CLB) — it has the most mature routing rules",
+      "Application Load Balancer (ALB) — it operates at Layer 7 and understands HTTP attributes",
+      "All three load balancer types support HTTP-level routing rules equally"
+    ],
+    correct: 2,
+    explanation: "ALB's advanced request routing can forward, redirect, or return fixed responses based on: HTTP method (GET/POST), HTTP headers (e.g., User-Agent), query string parameters, source IP, and even weighted target group distribution. This flexibility makes ALB the standard choice for modern web apps and API routing."
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+
+const tagMeta = {
+  alb:  { label: 'ALB',              cls: 'tag-alb' },
+  nlb:  { label: 'NLB',              cls: 'tag-nlb' },
+  gen:  { label: 'General',          cls: 'tag-gen' },
+  ha:   { label: 'High Availability',cls: 'tag-ha'  },
+  ts:   { label: 'Troubleshoot',     cls: 'tag-ts'  }
+};
+
+function render() {
+  const q = questions[current];
+  const ans = answers[current];
+  const isAnswered = ans !== null;
+  const total = questions.length;
+  const tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progressText').textContent = `${current + 1} / ${total}`;
+
+  document.getElementById('dotsNav').innerHTML = questions.map((_, i) => {
+    let cls = 'dot';
+    if (i === current) cls += ' active current';
+    else if (answers[i] !== null) cls += ' answered';
+    return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let cls = 'option';
+    let tag = '';
+    if (isAnswered) {
+      cls += ' locked';
+      if (i === q.correct) { cls += ' correct'; tag = `<span class="option-tag tag-correct">✓ CORRECT</span>`; }
+      else if (i === ans)  { cls += ' wrong';   tag = `<span class="option-tag tag-wrong">✗ WRONG</span>`; }
+    }
+    return `<div class="${cls}" onclick="selectAnswer(${i})">
+      <div class="option-dot"></div>
+      <span class="option-label">${opt}</span>${tag}
+    </div>`;
+  }).join('');
+
+  const explanationHtml = isAnswered ? `
+    <div class="explanation-box">
+      <div class="explanation-title">⚡ Explanation</div>
+      <div class="explanation-text">${q.explanation}</div>
+    </div>` : '';
+
+  const isLast = current === total - 1;
+  const allAnswered = answers.every(a => a !== null);
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card">
+      <div class="q-number">
+        Question ${current + 1} of ${total}
+        <span class="q-tag ${tm.cls}">${tm.label}</span>
+      </div>
+      <div class="question">${q.q}</div>
+      <div class="options">${optionsHtml}</div>
+      ${explanationHtml}
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()" ${current === 0 ? 'disabled' : ''}>← Back</button>
+        <button class="btn btn-reset" onclick="resetQuiz()">↺ Reset</button>
+        ${isLast && allAnswered
+          ? `<button class="btn btn-next" onclick="showResults()">See Results →</button>`
+          : `<button class="btn btn-next" onclick="goNext()" ${!isAnswered ? 'disabled' : ''}>Next →</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function selectAnswer(i) {
+  if (answers[current] !== null) return;
+  answers[current] = i;
+  render();
+}
+
+function goNext() { if (current < questions.length - 1) { current++; render(); } }
+function goBack() { if (current > 0) { current--; render(); } }
+function goTo(i)  { current = i; render(); }
+
+function resetQuiz() {
+  answers = new Array(questions.length).fill(null);
+  current = 0;
+  render();
+}
+
+function showResults() {
+  const score = answers.filter((a, i) => a === questions[i].correct).length;
+  const pct = Math.round((score / questions.length) * 100);
+  const msg = pct === 100 ? '🏆 Flawless! You know your LBs cold!'
+            : pct >= 70  ? '🎯 Solid grasp — keep sharpening!'
+            :               '📚 Review the explanations and retry!';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card result-screen">
+      <div class="result-score">${score}/${questions.length}</div>
+      <div class="result-label">FINAL SCORE · ${pct}%</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-list">
+        ${questions.map((q, i) => `
+          <div class="result-item">
+            <span style="font-size:15px">${answers[i] === q.correct ? '✅' : '❌'}</span>
+            <span class="q-tag ${tagMeta[q.tag].cls}" style="font-size:9px">${tagMeta[q.tag].label}</span>
+            Q${i+1}: ${q.q.length > 44 ? q.q.slice(0, 44) + '…' : q.q}
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>
+      <button class="btn btn-reset" style="margin:12px auto 0" onclick="resetQuiz()">↺ Try Again</button>
+    </div>`;
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = `${score} / ${questions.length} correct`;
+}
+
+function reviewAnswers() { current = 0; render(); }
+
+render();
+</script>
+</body>
+</html>

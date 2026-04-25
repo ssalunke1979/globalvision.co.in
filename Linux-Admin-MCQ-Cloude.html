@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Admin Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --card: #111827;
+    --border: #1e2d40;
+    --accent: #a8ff78;
+    --accent2: #22c55e;
+    --correct: #00e5a0;
+    --wrong: #ff4d6d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --highlight: rgba(168,255,120,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(168,255,120,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(34,197,94,0.05) 0%, transparent 50%);
+  }
+
+  header { text-align: center; margin-bottom: 40px; }
+
+  .badge {
+    display: inline-block;
+    background: rgba(168,255,120,0.1);
+    border: 1px solid rgba(168,255,120,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    color: var(--muted);
+    margin-top: 8px;
+    font-size: 14px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* Section tabs */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 8px 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .tab:hover { border-color: rgba(168,255,120,0.4); color: var(--text); }
+
+  .tab.active {
+    background: rgba(168,255,120,0.1);
+    border-color: rgba(168,255,120,0.5);
+    color: var(--accent);
+  }
+
+  .quiz-container { width: 100%; max-width: 780px; }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+    animation: slideIn 0.35s ease;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .q-tag {
+    display: inline-block;
+    background: rgba(168,255,120,0.08);
+    border: 1px solid rgba(168,255,120,0.2);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: 10px;
+    vertical-align: middle;
+    text-transform: uppercase;
+  }
+
+  .q-tag.scenario { background: rgba(255,159,67,0.08); border-color: rgba(255,159,67,0.2); color: #ff9f43; }
+  .q-tag.sar { background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.2); color: #a78bfa; }
+
+  .question {
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 28px;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .option {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    transition: all 0.2s ease;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .option:hover:not(.locked) {
+    border-color: rgba(168,255,120,0.4);
+    background: var(--highlight);
+    transform: translateX(4px);
+  }
+
+  .option-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+  }
+
+  .option.correct { border-color: var(--correct); background: rgba(0,229,160,0.06); }
+  .option.correct .option-dot { border-color: var(--correct); background: var(--correct); }
+  .option.wrong   { border-color: var(--wrong); background: rgba(255,77,109,0.06); }
+  .option.wrong .option-dot { border-color: var(--wrong); background: var(--wrong); }
+
+  .option-label { flex: 1; }
+
+  .option-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .tag-correct { background: rgba(0,229,160,0.15); color: var(--correct); }
+  .tag-wrong   { background: rgba(255,77,109,0.15); color: var(--wrong); }
+
+  .explanation-box {
+    margin-top: 20px;
+    padding: 16px 20px;
+    background: rgba(168,255,120,0.03);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .explanation-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .explanation-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+    gap: 12px;
+  }
+
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    padding: 12px 28px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-back { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-back:hover { border-color: rgba(168,255,120,0.4); color: var(--text); }
+  .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #000;
+    box-shadow: 0 4px 20px rgba(168,255,120,0.15);
+  }
+
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(168,255,120,0.3); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-reset {
+    background: rgba(34,197,94,0.08);
+    border: 1px solid rgba(34,197,94,0.25);
+    color: var(--accent2);
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .btn-reset:hover { background: rgba(34,197,94,0.15); }
+
+  .dots-nav {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 24px;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+  }
+
+  .dot.active   { background: var(--accent); transform: scale(1.35); }
+  .dot.answered { background: rgba(0,229,160,0.5); }
+  .dot.current  { border-color: var(--accent); }
+
+  .result-screen { text-align: center; padding: 50px 40px; }
+
+  .result-score {
+    font-size: 80px;
+    font-weight: 800;
+    line-height: 1;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .result-label {
+    font-family: 'Space Mono', monospace;
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+    margin-top: 8px;
+  }
+
+  .result-msg { font-size: 20px; font-weight: 600; margin-top: 24px; margin-bottom: 32px; }
+
+  .result-list {
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+    margin-bottom: 32px;
+    text-align: left;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .result-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .card { padding: 24px 20px; }
+    .question { font-size: 17px; }
+    .nav-row { flex-wrap: wrap; }
+    .btn-reset { order: -1; width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Linux Administration Prep</div>
+  <h1>Linux <span>Admin</span> Quiz</h1>
+  <p class="subtitle">// 55 questions · Core + Scenarios + SAR</p>
+</header>
+
+<div class="quiz-container">
+
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core (1–30)</button>
+    <button class="tab" onclick="switchSection(1)">Scenarios (31–35)</button>
+    <button class="tab" onclick="switchSection(2)">SAR Tool (1–20)</button>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+const sections = [
+  {
+    label: "Core Linux",
+    questions: [
+      {
+        q: "What is Linux?",
+        tag: "core",
+        options: [
+          "A proprietary OS developed by Microsoft",
+          "An open-source OS based on Unix architecture that manages hardware resources and provides services to applications",
+          "A cloud platform for deploying containers",
+          "A command-line utility for network management"
+        ],
+        correct: 1,
+        explanation: "Linux is an open-source, Unix-inspired operating system widely used in servers, cloud environments, and containers because of its stability, security, and flexibility. It's the backbone of most modern infrastructure."
+      },
+      {
+        q: "What is the Linux kernel?",
+        tag: "core",
+        options: [
+          "A graphical desktop environment",
+          "A file compression utility",
+          "The core component that interacts directly with hardware and manages CPU, memory, and devices",
+          "A package manager for installing software"
+        ],
+        correct: 2,
+        explanation: "The kernel is the heart of Linux — it acts as a bridge between applications and hardware, managing system resources like CPU scheduling, memory allocation, and device drivers."
+      },
+      {
+        q: "What is the key difference between Linux and Unix?",
+        tag: "core",
+        options: [
+          "Linux is older than Unix",
+          "Unix is open-source; Linux is proprietary",
+          "Linux is open-source and free; Unix is proprietary",
+          "There is no functional difference"
+        ],
+        correct: 2,
+        explanation: "Unix is a proprietary, commercial OS. Linux was inspired by Unix but developed independently by Linus Torvalds starting in 1991. Linux is free, open-source, and has become the dominant OS in servers and cloud."
+      },
+      {
+        q: "What is a shell in Linux?",
+        tag: "core",
+        options: [
+          "A hardware abstraction layer",
+          "A command-line interface that allows users to interact with the OS",
+          "A background service process",
+          "A tool for monitoring disk I/O"
+        ],
+        correct: 1,
+        explanation: "The shell is a program that reads user commands and passes them to the OS kernel for execution. Common shells include bash, sh, and zsh. It's the primary interface for system administration tasks."
+      },
+      {
+        q: "What is a process in Linux?",
+        tag: "core",
+        options: [
+          "A file stored in the /proc directory",
+          "A scheduled cron job",
+          "A running instance of a program with a unique PID",
+          "A type of Linux kernel module"
+        ],
+        correct: 2,
+        explanation: "A process is an active execution instance of a program. Each process is assigned a unique PID (Process ID) and consumes system resources like CPU and memory. The OS scheduler manages process execution."
+      },
+      {
+        q: "What is the difference between a process and a thread?",
+        tag: "core",
+        options: [
+          "They are identical — threads are just renamed processes",
+          "A process is a lightweight unit inside a thread",
+          "A process is an independent execution unit; a thread is a lightweight unit within a process",
+          "Threads run in foreground; processes run in background"
+        ],
+        correct: 2,
+        explanation: "Processes have their own memory space and run independently. Threads are lighter units within a process that share the same memory space, enabling more efficient parallel execution within a single application."
+      },
+      {
+        q: "What is a PID?",
+        tag: "core",
+        options: [
+          "Partition Identifier — used to label disk partitions",
+          "Package Install Directory — path where packages are stored",
+          "Process ID — a unique identifier assigned to each running process",
+          "Primary Interface Device — network interface name"
+        ],
+        correct: 2,
+        explanation: "PID stands for Process ID. Every running process gets a unique integer PID assigned by the OS. You use PIDs to send signals to processes (e.g., kill 1234) and manage them via commands like ps or top."
+      },
+      {
+        q: "What is the difference between foreground and background processes?",
+        tag: "core",
+        options: [
+          "Foreground uses more CPU; background uses less",
+          "Foreground runs in the terminal and blocks input; background runs without blocking the terminal",
+          "Background processes have higher priority than foreground",
+          "They differ only in their PID range"
+        ],
+        correct: 1,
+        explanation: "A foreground process occupies the terminal — you can't run other commands until it finishes. A background process (started with & or moved with bg) runs independently, allowing you to keep using the terminal for multitasking."
+      },
+      {
+        q: "How do you check running processes in Linux?",
+        tag: "core",
+        options: [
+          "Using ls -lh or find /proc",
+          "Using df, du, or lsblk",
+          "Using ps, top, or htop",
+          "Using journalctl or dmesg"
+        ],
+        correct: 2,
+        explanation: "ps gives a snapshot of running processes, top provides a real-time interactive view of processes sorted by resource usage, and htop is an enhanced version of top with a more user-friendly interface and color coding."
+      },
+      {
+        q: "How do you forcefully kill a process in Linux?",
+        tag: "core",
+        options: [
+          "Using rm -rf /proc/<PID>",
+          "Using stop <PID> or halt <PID>",
+          "Using kill, kill -9 <PID>, or pkill <name>",
+          "Using systemctl pause <PID>"
+        ],
+        correct: 2,
+        explanation: "kill <PID> sends SIGTERM (graceful termination). kill -9 <PID> sends SIGKILL (immediate, cannot be caught or ignored). pkill allows you to kill by process name. Use -9 only for unresponsive processes."
+      },
+      {
+        q: "What is a Linux file system?",
+        tag: "core",
+        options: [
+          "A GUI tool for browsing files",
+          "A structure used to store and organize files, starting from the root /",
+          "A backup mechanism for data recovery",
+          "A network protocol for file sharing"
+        ],
+        correct: 1,
+        explanation: "A file system organizes how data is stored on disk. Linux uses a hierarchical tree structure with / as the root. Common Linux file systems include ext4, xfs, and btrfs. Everything in Linux — including devices and processes — is represented as a file."
+      },
+      {
+        q: "What is an inode in Linux?",
+        tag: "core",
+        options: [
+          "A type of Linux network interface",
+          "A special root-level directory",
+          "A data structure that stores metadata about a file (permissions, size, timestamps) but not the filename",
+          "A physical sector on a hard disk"
+        ],
+        correct: 2,
+        explanation: "An inode holds all file metadata: size, owner, permissions, timestamps, and pointers to data blocks. Notably, it does NOT store the filename — that's stored in the directory entry. Hard links share the same inode."
+      },
+      {
+        q: "What are Linux file permissions?",
+        tag: "core",
+        options: [
+          "Encrypted tokens used for SSH authentication",
+          "ACLs that define read (r), write (w), and execute (x) access for user, group, and others",
+          "Flags stored in the kernel for process scheduling",
+          "Settings in /etc/passwd for user login"
+        ],
+        correct: 1,
+        explanation: "Linux file permissions control who can read, write, or execute a file. They are split into three classes: owner (user), group, and others. Shown as rwxrwxrwx in ls -l output, each class gets 3 bits representing r, w, and x."
+      },
+      {
+        q: "What does the chmod command do?",
+        tag: "core",
+        options: [
+          "Changes the hostname of the system",
+          "Modifies memory allocation for a process",
+          "Changes file or directory permissions",
+          "Checks file system integrity"
+        ],
+        correct: 2,
+        explanation: "chmod (change mode) modifies the access permissions of files and directories. You can use symbolic mode (chmod u+x file) or octal mode (chmod 755 file). It's essential for security and access control."
+      },
+      {
+        q: "What does the chown command do?",
+        tag: "core",
+        options: [
+          "Changes the current working directory",
+          "Changes the owner and/or group of a file or directory",
+          "Checks for open ports on a network interface",
+          "Creates a new user on the system"
+        ],
+        correct: 1,
+        explanation: "chown (change owner) assigns a new user and/or group to files and directories. Example: chown alice:developers file.txt changes the owner to 'alice' and group to 'developers'. Requires root or sudo privileges."
+      },
+      {
+        q: "What is sudo in Linux?",
+        tag: "core",
+        options: [
+          "A background daemon for user authentication",
+          "A network tool for superuser diagnostics",
+          "A command that allows permitted users to run commands as root with controlled access",
+          "A shell built-in for switching user environments"
+        ],
+        correct: 2,
+        explanation: "sudo (superuser do) lets authorized users execute commands with elevated (root) privileges without logging in as root. It logs all actions for auditing and is configured via /etc/sudoers, providing granular access control."
+      },
+      {
+        q: "What is the root user in Linux?",
+        tag: "core",
+        options: [
+          "The first user created during OS installation (UID 1000)",
+          "A user with read-only access to system files",
+          "The superuser with UID 0 and full, unrestricted system access",
+          "An AWS IAM role mapped to Linux"
+        ],
+        correct: 2,
+        explanation: "The root user (UID 0) has complete control over the system — no file permissions or restrictions apply. Root should be used carefully to avoid accidental damage. Best practice: use sudo for administrative tasks instead of logging in as root."
+      },
+      {
+        q: "What is a daemon in Linux?",
+        tag: "core",
+        options: [
+          "A malicious background process",
+          "A background service process that runs continuously without user interaction",
+          "A type of shell script that runs at login",
+          "A kernel module loaded at boot time"
+        ],
+        correct: 1,
+        explanation: "Daemons are background processes that provide system services. They typically start at boot and run continuously. Examples include sshd (SSH server), crond (job scheduler), httpd (web server), and ntpd (time sync)."
+      },
+      {
+        q: "What is cron in Linux?",
+        tag: "core",
+        options: [
+          "A real-time process monitor",
+          "A command for counting lines in a file",
+          "A time-based job scheduler used for automating repetitive tasks",
+          "A filesystem consistency checker"
+        ],
+        correct: 2,
+        explanation: "Cron is a daemon that executes scheduled commands at specified times. Jobs are defined in crontab files using the format: minute hour day month weekday command. It's essential for automating backups, log rotation, and maintenance tasks."
+      },
+      {
+        q: "What does systemctl do?",
+        tag: "core",
+        options: [
+          "Monitors system call activity in real time",
+          "Manages services and units in systemd — start, stop, enable, disable, status",
+          "Synchronizes system time with NTP servers",
+          "Checks CPU temperature and fan speed"
+        ],
+        correct: 1,
+        explanation: "systemctl is the main tool for interacting with systemd. Common commands: systemctl start/stop/restart <service>, systemctl enable/disable (persist across reboots), systemctl status (check current state and recent logs)."
+      },
+      {
+        q: "What is systemd?",
+        tag: "core",
+        options: [
+          "A shell scripting language for automation",
+          "A disk partitioning and formatting tool",
+          "A system and service manager that handles the boot process, service lifecycle, and logging",
+          "A kernel security module for SELinux"
+        ],
+        correct: 2,
+        explanation: "systemd is the init system and service manager used by most modern Linux distributions. It replaces older init systems (SysV init), manages services in parallel during boot for faster startup, and provides journald for centralized logging."
+      },
+      {
+        q: "What is a package manager in Linux?",
+        tag: "core",
+        options: [
+          "A tool for compressing and archiving files",
+          "A network traffic analyzer",
+          "A tool to install, update, and manage software packages and dependencies",
+          "A daemon that manages background processes"
+        ],
+        correct: 2,
+        explanation: "Package managers automate software installation and dependency resolution. Common ones: apt/apt-get (Debian/Ubuntu), yum/dnf (RHEL/CentOS/Fedora), zypper (openSUSE). They fetch packages from repositories and maintain an installed package database."
+      },
+      {
+        q: "What is SSH?",
+        tag: "core",
+        options: [
+          "Simple Shell Handler — a local command interpreter",
+          "Secure Shell — a cryptographic network protocol for secure remote login and command execution",
+          "System Service Host — a Windows compatibility layer",
+          "Stateful Session Handler — a web session protocol"
+        ],
+        correct: 1,
+        explanation: "SSH (Secure Shell) provides encrypted communication over an insecure network. It replaced older protocols like Telnet. It uses asymmetric key pairs for authentication and symmetric encryption for the session, running on port 22 by default."
+      },
+      {
+        q: "What does the grep command do?",
+        tag: "core",
+        options: [
+          "Generates reports on process execution",
+          "Groups files by extension for batch processing",
+          "Searches for text patterns within files or input streams using regular expressions",
+          "Gets the real-time path of a running executable"
+        ],
+        correct: 2,
+        explanation: "grep (Global Regular Expression Print) scans files or stdin for lines matching a pattern and prints them. Extremely useful for log analysis, filtering command output, and searching codebases. Common flags: -i (case insensitive), -r (recursive), -v (invert match)."
+      },
+      {
+        q: "What is awk used for?",
+        tag: "core",
+        options: [
+          "Auditing kernel write operations",
+          "A text processing tool used for parsing and transforming structured data",
+          "Archiving files with compression",
+          "A network packet analyzer"
+        ],
+        correct: 1,
+        explanation: "awk is a powerful text processing language that processes input line by line, splitting each into fields. It's ideal for log parsing, report generation, and data extraction. Example: awk '{print $1, $3}' file.txt prints columns 1 and 3."
+      },
+      {
+        q: "What is sed in Linux?",
+        tag: "core",
+        options: [
+          "A secure encryption daemon for file protection",
+          "A storage error detector for disk diagnostics",
+          "A stream editor used for modifying text in files or pipelines",
+          "A service dependency manager for systemd"
+        ],
+        correct: 2,
+        explanation: "sed (Stream EDitor) processes text line by line, applying substitution, deletion, and insertion operations. Most common use: sed 's/old/new/g' file.txt for find-and-replace. It's ideal for automated config file modifications in scripts."
+      },
+      {
+        q: "What does the df command show?",
+        tag: "core",
+        options: [
+          "The definition of a file's inode metadata",
+          "A diff between two file versions",
+          "Disk filesystem usage — total, used, and available space per mounted filesystem",
+          "Directory file listings with permissions"
+        ],
+        correct: 2,
+        explanation: "df (disk free) reports filesystem disk space usage. Use df -h for human-readable sizes. It shows each mounted filesystem, its total size, used space, available space, and mount point. Essential for monitoring storage capacity."
+      },
+      {
+        q: "What does the du command do?",
+        tag: "core",
+        options: [
+          "Displays user account information",
+          "Shows the size of files and directories on disk",
+          "Dumps the contents of a binary file",
+          "Displays uptime and load averages"
+        ],
+        correct: 1,
+        explanation: "du (disk usage) estimates the disk space used by files and directories. Use du -sh * to see the size of each item in the current directory in human-readable form. Combine with sort -rh | head to find the largest directories."
+      },
+      {
+        q: "What does the top command display?",
+        tag: "core",
+        options: [
+          "The top-level directory tree of the filesystem",
+          "A summary of the last 10 commands run",
+          "A real-time, dynamic view of running processes and system resource usage",
+          "The topmost entries in /var/log/syslog"
+        ],
+        correct: 2,
+        explanation: "top provides a live, auto-refreshing view of processes sorted by CPU usage by default. It shows system uptime, load averages, CPU/memory stats, and per-process details like PID, user, CPU%, and MEM%. Press M to sort by memory, P for CPU."
+      },
+      {
+        q: "How do you check memory usage in Linux?",
+        tag: "core",
+        options: [
+          "Using memstat or ramcheck commands",
+          "Using ls /proc/meminfo with grep",
+          "Using free -m to display RAM and swap usage in megabytes",
+          "Using vmstat --memory flag"
+        ],
+        correct: 2,
+        explanation: "free -m shows total, used, free, shared, buff/cache, and available memory in MB. The 'available' column is the most useful — it shows how much RAM can be used by new processes without swapping. Use watch free -m for continuous monitoring."
+      }
+    ]
+  },
+  {
+    label: "Scenarios",
+    questions: [
+      {
+        q: "A server is running slowly — what do you check first?",
+        tag: "scenario",
+        options: [
+          "Immediately reboot the server to clear any stuck processes",
+          "Check CPU with top, memory with free, disk with df, and identify resource-heavy processes",
+          "Check only the network interface statistics",
+          "Review /etc/crontab for any runaway scheduled jobs"
+        ],
+        correct: 1,
+        explanation: "Slow servers usually have a resource bottleneck — CPU, memory, disk I/O, or network. Use top/htop for CPU and memory pressure, free -m for RAM, df -h for disk space, iostat for disk I/O, and netstat/ss for connection issues. Systematic layered checks isolate the root cause."
+      },
+      {
+        q: "The disk is full on a production server — what do you do?",
+        tag: "scenario",
+        options: [
+          "Immediately terminate the largest running process",
+          "Use du -sh /* to find large files/dirs, clear old logs, and extend the disk if needed",
+          "Reformat the partition and restore from backup",
+          "Increase swap space to compensate for full disk"
+        ],
+        correct: 1,
+        explanation: "Run du -sh /* then drill down to find space hogs. Common culprits: /var/log (old logs), /tmp (temp files), application data. Use truncate -s 0 to clear active log files safely (don't delete them). Then consider extending the LVM volume or EBS disk without downtime."
+      },
+      {
+        q: "A critical service fails to start — how do you diagnose it?",
+        tag: "scenario",
+        options: [
+          "Reinstall the service package immediately",
+          "Check service logs with journalctl -xe, verify config files, and check dependencies",
+          "Kill all related processes and restart the server",
+          "Disable the service and create a new one from scratch"
+        ],
+        correct: 1,
+        explanation: "Start with journalctl -u <service> -n 50 for recent logs — they usually reveal the exact error (config syntax error, missing file, port conflict). Check systemctl status <service> for state. Verify config with the service's built-in check (e.g., nginx -t, sshd -t). Check if required ports are free with ss -tlnp."
+      },
+      {
+        q: "You cannot SSH into a remote server — what could be wrong?",
+        tag: "scenario",
+        options: [
+          "The server's hard disk is likely full",
+          "The SSH daemon has a memory leak",
+          "Check SSH service status, firewall rules, Security Groups, network connectivity, and SSH key validity",
+          "The server's hostname has changed"
+        ],
+        correct: 2,
+        explanation: "Troubleshoot layer by layer: (1) Can you ping the server? (network/routing issue), (2) Is port 22 open? (firewall/Security Group), (3) Is sshd running on the server? (systemctl status sshd), (4) Are key permissions correct? (~/.ssh/authorized_keys should be 600), (5) Check /var/log/auth.log or /var/log/secure for auth failures."
+      },
+      {
+        q: "You notice high CPU usage on a server — how do you debug it?",
+        tag: "scenario",
+        options: [
+          "Reboot the server to reset CPU counters",
+          "Increase the instance type to a larger CPU size immediately",
+          "Use top to identify the process, check its logs, analyze if it's a runaway job or legitimate load",
+          "Kill all processes with CPU usage above 50%"
+        ],
+        correct: 2,
+        explanation: "Open top and press P to sort by CPU. Note the PID and process name of the top consumer. Use ps aux --sort=-%cpu | head for a snapshot. Check if it's a known process behaving abnormally (runaway loop, memory leak causing swapping). Look at application logs. Use strace -p <PID> to see system calls if needed."
+      }
+    ]
+  },
+  {
+    label: "SAR Tool",
+    questions: [
+      {
+        q: "What is the sar command in Linux?",
+        tag: "sar",
+        options: [
+          "A command to schedule and run automated tasks",
+          "System Activity Reporter — collects and reports historical CPU, memory, disk I/O, and network metrics",
+          "A tool for searching and replacing text in log files",
+          "A service account runner for systemd units"
+        ],
+        correct: 1,
+        explanation: "sar (System Activity Reporter) is part of the sysstat package. Unlike top (real-time only), sar records performance data at regular intervals and stores it, allowing you to analyze historical trends — invaluable for diagnosing past incidents or outages."
+      },
+      {
+        q: "Which package provides the sar command?",
+        tag: "sar",
+        options: [
+          "procps-ng",
+          "performance-tools",
+          "sysstat",
+          "util-linux"
+        ],
+        correct: 2,
+        explanation: "The sysstat package provides sar along with other tools like iostat, mpstat, and pidstat. You must install it (apt install sysstat / yum install sysstat) and enable its data collection service to start gathering historical metrics."
+      },
+      {
+        q: "How does sar collect and store performance data?",
+        tag: "sar",
+        options: [
+          "It runs as a foreground process and writes to stdout only",
+          "It hooks into the kernel's perf subsystem and streams to a socket",
+          "It uses cron/systemd timers to periodically collect metrics, storing them in /var/log/sa/saXX files",
+          "It stores data in a SQLite database in /var/lib/sysstat"
+        ],
+        correct: 2,
+        explanation: "The sysstat service (sa1 and sa2 scripts) runs via cron or systemd timers, typically every 10 minutes. Data is saved to /var/log/sa/saXX where XX is the day of the month (e.g., sa15 = 15th of the month), enabling 30 days of historical data by default."
+      },
+      {
+        q: "How do you check CPU usage history using sar?",
+        tag: "sar",
+        options: [
+          "sar -c",
+          "sar -u",
+          "sar --cpu-all",
+          "sar -p CPU"
+        ],
+        correct: 1,
+        explanation: "sar -u displays CPU utilization statistics including %user (user space), %system (kernel), %iowait (waiting for I/O), %steal (hypervisor stealing CPU in VMs), and %idle. Low %idle combined with high %user or %system indicates CPU saturation."
+      },
+      {
+        q: "What does a low %idle value in sar output indicate?",
+        tag: "sar",
+        options: [
+          "The system has too much free memory",
+          "The disk is running low on space",
+          "High CPU utilization — the processor is busy and has little free capacity",
+          "Network interfaces are misconfigured"
+        ],
+        correct: 2,
+        explanation: "%idle is the percentage of time the CPU has nothing to do. Low %idle (e.g., under 10%) means the CPU is heavily utilized. This could be legitimate high load or a runaway process. Correlate with %user (application load) and %system (kernel activity) to pinpoint the cause."
+      },
+      {
+        q: "How do you check memory usage history using sar?",
+        tag: "sar",
+        options: [
+          "sar -m",
+          "sar -M MEM",
+          "sar -r",
+          "sar --ram"
+        ],
+        correct: 2,
+        explanation: "sar -r reports memory statistics over time including kbmemfree (free RAM), kbmemused (used RAM), kbbuffers (buffer cache), kbcached (page cache), and %memused. Combine with sar -S to check swap usage alongside memory."
+      },
+      {
+        q: "How do you check disk I/O statistics using sar?",
+        tag: "sar",
+        options: [
+          "sar -f /dev/sda",
+          "sar -d",
+          "sar -i disk",
+          "sar --io-stats"
+        ],
+        correct: 1,
+        explanation: "sar -d shows disk I/O per device: tps (transfers per second), kB_read/s and kB_wrtn/s (throughput), and %util (how busy the device is). High %util (close to 100%) indicates disk saturation. High await values signal slow response times."
+      },
+      {
+        q: "How do you check network traffic statistics using sar?",
+        tag: "sar",
+        options: [
+          "sar -n NET",
+          "sar -w eth0",
+          "sar -n DEV",
+          "sar --network-dev"
+        ],
+        correct: 2,
+        explanation: "sar -n DEV shows network statistics per interface: rxpck/s and txpck/s (packets per second), rxkB/s and txkB/s (kilobytes per second), and %ifutil (interface utilization). Use this to detect traffic spikes or saturated network interfaces."
+      },
+      {
+        q: "How do you view sar data from a specific past day?",
+        tag: "sar",
+        options: [
+          "sar --date=2024-01-10",
+          "sar -h /var/log/sa/sa10",
+          "sar -f /var/log/sa/sa10",
+          "sar --history 10"
+        ],
+        correct: 2,
+        explanation: "sar -f /var/log/sa/saXX reads historical data from a specific day's file. For example, sar -f /var/log/sa/sa10 -u shows CPU history for the 10th of the month. This is the most powerful feature of sar — post-incident analysis without needing real-time presence."
+      },
+      {
+        q: "What is the key difference between sar and top?",
+        tag: "sar",
+        options: [
+          "top is for memory only; sar is for CPU only",
+          "sar requires root; top does not",
+          "top shows real-time data; sar provides both historical and real-time analysis",
+          "top uses more CPU than sar"
+        ],
+        correct: 2,
+        explanation: "top is a real-time tool — you must be watching when the issue occurs. sar collects data continuously in the background, so you can analyze what happened hours or days ago. This makes sar indispensable for post-incident forensics and capacity planning."
+      },
+      {
+        q: "How do you run sar to collect data at 1-second intervals, 5 times?",
+        tag: "sar",
+        options: [
+          "sar -t 1 -n 5",
+          "sar 1 5",
+          "sar --interval=1 --count=5",
+          "sar -c 5 -s 1"
+        ],
+        correct: 1,
+        explanation: "sar [interval] [count] collects data in real time. sar 1 5 samples every 1 second, 5 times. You can combine with flags: sar -u 1 5 (CPU), sar -r 1 5 (memory). This is useful for live diagnostics when you want a snapshot over a short period."
+      },
+      {
+        q: "How do you check system load average using sar?",
+        tag: "sar",
+        options: [
+          "sar -l",
+          "sar -q",
+          "sar -L AVG",
+          "sar --load"
+        ],
+        correct: 1,
+        explanation: "sar -q shows queue statistics including runq-sz (run queue length), plist-sz (process list size), and load averages (ldavg-1, ldavg-5, ldavg-15). High run queue values relative to CPU count indicate the system is overloaded."
+      },
+      {
+        q: "How do you check swap usage history using sar?",
+        tag: "sar",
+        options: [
+          "sar -p SWAP",
+          "sar -s",
+          "sar -S",
+          "sar -w swap"
+        ],
+        correct: 2,
+        explanation: "sar -S reports swap space statistics: kbswpfree (free swap), kbswpused (used swap), and %swpused. High swap usage combined with low free memory indicates memory pressure — the system is paging to disk, which severely degrades performance."
+      },
+      {
+        q: "How do you check per-CPU core statistics using sar?",
+        tag: "sar",
+        options: [
+          "sar -u per-core",
+          "sar -C ALL",
+          "sar -P ALL",
+          "sar --cpus all"
+        ],
+        correct: 2,
+        explanation: "sar -P ALL shows individual statistics for each CPU core. This is useful for detecting unbalanced load where one core is saturated while others are idle (common with single-threaded processes or CPU affinity issues)."
+      },
+      {
+        q: "What does high %iowait in sar output indicate?",
+        tag: "sar",
+        options: [
+          "High network I/O causing packet loss",
+          "High CPU utilization from user applications",
+          "The CPU is spending significant time waiting for disk I/O to complete — a disk bottleneck",
+          "The system is running too many background daemons"
+        ],
+        correct: 2,
+        explanation: "%iowait is the percentage of CPU time spent waiting for I/O operations to complete. High iowait (consistently above 20-30%) signals a disk bottleneck. Correlate with sar -d to identify which disk is saturated. Consider faster storage, caching, or I/O optimization."
+      },
+      {
+        q: "A server was slow yesterday — how do you investigate using sar?",
+        tag: "sar",
+        options: [
+          "You can't — sar only shows real-time data",
+          "Check /var/log/messages for errors from yesterday",
+          "Use sar -f /var/log/sa/saXX (yesterday's file) with -u, -r, -d flags to review CPU, memory, and disk",
+          "Re-run the same load test to reproduce yesterday's conditions"
+        ],
+        correct: 2,
+        explanation: "This is sar's killer feature: post-incident analysis. Load yesterday's data file with sar -f /var/log/sa/saXX and check: sar -u (was CPU saturated?), sar -r (was RAM exhausted?), sar -d (was disk I/O maxed?), sar -n DEV (network spike?). Correlate timestamps to find the root cause."
+      },
+      {
+        q: "How do you confirm high CPU usage using sar?",
+        tag: "sar",
+        options: [
+          "sar -d and look for high %util",
+          "sar -n DEV and check rxkB/s",
+          "sar -u and check %idle (low) and %user/%system (high)",
+          "sar -q and check ldavg-15"
+        ],
+        correct: 2,
+        explanation: "Run sar -u to see CPU metrics over time. Low %idle (e.g., < 10%) confirms high utilization. High %user means application-level CPU pressure. High %system means kernel activity. High %iowait means disk-bound CPU waiting. Together they paint a complete picture."
+      },
+      {
+        q: "How do you detect a disk bottleneck using sar?",
+        tag: "sar",
+        options: [
+          "sar -r to check memory and infer disk issues",
+          "sar -d and check %util (near 100%) and await (high latency)",
+          "sar -q to check the run queue",
+          "sar -n DEV to check network instead of disk"
+        ],
+        correct: 1,
+        explanation: "sar -d shows per-disk metrics. Look for %util approaching 100% (disk saturated) and high await values (ms per I/O operation — typically should be under 10ms for SSDs, under 20ms for HDDs). High rd_await or wr_await can indicate read vs write bottlenecks."
+      },
+      {
+        q: "How do you detect a network issue using sar?",
+        tag: "sar",
+        options: [
+          "sar -n DEV and look for abnormal traffic spikes in rxkB/s or txkB/s",
+          "sar -u and check for high %system as a proxy for network load",
+          "sar -d looking at network-attached storage metrics",
+          "sar -q to check the process queue for network-related processes"
+        ],
+        correct: 0,
+        explanation: "sar -n DEV shows per-interface traffic. Look for sudden spikes in rxkB/s (inbound) or txkB/s (outbound), unusually high packet rates, or interface utilization (%ifutil) near 100%. Correlate timing with application issues to confirm network-related incidents."
+      },
+      {
+        q: "How do you detect memory pressure using sar?",
+        tag: "sar",
+        options: [
+          "sar -u with high %user indicates memory issues",
+          "sar -d with high disk %util is always caused by memory pressure",
+          "sar -r showing low free memory + sar -S showing high swap usage indicates memory pressure",
+          "sar -q with high run queue always means memory exhaustion"
+        ],
+        correct: 2,
+        explanation: "Run sar -r to see free memory trending toward zero and sar -S to see swap usage climbing. When RAM is exhausted, the OS swaps to disk — this kills performance. Look for kbmemfree approaching 0 and kbswpused growing over time. The fix: identify the memory-hungry process with top/ps and address the root cause."
+      }
+    ]
+  }
+];
+
+let currentSection = 0;
+let current = 0;
+let sectionAnswers = sections.map(s => new Array(s.questions.length).fill(null));
+
+function switchSection(idx) {
+  currentSection = idx;
+  current = 0;
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  render();
+}
+
+function render() {
+  const sec = sections[currentSection];
+  const q = sec.questions[current];
+  const answers = sectionAnswers[currentSection];
+  const ans = answers[current];
+  const isAnswered = ans !== null;
+  const total = sec.questions.length;
+
+  document.getElementById('progressFill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progressText').textContent = `${current + 1} / ${total}`;
+
+  const tagLabels = { core: 'Core', scenario: '🔥 Scenario', sar: 'SAR' };
+  const tagClass = q.tag === 'scenario' ? 'scenario' : q.tag === 'sar' ? 'sar' : '';
+
+  document.getElementById('dotsNav').innerHTML = sec.questions.map((_, i) => {
+    let cls = 'dot';
+    if (i === current) cls += ' active current';
+    else if (answers[i] !== null) cls += ' answered';
+    return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let cls = 'option';
+    let tag = '';
+    if (isAnswered) {
+      cls += ' locked';
+      if (i === q.correct) { cls += ' correct'; tag = `<span class="option-tag tag-correct">✓ CORRECT</span>`; }
+      else if (i === ans) { cls += ' wrong'; tag = `<span class="option-tag tag-wrong">✗ WRONG</span>`; }
+    }
+    return `<div class="${cls}" onclick="selectAnswer(${i})">
+      <div class="option-dot"></div>
+      <span class="option-label">${opt}</span>${tag}
+    </div>`;
+  }).join('');
+
+  const explanationHtml = isAnswered ? `
+    <div class="explanation-box">
+      <div class="explanation-title">⚡ Explanation</div>
+      <div class="explanation-text">${q.explanation}</div>
+    </div>` : '';
+
+  const isLast = current === total - 1;
+  const allAnswered = answers.every(a => a !== null);
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card">
+      <div class="q-number">Question ${current + 1} of ${total}<span class="q-tag ${tagClass}">${tagLabels[q.tag]}</span></div>
+      <div class="question">${q.q}</div>
+      <div class="options">${optionsHtml}</div>
+      ${explanationHtml}
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()" ${current === 0 ? 'disabled' : ''}>← Back</button>
+        <button class="btn btn-reset" onclick="resetSection()">↺ Reset</button>
+        ${isLast && allAnswered
+          ? `<button class="btn btn-next" onclick="showResults()">See Results →</button>`
+          : `<button class="btn btn-next" onclick="goNext()" ${!isAnswered ? 'disabled' : ''}>Next →</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function selectAnswer(i) {
+  if (sectionAnswers[currentSection][current] !== null) return;
+  sectionAnswers[currentSection][current] = i;
+  render();
+}
+
+function goNext() { if (current < sections[currentSection].questions.length - 1) { current++; render(); } }
+function goBack() { if (current > 0) { current--; render(); } }
+function goTo(i) { current = i; render(); }
+
+function resetSection() {
+  sectionAnswers[currentSection] = new Array(sections[currentSection].questions.length).fill(null);
+  current = 0;
+  render();
+}
+
+function showResults() {
+  const sec = sections[currentSection];
+  const answers = sectionAnswers[currentSection];
+  const score = answers.filter((a, i) => a === sec.questions[i].correct).length;
+  const total = sec.questions.length;
+  const pct = Math.round((score / total) * 100);
+  let msg = pct === 100 ? '🏆 Perfect! You nailed it!' : pct >= 70 ? '🎯 Strong work — nearly there!' : '📚 Review explanations and retry!';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card result-screen">
+      <div class="result-score">${score}/${total}</div>
+      <div class="result-label">SCORE · ${sec.label.toUpperCase()} · ${pct}%</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-list">
+        ${sec.questions.map((q, i) => `
+          <div class="result-item">
+            <span style="font-size:15px">${answers[i] === q.correct ? '✅' : '❌'}</span>
+            Q${i+1}: ${q.q.length > 46 ? q.q.slice(0, 46) + '…' : q.q}
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>
+      <button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">↺ Try Again</button>
+    </div>`;
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = `${score} / ${total} correct`;
+}
+
+function reviewAnswers() { current = 0; render(); }
+
+render();
+</script>
+</body>
+</html>
