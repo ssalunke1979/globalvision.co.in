@@ -44,7 +44,8 @@ header {
   color: #add6ff;
 }
 
-.navbar ul {
+/* ONLY top-level menu */
+.navbar > ul {
   list-style: none;
   display: flex;
   gap: 25px;
@@ -247,3 +248,50 @@ footer {
   color: #49fc03;
   text-decoration: underline;
 }
+
+/* Dropdown */
+.dropdown {
+  position: relative;
+}
+
+/* 🔥 FIX: reset dropdown UL */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+
+  background: #0f172a;
+  border-radius: 10px;
+  min-width: 200px;
+  padding: 8px 0;
+
+  list-style: none;
+
+  /* 🔥 IMPORTANT: override flex */
+  flex-direction: column;
+}
+
+/* Ensure vertical items */
+.dropdown-menu li {
+  display: block;
+  width: 100%;
+}
+
+/* Links */
+.dropdown-menu li a {
+  display: block;
+  padding: 10px 15px;
+  color: #fff;
+}
+
+/* Hover */
+.dropdown-menu li a:hover {
+  background: #1f2937;
+}
+
+/* Show */
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
