@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Interview Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+	--bg: #eaf4ff;          /* light blue background */
+	--card: #ffffff;       /* clean white cards */
+	--border: #cfe3ff;     /* soft blue border */
+	--accent: #3b82f6;     /* primary blue */
+	--accent2: #60a5fa;    /* secondary blue */
+	--correct: #10b981;    /* green (kept clean) */
+	--wrong: #ef4444;      /* red (kept clean) */
+	--text: #0f172a;       /* dark text for readability */
+	--muted: #64748b;      /* soft gray-blue */
+    --highlight: rgba(168,255,120,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    background-image:
+      radial-gradient(ellipse at 15% 10%, rgba(244,114,182,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 90%, rgba(219,39,119,0.06) 0%, transparent 50%);
+  }
+
+  header { text-align: center; margin-bottom: 36px; }
+
+  .badge {
+    display: inline-block;
+    background: rgba(244,114,182,0.1);
+    border: 1px solid rgba(244,114,182,0.3);
+    color: var(--accent);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    padding: 6px 16px;
+    border-radius: 2px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; font-family: 'Space Mono', monospace; }
+
+  /* tabs */
+  .tabs {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 28px; flex-wrap: wrap;
+  }
+
+  .tab {
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    letter-spacing: 1.5px; padding: 8px 18px; border-radius: 4px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--muted); cursor: pointer; transition: all 0.2s ease;
+    text-transform: uppercase;
+  }
+
+  .tab:hover { border-color: rgba(244,114,182,0.4); color: var(--text); }
+  .tab.active { background: rgba(244,114,182,0.1); border-color: rgba(244,114,182,0.5); color: var(--accent); }
+
+  .quiz-container { width: 100%; max-width: 780px; }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-bottom: 24px;
+  }
+
+  .legend-item {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    letter-spacing: 1px; padding: 4px 10px; border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .progress-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-text { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 36px 40px;
+    position: relative; overflow: hidden; animation: slideIn 0.35s ease;
+  }
+
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  @keyframes slideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  .q-number {
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    letter-spacing: 2px; color: var(--accent); text-transform: uppercase;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+
+  .q-tag {
+    font-size: 9px; letter-spacing: 1.5px; padding: 2px 8px;
+    border-radius: 2px; text-transform: uppercase; font-weight: 700;
+  }
+
+  .tag-core     { background: rgba(244,114,182,0.12); border: 1px solid rgba(244,114,182,0.3); color: #f472b6; }
+  .tag-cicd     { background: rgba(251,191,36,0.12);  border: 1px solid rgba(251,191,36,0.3);  color: #fbbf24; }
+  .tag-docker   { background: rgba(56,189,248,0.12);  border: 1px solid rgba(56,189,248,0.3);  color: #38bdf8; }
+  .tag-k8s      { background: rgba(52,211,153,0.12);  border: 1px solid rgba(52,211,153,0.3);  color: #34d399; }
+  .tag-gitlab   { background: rgba(251,146,60,0.12);  border: 1px solid rgba(251,146,60,0.3);  color: #fb923c; }
+  .tag-scenario { background: rgba(255,77,109,0.12);  border: 1px solid rgba(255,77,109,0.3);  color: #ff4d6d; }
+  .tag-iac      { background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; }
+
+  .question { font-size: 21px; font-weight: 600; line-height: 1.4; margin-bottom: 28px; }
+
+  .tool-row {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;
+  }
+
+  .tool-chip {
+    font-family: 'Space Mono', monospace; font-size: 10px;
+    padding: 3px 10px; border-radius: 20px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    color: var(--muted); letter-spacing: 0.5px;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 12px; }
+
+  .option {
+    background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 20px; cursor: pointer;
+    display: flex; align-items: flex-start; gap: 14px;
+    transition: all 0.2s ease; font-size: 15px; line-height: 1.5;
+  }
+
+  .option:hover:not(.locked) { border-color: rgba(244,114,182,0.4); background: var(--highlight); transform: translateX(4px); }
+  .option-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px; transition: all 0.2s ease; }
+  .option.correct { border-color: var(--correct); background: rgba(0,229,160,0.06); }
+  .option.correct .option-dot { border-color: var(--correct); background: var(--correct); }
+  .option.wrong   { border-color: var(--wrong); background: rgba(255,77,109,0.06); }
+  .option.wrong .option-dot { border-color: var(--wrong); background: var(--wrong); }
+  .option-label { flex: 1; }
+
+  .option-tag {
+    font-family: 'Space Mono', monospace; font-size: 10px; padding: 2px 8px;
+    border-radius: 2px; margin-left: auto; flex-shrink: 0; align-self: center;
+    font-weight: 700; letter-spacing: 1px;
+  }
+
+  .tag-correct { background: rgba(0,229,160,0.15); color: var(--correct); }
+  .tag-wrong   { background: rgba(255,77,109,0.15); color: var(--wrong); }
+
+  .explanation-box {
+    margin-top: 20px; padding: 16px 20px;
+    background: rgba(244,114,182,0.04);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+
+  .explanation-title { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; }
+  .explanation-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+
+  .btn {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px;
+    letter-spacing: 0.5px; padding: 12px 28px; border-radius: 6px;
+    border: none; cursor: pointer; transition: all 0.2s ease;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .btn-back { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-back:hover { border-color: rgba(244,114,182,0.4); color: var(--text); }
+  .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-next { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(244,114,182,0.2); }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(244,114,182,0.35); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-reset { background: rgba(219,39,119,0.08); border: 1px solid rgba(219,39,119,0.25); color: var(--accent2); padding: 10px 20px; font-size: 13px; }
+  .btn-reset:hover { background: rgba(219,39,119,0.18); }
+
+  .dots-nav { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+  .dot.active   { background: var(--accent); transform: scale(1.35); }
+  .dot.answered { background: rgba(0,229,160,0.5); }
+  .dot.current  { border-color: var(--accent); }
+
+  .result-screen { text-align: center; padding: 50px 40px; }
+  .result-score { font-size: 80px; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .result-label { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 13px; letter-spacing: 2px; margin-top: 8px; }
+  .result-msg { font-size: 20px; font-weight: 600; margin-top: 24px; margin-bottom: 32px; }
+  .result-list { display: flex; gap: 8px; flex-direction: column; margin-bottom: 32px; text-align: left; max-width: 440px; margin-left: auto; margin-right: auto; }
+  .result-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .card { padding: 24px 20px; }
+    .question { font-size: 17px; }
+    .nav-row { flex-wrap: wrap; }
+    .btn-reset { order: -1; width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">DevOps Interview Prep</div>
+  <h1>Dev<span>Ops</span> Quiz</h1>
+  <p class="subtitle">// 20 questions · Core + GitLab + Scenarios</p>
+</header>
+
+<div class="quiz-container">
+
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core Concepts (1–10)</button>
+    <button class="tab" onclick="switchSection(1)">GitLab Deep (11–15)</button>
+    <button class="tab" onclick="switchSection(2)">🔥 Scenarios (16–20)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-cicd">CI/CD</span>
+    <span class="legend-item tag-docker">Docker</span>
+    <span class="legend-item tag-k8s">Kubernetes</span>
+    <span class="legend-item tag-gitlab">GitLab</span>
+    <span class="legend-item tag-iac">IaC</span>
+    <span class="legend-item tag-scenario">🔥 Scenario</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+const sections = [
+  {
+    label: "Core Concepts",
+    questions: [
+      {
+        q: "What does DevOps stand for, and what is its core purpose?",
+        tag: "core",
+        tools: ["Git", "GitLab CI/CD", "Docker", "Kubernetes", "AWS"],
+        options: [
+          "Development + Operations — a job title for engineers who do both coding and server management",
+          "Development + Operations — a culture and set of practices that integrate dev and ops teams to deliver software faster, reliably, and with high quality",
+          "Deployment + Optimization — a framework for reducing cloud infrastructure costs",
+          "DevSecOps — a security-first approach to software delivery pipelines"
+        ],
+        correct: 1,
+        explanation: "DevOps bridges the traditional gap between developers (who write code) and operations teams (who deploy and maintain it). It introduces automation, continuous integration/delivery, and a feedback-driven culture. The result: faster releases, fewer failures, and quicker recovery. Tools like Git, Docker, and Kubernetes are central to modern DevOps workflows."
+      },
+      {
+        q: "What does CI/CD stand for, and what problem does it solve?",
+        tag: "cicd",
+        tools: ["GitLab CI", "Jenkins", "ArgoCD"],
+        options: [
+          "Container Integration / Container Deployment — automates Docker image builds",
+          "Continuous Inspection / Continuous Debugging — identifies bugs before code review",
+          "Continuous Integration / Continuous Delivery (or Deployment) — automatically builds, tests, and deploys code changes",
+          "Code Integration / Code Deployment — replaces manual Git merging workflows"
+        ],
+        correct: 2,
+        explanation: "CI (Continuous Integration) ensures every code push is automatically built and tested, catching integration bugs early. CD (Continuous Delivery) keeps the codebase always deployable; Continuous Deployment goes further and auto-deploys to production. Together they eliminate manual handoffs, reduce release risk, and dramatically shorten feedback loops."
+      },
+      {
+        q: "What is Git and why is it essential in DevOps?",
+        tag: "core",
+        tools: ["Git", "GitLab", "GitHub"],
+        options: [
+          "A cloud-based file storage service for deployment artifacts and Docker images",
+          "A distributed version control system used to track code changes and enable team collaboration",
+          "A CI/CD orchestration tool that replaces Jenkins pipelines",
+          "A container registry for storing and versioning Docker images"
+        ],
+        correct: 1,
+        explanation: "Git allows every developer to have a full copy of the repository history. Branching enables parallel work; merge requests enable code review; tagging enables release versioning. In DevOps, Git is the trigger for everything — a push to a branch kicks off the CI/CD pipeline, making it the starting point of the entire delivery chain."
+      },
+      {
+        q: "What is Docker and what problem does it solve?",
+        tag: "docker",
+        tools: ["Docker Engine", "Docker Hub", "Amazon ECR"],
+        options: [
+          "A virtual machine manager that provisions full OS environments for each application",
+          "A container orchestration platform that manages scaling and self-healing of services",
+          "A containerization platform that packages an application with its dependencies into a portable image that runs consistently across all environments",
+          "A configuration management tool that installs software consistently across servers"
+        ],
+        correct: 2,
+        explanation: "Docker solves the classic 'works on my machine' problem. A Docker image bundles the application code, runtime, libraries, and config into a single artifact. Whether run on a developer's laptop, a CI runner, or a production Kubernetes cluster, the behavior is identical. Images are stored in registries (Docker Hub, ECR) and versioned via tags."
+      },
+      {
+        q: "What is Kubernetes (K8s) and what does it automate?",
+        tag: "k8s",
+        tools: ["kubectl", "Helm", "AWS EKS"],
+        options: [
+          "A container build tool that compiles Dockerfiles into optimized images",
+          "A monitoring platform that tracks container CPU and memory usage",
+          "A container orchestration platform that automates deployment, scaling, load balancing, and self-healing of containerized applications",
+          "A service mesh that encrypts traffic between microservices"
+        ],
+        correct: 2,
+        explanation: "Kubernetes manages the lifecycle of containers at scale. It handles: scheduling containers onto nodes, auto-scaling pods based on CPU/memory, load balancing across replicas, rolling updates with zero downtime, and self-healing (restarting crashed pods). K8s is the de-facto standard for running production containerized workloads. EKS is AWS's managed Kubernetes service."
+      },
+      {
+        q: "What is Infrastructure as Code (IaC)?",
+        tag: "iac",
+        tools: ["Terraform", "AWS CloudFormation"],
+        options: [
+          "Writing Bash scripts to manually configure servers after they are provisioned",
+          "Embedding cloud credentials inside application source code for automated access",
+          "Managing and provisioning infrastructure through machine-readable code files instead of manual processes",
+          "A software design pattern for abstracting cloud API calls in application code"
+        ],
+        correct: 2,
+        explanation: "IaC treats infrastructure (VPCs, EC2s, databases, load balancers) the same way as application code — stored in version control, reviewed via pull requests, and applied automatically. Benefits: repeatability (create identical environments on demand), auditability (who changed what), and disaster recovery (recreate everything from code). Terraform is cloud-agnostic; CloudFormation is AWS-native."
+      },
+      {
+        q: "What is Configuration Management in DevOps?",
+        tag: "core",
+        tools: ["Ansible", "Puppet", "Chef"],
+        options: [
+          "Managing Git repository settings, branch protection rules, and merge request approvals",
+          "Automatically managing and enforcing consistent software configuration across multiple servers",
+          "Storing application config files in S3 and distributing them at boot time",
+          "A Docker Compose pattern for managing multi-container application configuration"
+        ],
+        correct: 1,
+        explanation: "Configuration management ensures that all your servers are configured identically and stay that way over time. Tools like Ansible use declarative playbooks to install packages, configure services, and manage files across hundreds of servers simultaneously — eliminating configuration drift and manual SSH-based administration."
+      },
+      {
+        q: "What is the purpose of Monitoring in a DevOps workflow?",
+        tag: "core",
+        tools: ["Prometheus", "Grafana", "Amazon CloudWatch"],
+        options: [
+          "Monitoring is only used after production incidents to conduct post-mortems",
+          "It replaces logging by capturing all application output in real time",
+          "Monitoring tracks system performance and health metrics to detect issues early, trigger alerts, and enable data-driven capacity planning",
+          "Monitoring is a compliance requirement with no direct operational benefit"
+        ],
+        correct: 2,
+        explanation: "Monitoring is the feedback loop that closes the DevOps cycle. Prometheus scrapes metrics, Grafana visualizes them on dashboards, and CloudWatch integrates with AWS services. Together they enable: SLO/SLA tracking, proactive alerting (alert before users notice), performance baselines, and capacity planning — turning operations from reactive to proactive."
+      },
+      {
+        q: "What is the difference between Monitoring and Logging?",
+        tag: "core",
+        tools: ["Prometheus", "Grafana", "ELK Stack", "Fluentd"],
+        options: [
+          "There is no difference — logs and metrics are the same data in different formats",
+          "Monitoring tracks numeric metrics (CPU%, latency, error rate) over time; logging records discrete events and messages for debugging and auditing",
+          "Monitoring is for infrastructure; logging is only for application code",
+          "Logging is real-time; monitoring is always historical"
+        ],
+        correct: 1,
+        explanation: "Monitoring captures quantitative metrics (e.g., CPU at 87%, p99 latency at 320ms) and is great for trend analysis and alerting on thresholds. Logging captures qualitative event records ('user X failed to authenticate at 14:32:01') used for root cause analysis and auditing. A mature observability stack uses both together — metrics to alert, logs to diagnose."
+      },
+      {
+        q: "In a GitLab CI/CD pipeline, what happens when a developer pushes code?",
+        tag: "cicd",
+        tools: ["GitLab Runner", "Docker", "Kubernetes"],
+        options: [
+          "GitLab emails the team lead for manual approval before any automated step runs",
+          "The push is blocked until all unit tests pass locally on the developer's machine",
+          "GitLab reads .gitlab-ci.yml, creates a pipeline, and GitLab Runner executes stages: build → test → deploy automatically",
+          "Git creates a new branch automatically and opens a merge request for human review"
+        ],
+        correct: 2,
+        explanation: "When code is pushed, GitLab triggers a pipeline defined in .gitlab-ci.yml. GitLab Runner picks up jobs and executes them in isolated environments (Docker containers). A typical flow: Build stage compiles/packages the app → Test stage runs unit/integration tests → Deploy stage pushes to staging or production. Each stage can have gates — a failed test blocks the deploy."
+      }
+    ]
+  },
+  {
+    label: "GitLab Deep Dive",
+    questions: [
+      {
+        q: "What is the .gitlab-ci.yml file?",
+        tag: "gitlab",
+        tools: ["GitLab CI", "GitLab Runner", "Docker"],
+        options: [
+          "A GitLab configuration file for managing repository access permissions and branch protection",
+          "A YAML file stored at the repo root that defines the full CI/CD pipeline — its stages, jobs, scripts, rules, and environment variables",
+          "A Docker Compose file that defines services needed to run the application locally",
+          "A Kubernetes manifest file deployed to the cluster when the pipeline runs"
+        ],
+        correct: 1,
+        explanation: "The .gitlab-ci.yml is the heart of GitLab CI/CD. It defines: stages (ordered sequence of phases), jobs (individual units of work within a stage), scripts (shell commands the job runs), rules/only/except (conditions for when jobs run), artifacts (files to pass between jobs), and cache (dependencies to reuse). GitLab reads this file on every push to determine the pipeline structure."
+      },
+      {
+        q: "What is a GitLab Runner?",
+        tag: "gitlab",
+        tools: ["GitLab Runner", "Docker", "Kubernetes"],
+        options: [
+          "A GitLab dashboard widget that monitors active pipeline executions in real time",
+          "An automated bot that reviews and approves merge requests based on code quality scores",
+          "An agent service installed on a machine that picks up pipeline jobs from GitLab and executes them in isolated environments",
+          "A GitLab CLI tool for triggering pipelines from the command line"
+        ],
+        correct: 2,
+        explanation: "GitLab Runner is a lightweight agent that registers with your GitLab instance and polls for jobs. When a pipeline triggers, the Runner executes the job's script inside an executor (Docker container, shell, Kubernetes pod, or VM). Runners can be shared (managed by GitLab) or specific (self-hosted for custom hardware, network access, or security requirements)."
+      },
+      {
+        q: "What is caching in a GitLab pipeline and why is it used?",
+        tag: "gitlab",
+        tools: ["GitLab CI"],
+        options: [
+          "Caching stores the entire Docker image between pipeline runs to avoid rebuilding from scratch",
+          "Caching stores downloaded dependencies (node_modules, pip packages, Maven jars) between pipeline runs to avoid re-downloading and speed up jobs",
+          "Caching reuses the test results from the previous pipeline run to skip unchanged test files",
+          "Caching is a GitLab Premium feature that pre-warms runner environments before jobs start"
+        ],
+        correct: 1,
+        explanation: "Cache in GitLab CI stores directories (like node_modules/ or .pip_cache/) on the runner between pipeline runs. Without caching, every pipeline run downloads all dependencies from scratch — slow and wasteful. With cache configured, subsequent runs restore the cache first, dramatically reducing job duration. Note: cache is not guaranteed (unlike artifacts) — it's a performance optimization."
+      },
+      {
+        q: "What are GitLab CI artifacts?",
+        tag: "gitlab",
+        tools: ["GitLab CI"],
+        options: [
+          "Historical pipeline execution logs stored permanently in GitLab's object storage",
+          "Docker images pushed to the GitLab Container Registry after a successful build job",
+          "Files generated by a job (binaries, test reports, build outputs) that are uploaded to GitLab and can be downloaded or passed to subsequent pipeline stages",
+          "Environment variables defined in GitLab Settings that are injected into pipeline jobs"
+        ],
+        correct: 2,
+        explanation: "Artifacts are job outputs that GitLab stores and makes available to later stages. For example: a build job compiles code and declares the dist/ folder as an artifact — the deploy job then downloads that artifact to deploy it. Artifacts can also be test reports (GitLab parses JUnit XML to show pass/fail in the MR), coverage reports, or downloadable binaries exposed in the GitLab UI."
+      },
+      {
+        q: "How do you securely manage secrets (passwords, API keys, tokens) in GitLab pipelines?",
+        tag: "gitlab",
+        tools: ["GitLab CI", "AWS Secrets Manager"],
+        options: [
+          "Commit secrets directly in .gitlab-ci.yml and use .gitignore to prevent them from appearing in diffs",
+          "Hardcode secrets as string literals in the job script — they are masked in logs automatically",
+          "Store secrets as protected CI/CD variables in GitLab Settings — they are injected as environment variables at runtime and masked in job logs",
+          "Create a secrets.txt file in the repository root and read it using cat in the pipeline script"
+        ],
+        correct: 2,
+        explanation: "GitLab CI/CD variables (Settings → CI/CD → Variables) are the correct way to handle secrets. Mark them as Protected (only available on protected branches) and Masked (hidden in job logs). They're injected as environment variables at runtime — your script reads $DB_PASSWORD without it ever appearing in the codebase. For enterprise-grade secret rotation, integrate with AWS Secrets Manager or HashiCorp Vault."
+      }
+    ]
+  },
+  {
+    label: "Scenarios",
+    questions: [
+      {
+        q: "Your GitLab pipeline failed — what is your step-by-step debugging approach?",
+        tag: "scenario",
+        tools: ["GitLab CI", "GitLab Runner"],
+        options: [
+          "Immediately re-run the pipeline — most failures are transient and resolve themselves",
+          "Delete the failing job from .gitlab-ci.yml and redeploy without it",
+          "Open the failed job logs, identify the exact error, validate .gitlab-ci.yml syntax, check runner health, and fix the root cause before re-running",
+          "Clone the repo fresh and push again to trigger a clean pipeline"
+        ],
+        correct: 2,
+        explanation: "Systematic approach: (1) Click the failed job in GitLab UI and read the full log — the error is almost always there. (2) Validate .gitlab-ci.yml syntax using GitLab's CI Lint tool (CI/CD → Editor). (3) Check if the runner is online and healthy. (4) If it's a dependency issue, check cache/artifact availability. (5) Reproduce locally if possible. Never re-run blindly — understand what failed and why first."
+      },
+      {
+        q: "Your production deployment failed midway — how do you handle it to minimize downtime?",
+        tag: "scenario",
+        tools: ["GitLab CI", "Kubernetes", "ArgoCD"],
+        options: [
+          "Leave the deployment running and wait — it will self-heal automatically via Kubernetes",
+          "Immediately delete all pods and re-deploy from the same broken pipeline",
+          "Trigger a rollback to the last stable version immediately, then investigate the failure in a non-production environment",
+          "Scale down the deployment to zero instances and restore from the last database backup"
+        ],
+        correct: 2,
+        explanation: "When a deployment fails in production, the priority is restoring service, not investigation. Rollback options: Kubernetes (kubectl rollout undo deployment/app), GitLab (re-run the previous successful pipeline), or ArgoCD (sync to the previous Git revision). Only after service is restored do you investigate the root cause in staging. This is the 'fix forward vs rollback' decision — rollback when fast recovery is critical."
+      },
+      {
+        q: "The application is running but responding slowly — how do you diagnose it?",
+        tag: "scenario",
+        tools: ["top", "sar", "CloudWatch", "Prometheus", "Grafana"],
+        options: [
+          "Restart the application service immediately — slow responses always indicate a memory leak",
+          "Scale up the instance type first, then investigate after performance improves",
+          "Systematically check CPU (top/sar -u), memory (free/sar -r), disk I/O (sar -d), database query times, and application logs to pinpoint the bottleneck",
+          "Drain all traffic from the instance and replace it with a fresh one from the AMI"
+        ],
+        correct: 2,
+        explanation: "Performance issues have many possible causes — never guess. Layer-by-layer: (1) CPU — is any process pegging a core? (2) Memory — is the app swapping to disk? (3) Disk I/O — high iowait? (4) Database — slow queries, connection pool exhaustion? (5) Network — high latency to dependencies? (6) Application logs — exceptions, GC pauses, thread pool saturation? Use Grafana/CloudWatch dashboards alongside sar for historical correlation."
+      },
+      {
+        q: "How do you achieve zero downtime deployments in a DevOps pipeline?",
+        tag: "scenario",
+        tools: ["Kubernetes", "AWS Load Balancer", "GitLab CI"],
+        options: [
+          "Schedule deployments at 3am when traffic is lowest, then restart all instances simultaneously",
+          "Deploy to a completely separate environment, test it, then do a DNS cutover",
+          "Use rolling deployments (Kubernetes gradually replaces pods) or blue-green deployments (run two identical environments and switch traffic via the load balancer)",
+          "Use connection draining on the load balancer and deploy all instances at once after connections drain"
+        ],
+        correct: 2,
+        explanation: "Two main patterns: Rolling deployments — Kubernetes replaces pods incrementally (e.g., 25% at a time), always keeping healthy pods serving traffic. Blue-green deployments — maintain two identical environments (blue=current, green=new), deploy to green, test it, then flip the load balancer to green in seconds. Green becomes the new production; blue becomes the rollback target. Both eliminate the maintenance window."
+      },
+      {
+        q: "You need to design a complete DevOps pipeline from scratch — what does it look like?",
+        tag: "scenario",
+        tools: ["Git", "GitLab CI", "Docker", "Kubernetes", "Terraform", "Prometheus"],
+        options: [
+          "Developer emails code to the ops team → ops manually builds and deploys → QA manually tests → release every quarter",
+          "Code → Git push → CI pipeline (build + test) → Docker image pushed to registry → CD deploys to Kubernetes → monitoring and alerting in place",
+          "Code → FTP to server → manually run install script → notify team via Slack → done",
+          "Write Terraform to provision servers → SSH in and manually install the app → configure cron for daily restarts"
+        ],
+        correct: 1,
+        explanation: "A mature DevOps pipeline: (1) Developer pushes to Git branch → MR triggers pipeline. (2) CI: lint → unit tests → build Docker image → security scan → push image to ECR. (3) CD: deploy to staging (auto) → integration tests → manual gate for production → rolling deploy to Kubernetes. (4) Post-deploy: smoke tests → monitoring dashboards live → alerts configured. (5) IaC (Terraform) manages all infrastructure. This enables multiple deployments per day with confidence."
+      }
+    ]
+  }
+];
+
+let currentSection = 0;
+let current = 0;
+let sectionAnswers = sections.map(s => new Array(s.questions.length).fill(null));
+
+const tagMeta = {
+  core:     { label: 'Core',       cls: 'tag-core'     },
+  cicd:     { label: 'CI/CD',      cls: 'tag-cicd'     },
+  docker:   { label: 'Docker',     cls: 'tag-docker'   },
+  k8s:      { label: 'Kubernetes', cls: 'tag-k8s'      },
+  gitlab:   { label: 'GitLab',     cls: 'tag-gitlab'   },
+  iac:      { label: 'IaC',        cls: 'tag-iac'      },
+  scenario: { label: '🔥 Scenario', cls: 'tag-scenario' }
+};
+
+function switchSection(idx) {
+  currentSection = idx;
+  current = 0;
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+  render();
+}
+
+function render() {
+  const sec = sections[currentSection];
+  const q = sec.questions[current];
+  const answers = sectionAnswers[currentSection];
+  const ans = answers[current];
+  const isAnswered = ans !== null;
+  const total = sec.questions.length;
+  const tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = `${((current + 1) / total) * 100}%`;
+  document.getElementById('progressText').textContent = `${current + 1} / ${total}`;
+
+  document.getElementById('dotsNav').innerHTML = sec.questions.map((_, i) => {
+    let cls = 'dot';
+    if (i === current) cls += ' active current';
+    else if (answers[i] !== null) cls += ' answered';
+    return `<div class="${cls}" onclick="goTo(${i})"></div>`;
+  }).join('');
+
+  const toolsHtml = q.tools && q.tools.length
+    ? `<div class="tool-row">${q.tools.map(t => `<span class="tool-chip">⚙ ${t}</span>`).join('')}</div>`
+    : '';
+
+  const optionsHtml = q.options.map((opt, i) => {
+    let cls = 'option';
+    let tag = '';
+    if (isAnswered) {
+      cls += ' locked';
+      if (i === q.correct) { cls += ' correct'; tag = `<span class="option-tag tag-correct">✓ CORRECT</span>`; }
+      else if (i === ans)  { cls += ' wrong';   tag = `<span class="option-tag tag-wrong">✗ WRONG</span>`; }
+    }
+    return `<div class="${cls}" onclick="selectAnswer(${i})">
+      <div class="option-dot"></div>
+      <span class="option-label">${opt}</span>${tag}
+    </div>`;
+  }).join('');
+
+  const explanationHtml = isAnswered ? `
+    <div class="explanation-box">
+      <div class="explanation-title">⚡ Explanation</div>
+      <div class="explanation-text">${q.explanation}</div>
+    </div>` : '';
+
+  const isLast = current === total - 1;
+  const allAnswered = answers.every(a => a !== null);
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card">
+      <div class="q-number">
+        Question ${current + 1} of ${total}
+        <span class="q-tag ${tm.cls}">${tm.label}</span>
+      </div>
+      ${toolsHtml}
+      <div class="question">${q.q}</div>
+      <div class="options">${optionsHtml}</div>
+      ${explanationHtml}
+      <div class="nav-row">
+        <button class="btn btn-back" onclick="goBack()" ${current === 0 ? 'disabled' : ''}>← Back</button>
+        <button class="btn btn-reset" onclick="resetSection()">↺ Reset</button>
+        ${isLast && allAnswered
+          ? `<button class="btn btn-next" onclick="showResults()">See Results →</button>`
+          : `<button class="btn btn-next" onclick="goNext()" ${!isAnswered ? 'disabled' : ''}>Next →</button>`
+        }
+      </div>
+    </div>`;
+}
+
+function selectAnswer(i) {
+  if (sectionAnswers[currentSection][current] !== null) return;
+  sectionAnswers[currentSection][current] = i;
+  render();
+}
+
+function goNext() { if (current < sections[currentSection].questions.length - 1) { current++; render(); } }
+function goBack() { if (current > 0) { current--; render(); } }
+function goTo(i)  { current = i; render(); }
+
+function resetSection() {
+  sectionAnswers[currentSection] = new Array(sections[currentSection].questions.length).fill(null);
+  current = 0;
+  render();
+}
+
+function showResults() {
+  const sec = sections[currentSection];
+  const answers = sectionAnswers[currentSection];
+  const score = answers.filter((a, i) => a === sec.questions[i].correct).length;
+  const total = sec.questions.length;
+  const pct = Math.round((score / total) * 100);
+  const msg = pct === 100 ? '🏆 Perfect! Full-stack DevOps knowledge!'
+            : pct >= 70  ? '🎯 Strong answers — keep building!'
+            :               '📚 Review explanations and go again!';
+
+  document.getElementById('quizArea').innerHTML = `
+    <div class="card result-screen">
+      <div class="result-score">${score}/${total}</div>
+      <div class="result-label">SCORE · ${sec.label.toUpperCase()} · ${pct}%</div>
+      <div class="result-msg">${msg}</div>
+      <div class="result-list">
+        ${sec.questions.map((q, i) => `
+          <div class="result-item">
+            <span style="font-size:15px">${answers[i] === q.correct ? '✅' : '❌'}</span>
+            <span class="q-tag ${tagMeta[q.tag].cls}" style="font-size:9px">${tagMeta[q.tag].label}</span>
+            Q${i+1}: ${q.q.length > 48 ? q.q.slice(0, 48) + '…' : q.q}
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>
+      <button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">↺ Try Again</button>
+    </div>`;
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = `${score} / ${total} correct`;
+}
+
+function reviewAnswers() { current = 0; render(); }
+
+render();
+</script>
+</body>
+</html>

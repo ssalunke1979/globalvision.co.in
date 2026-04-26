@@ -1,0 +1,567 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS IAM Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+	--bg: #eaf4ff;          /* light blue background */
+	--card: #ffffff;       /* clean white cards */
+	--border: #cfe3ff;     /* soft blue border */
+	--accent: #3b82f6;     /* primary blue */
+	--accent2: #60a5fa;    /* secondary blue */
+	--correct: #10b981;    /* green (kept clean) */
+	--wrong: #ef4444;      /* red (kept clean) */
+	--text: #0f172a;       /* dark text for readability */
+	--muted: #64748b;      /* soft gray-blue */
+    --highlight: rgba(168,255,120,0.06);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; background-image: radial-gradient(ellipse at 15% 10%, rgba(232,121,249,0.07) 0%, transparent 50%), radial-gradient(ellipse at 85% 90%, rgba(162,28,175,0.06) 0%, transparent 50%); }
+  header { text-align: center; margin-bottom: 36px; }
+  .badge { display: inline-block; background: rgba(232,121,249,0.1); border: 1px solid rgba(232,121,249,0.3); color: var(--accent); font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 3px; padding: 6px 16px; border-radius: 2px; margin-bottom: 16px; text-transform: uppercase; }
+  h1 { font-size: clamp(28px, 5vw, 48px); font-weight: 800; letter-spacing: -1px; line-height: 1.1; }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); margin-top: 8px; font-size: 14px; font-family: 'Space Mono', monospace; }
+  .tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; flex-wrap: wrap; }
+  .tab { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 1.5px; padding: 8px 18px; border-radius: 4px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; }
+  .tab:hover { border-color: rgba(232,121,249,0.4); color: var(--text); }
+  .tab.active { background: rgba(232,121,249,0.1); border-color: rgba(232,121,249,0.5); color: var(--accent); }
+  .quiz-container { width: 100%; max-width: 780px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px; }
+  .legend-item { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 4px 10px; border-radius: 3px; text-transform: uppercase; }
+  .progress-bar-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .progress-bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-text { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 36px 40px; position: relative; overflow: hidden; animation: slideIn 0.35s ease; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  @keyframes slideIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+  .q-number { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .q-tag { font-size: 9px; letter-spacing: 1.5px; padding: 2px 8px; border-radius: 2px; text-transform: uppercase; font-weight: 700; }
+  .tag-core     { background: rgba(232,121,249,0.12); border: 1px solid rgba(232,121,249,0.3); color: #e879f9; }
+  .tag-policy   { background: rgba(251,191,36,0.12);  border: 1px solid rgba(251,191,36,0.3);  color: #fbbf24; }
+  .tag-role     { background: rgba(56,189,248,0.12);  border: 1px solid rgba(56,189,248,0.3);  color: #38bdf8; }
+  .tag-security { background: rgba(52,211,153,0.12);  border: 1px solid rgba(52,211,153,0.3);  color: #34d399; }
+  .tag-scenario { background: rgba(255,77,109,0.12);  border: 1px solid rgba(255,77,109,0.3);  color: #ff4d6d; }
+  .tag-advanced { background: rgba(167,139,250,0.12); border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; }
+  .question { font-size: 21px; font-weight: 600; line-height: 1.4; margin-bottom: 28px; }
+  .fullform-box { display: inline-flex; align-items: center; gap: 8px; background: rgba(232,121,249,0.06); border: 1px solid rgba(232,121,249,0.2); border-radius: 6px; padding: 6px 14px; margin-bottom: 20px; font-family: 'Space Mono', monospace; font-size: 12px; color: var(--accent); }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; cursor: pointer; display: flex; align-items: flex-start; gap: 14px; transition: all 0.2s ease; font-size: 15px; line-height: 1.5; }
+  .option:hover:not(.locked) { border-color: rgba(232,121,249,0.4); background: var(--highlight); transform: translateX(4px); }
+  .option-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; margin-top: 2px; transition: all 0.2s ease; }
+  .option.correct { border-color: var(--correct); background: rgba(0,229,160,0.06); }
+  .option.correct .option-dot { border-color: var(--correct); background: var(--correct); }
+  .option.wrong   { border-color: var(--wrong); background: rgba(255,77,109,0.06); }
+  .option.wrong .option-dot { border-color: var(--wrong); background: var(--wrong); }
+  .option-label { flex: 1; }
+  .option-tag { font-family: 'Space Mono', monospace; font-size: 10px; padding: 2px 8px; border-radius: 2px; margin-left: auto; flex-shrink: 0; align-self: center; font-weight: 700; letter-spacing: 1px; }
+  .tag-correct { background: rgba(0,229,160,0.15); color: var(--correct); }
+  .tag-wrong   { background: rgba(255,77,109,0.15); color: var(--wrong); }
+  .explanation-box { margin-top: 20px; padding: 16px 20px; background: rgba(232,121,249,0.04); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+  .explanation-title { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; }
+  .explanation-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+  .nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; gap: 12px; }
+  .btn { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: 0.5px; padding: 12px 28px; border-radius: 6px; border: none; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
+  .btn-back { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-back:hover { border-color: rgba(232,121,249,0.4); color: var(--text); }
+  .btn-back:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-next { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; box-shadow: 0 4px 20px rgba(232,121,249,0.2); }
+  .btn-next:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(232,121,249,0.35); }
+  .btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-reset { background: rgba(162,28,175,0.08); border: 1px solid rgba(162,28,175,0.25); color: #c026d3; padding: 10px 20px; font-size: 13px; }
+  .btn-reset:hover { background: rgba(162,28,175,0.18); }
+  .dots-nav { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin-top: 24px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent; }
+  .dot.active   { background: var(--accent); transform: scale(1.35); }
+  .dot.answered { background: rgba(0,229,160,0.5); }
+  .dot.current  { border-color: var(--accent); }
+  .result-screen { text-align: center; padding: 50px 40px; }
+  .result-score { font-size: 80px; font-weight: 800; line-height: 1; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .result-label { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 13px; letter-spacing: 2px; margin-top: 8px; }
+  .result-msg { font-size: 20px; font-weight: 600; margin-top: 24px; margin-bottom: 32px; }
+  .result-list { display: flex; gap: 8px; flex-direction: column; margin-bottom: 32px; text-align: left; max-width: 440px; margin-left: auto; margin-right: auto; }
+  .result-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 560px) { .card { padding: 24px 20px; } .question { font-size: 17px; } .nav-row { flex-wrap: wrap; } .btn-reset { order: -1; width: 100%; justify-content: center; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Certification Prep</div>
+  <h1>Identity &amp; Access <span>Management</span></h1>
+  <p class="subtitle">// 25 questions &middot; Core &middot; Policies &middot; Roles &middot; Scenarios &middot; Advanced</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core IAM (1&ndash;10)</button>
+    <button class="tab" onclick="switchSection(1)">Policies &amp; Roles (11&ndash;20)</button>
+    <button class="tab" onclick="switchSection(2)">&#128293; Advanced (21&ndash;25)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-policy">Policy</span>
+    <span class="legend-item tag-role">Roles</span>
+    <span class="legend-item tag-security">Security</span>
+    <span class="legend-item tag-scenario">&#128293; Scenario</span>
+    <span class="legend-item tag-advanced">Advanced</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections = [
+  {
+    label: "Core IAM",
+    questions: [
+      {
+        q: "What does IAM stand for, and what is its purpose?",
+        tag: "core", fullform: "IAM = Identity and Access Management",
+        options: [
+          "Infrastructure and Automation Manager — automates EC2 provisioning and scaling",
+          "Identity and Access Management — securely controls access to AWS resources by managing users, permissions, and authentication",
+          "Instance and Application Monitor — tracks health of running workloads across regions",
+          "Integrated API Middleware — bridges communication between AWS services and external systems"
+        ],
+        correct: 1,
+        explanation: "IAM is the security gatekeeper of AWS. It answers two fundamental questions: (1) Who are you? (Authentication — users, roles, federated identities) and (2) What can you do? (Authorization — policies defining allowed/denied actions on specific resources). Every API call to AWS is verified against IAM before being executed."
+      },
+      {
+        q: "What are the four core components of IAM?",
+        tag: "core",
+        options: [
+          "Buckets, Instances, Functions, and Databases",
+          "Regions, Availability Zones, VPCs, and Subnets",
+          "Users, Groups, Roles, and Policies",
+          "Access Keys, Certificates, Tokens, and Passwords"
+        ],
+        correct: 2,
+        explanation: "IAM has four building blocks: Users (individual identities for people or applications), Groups (collections of users sharing the same permissions), Roles (temporary identities assumed by services or users — no permanent credentials), and Policies (JSON documents defining what actions are allowed or denied on which resources). Together they form a complete access control system."
+      },
+      {
+        q: "What is an IAM User?",
+        tag: "core",
+        options: [
+          "A temporary identity assumed by EC2 instances to access AWS services",
+          "A permanent AWS identity created for a person or application, with a username, optional console password, and/or access keys for programmatic access",
+          "An AWS root account with full billing and administrative permissions",
+          "A shared identity used by all team members to access a specific AWS service"
+        ],
+        correct: 1,
+        explanation: "An IAM user represents a long-term identity in your AWS account. Console access uses a username + password. Programmatic access (CLI, SDK) uses an access key ID + secret access key. Best practice: avoid using IAM users for EC2/Lambda access — use roles instead. For human users, consider SSO (AWS Identity Center) over individual IAM users for better manageability."
+      },
+      {
+        q: "What is an IAM Role?",
+        tag: "role",
+        options: [
+          "A permanent user account with elevated administrator privileges",
+          "A billing role that determines how AWS charges are allocated across accounts",
+          "An IAM identity with attached permissions that can be assumed temporarily by AWS services, users, or applications — without permanent credentials",
+          "A compliance template that enforces security standards across all IAM users"
+        ],
+        correct: 2,
+        explanation: "Roles are the preferred way to grant permissions to AWS services (EC2, Lambda, ECS) and for cross-account access. When a role is assumed, AWS STS issues temporary security credentials (access key, secret key, session token) that expire automatically. This eliminates the need to hardcode credentials anywhere. Example: an EC2 instance assumes a role to read from S3 — the SDK automatically retrieves and refreshes the temporary credentials."
+      },
+      {
+        q: "What is the key difference between an IAM User and an IAM Role?",
+        tag: "core",
+        options: [
+          "Users can only access the AWS Console; Roles can only access the CLI",
+          "Users have permanent long-term credentials; Roles provide temporary credentials that expire automatically — making roles more secure",
+          "Users can be added to groups; Roles cannot be added to any group",
+          "Users are free; Roles incur an additional charge per assume-role API call"
+        ],
+        correct: 1,
+        explanation: "The key distinction is credential lifetime. IAM users have permanent access keys that don't expire unless manually rotated — a security risk if leaked. Roles issue temporary credentials via STS (15 minutes to 12 hours) that expire automatically and are rotated. This is why roles are strongly preferred for applications, services, and cross-account access over long-lived user credentials."
+      },
+      {
+        q: "What is an IAM Policy?",
+        tag: "policy",
+        options: [
+          "A billing alert that triggers when IAM API calls exceed a monthly threshold",
+          "A compliance checklist that audits IAM configurations against AWS security benchmarks",
+          "A JSON document that defines permissions — specifying which actions are allowed or denied on which AWS resources",
+          "A network policy controlling which VPCs an IAM user can launch resources into"
+        ],
+        correct: 2,
+        explanation: "An IAM policy is a JSON document with a structure: Effect (Allow/Deny), Action (e.g., s3:GetObject, ec2:StartInstances), Resource (specific ARN or * for all), and optional Condition. Policies are attached to users, groups, or roles. When an API call is made, IAM evaluates all attached policies to determine if the action is permitted."
+      },
+      {
+        q: "What are the two main types of IAM policies?",
+        tag: "policy",
+        options: [
+          "Read policies and Write policies — based on the type of action they permit",
+          "Managed policies (reusable, standalone — AWS-managed or customer-managed) and Inline policies (embedded directly into one specific user, group, or role)",
+          "Global policies (apply across all regions) and Regional policies (apply in one region only)",
+          "Allow policies and Deny policies — each type can only contain rules of one kind"
+        ],
+        correct: 1,
+        explanation: "Managed policies are standalone documents you can attach to multiple identities — AWS provides hundreds of pre-built ones (e.g., AmazonS3ReadOnlyAccess) and you can create custom ones. Inline policies are embedded directly in a single entity and are deleted when the entity is deleted. Best practice: use managed policies for reusability and easier auditing. Use inline only when a policy must be strictly tied to one specific identity."
+      },
+      {
+        q: "What is the Principle of Least Privilege in IAM?",
+        tag: "security",
+        options: [
+          "Granting every new user Administrator access by default, then removing permissions as needed",
+          "Using the cheapest IAM tier to minimize AWS billing costs",
+          "Granting only the minimum permissions required to perform a specific task — nothing more",
+          "A policy that automatically reduces permissions after 30 days of inactivity"
+        ],
+        correct: 2,
+        explanation: "Least privilege means: instead of allowing s3:* (full S3 access), grant only s3:GetObject on specific buckets. Instead of AdministratorAccess, define only the exact actions a role needs. This limits the blast radius if credentials are compromised — an attacker can only do what that identity was allowed to do. IAM Access Analyzer and AWS IAM Access Advisor help identify overly permissive policies."
+      },
+      {
+        q: "What is MFA in the context of IAM?",
+        tag: "security", fullform: "MFA = Multi-Factor Authentication",
+        options: [
+          "A feature that requires multiple IAM administrators to approve policy changes",
+          "An additional authentication layer requiring a second verification factor (time-based OTP from an authenticator app or hardware key) beyond just a password",
+          "A method of encrypting IAM policy documents using multiple encryption keys",
+          "A monitoring feature that sends alerts when multiple failed login attempts are detected"
+        ],
+        correct: 1,
+        explanation: "MFA adds a critical second factor to console logins. Even if a password is stolen, the attacker cannot log in without the second factor (typically a 6-digit TOTP from Google Authenticator, Authy, or a hardware YubiKey). Best practices: enable MFA on the root account immediately, enforce MFA for all IAM users with console access, and require MFA for sensitive API calls using IAM condition keys."
+      },
+      {
+        q: "What are IAM Access Keys?",
+        tag: "core",
+        options: [
+          "One-time passwords sent to a user's email for temporary console access",
+          "Physical hardware tokens that generate time-based codes for MFA",
+          "Long-term credentials (Access Key ID + Secret Access Key) used for programmatic AWS access via CLI, SDK, or API",
+          "Encryption keys managed in AWS KMS for securing S3 objects"
+        ],
+        correct: 2,
+        explanation: "Access keys consist of an Access Key ID (like a username) and a Secret Access Key (like a password — shown only once at creation). They grant programmatic access without requiring console login. Best practices: never hardcode access keys in application code or commit to Git, rotate keys regularly, delete unused keys, prefer IAM roles over access keys for EC2/Lambda, and use AWS Secrets Manager if keys must be stored."
+      }
+    ]
+  },
+  {
+    label: "Policies & Roles",
+    questions: [
+      {
+        q: "What is an ARN and how is it used in IAM policies?",
+        tag: "policy", fullform: "ARN = Amazon Resource Name",
+        options: [
+          "An Auto-Rotation Number assigned to access keys when they are scheduled for automatic renewal",
+          "A unique identifier for every AWS resource, used in IAM policy Resource fields to specify exactly which resources the policy applies to",
+          "An Availability Region Node — the internal AWS identifier for a specific data center location",
+          "An API Request Number logged in CloudTrail for auditing API calls"
+        ],
+        correct: 1,
+        explanation: "ARN format: arn:aws:service:region:account-id:resource. Examples: arn:aws:s3:::my-bucket (S3 bucket — no region/account needed), arn:aws:ec2:us-east-1:123456789:instance/i-abc123. In IAM policies, ARNs in the Resource field specify exactly what the policy applies to. Using * grants access to all resources of that type — avoid this unless truly necessary."
+      },
+      {
+        q: "What is a Trust Policy in IAM?",
+        tag: "role",
+        options: [
+          "A policy that defines the maximum permissions a role can ever grant to any entity",
+          "A policy attached to a role that defines which principals (users, services, accounts) are allowed to assume that role",
+          "A compliance policy that audits trust relationships between AWS accounts quarterly",
+          "A network policy defining which VPCs can access IAM APIs"
+        ],
+        correct: 1,
+        explanation: "Every IAM role has two policy types: a Trust Policy (who can assume the role) and Permission Policies (what the role can do). The trust policy uses a Principal field: EC2 service (ec2.amazonaws.com), a specific IAM user, another AWS account ID, or a federated identity provider. Without a trust policy allowing the right principal, no one can assume the role — even if they have the correct permissions."
+      },
+      {
+        q: "What is an IAM Group?",
+        tag: "core",
+        options: [
+          "A cluster of EC2 instances managed together under a shared IAM role",
+          "A collection of IAM users that share the same set of permissions — policies attached to the group apply to all members automatically",
+          "A cross-account federation group for enterprise SSO integration",
+          "A billing group that allocates IAM-related costs across departments"
+        ],
+        correct: 1,
+        explanation: "Groups simplify permission management at scale. Instead of attaching policies to each user individually, you attach policies to groups: 'Developers' group gets CodeCommit + EC2 read access, 'DBAdmins' group gets RDS full access. When a new developer joins, add them to the group — they instantly get all the right permissions. Note: groups cannot be nested (no group within a group) and cannot assume roles."
+      },
+      {
+        q: "What is a Permission Boundary in IAM?",
+        tag: "advanced",
+        options: [
+          "The maximum size limit (in KB) of an IAM policy document",
+          "A VPC security boundary that prevents IAM users from creating resources outside their assigned subnet",
+          "An advanced feature that sets the maximum permissions an IAM user or role can have — even if their attached policies grant more",
+          "A CloudTrail rule that blocks API calls from specific geographic regions"
+        ],
+        correct: 2,
+        explanation: "Permission boundaries are a guardrail mechanism. Scenario: you delegate IAM user/role creation to a team, but don't want them to create identities with more permissions than they have. Apply a permission boundary — the effective permissions = intersection of the identity's policies AND the boundary. A user with AdministratorAccess + a boundary allowing only S3 can only do S3 actions. Critical for delegated administration in large organizations."
+      },
+      {
+        q: "What is AWS STS?",
+        tag: "role", fullform: "STS = Security Token Service",
+        options: [
+          "Simple Trigger Service — sends events to Lambda when IAM policy changes are detected",
+          "Storage Transfer Service — moves data between S3 buckets across accounts",
+          "Security Token Service — issues temporary, short-lived security credentials for IAM roles, federated users, and cross-account access",
+          "System Threat Scanner — continuously audits IAM configurations for security vulnerabilities"
+        ],
+        correct: 2,
+        explanation: "STS is the engine behind IAM roles. When a principal assumes a role (sts:AssumeRole), STS returns temporary credentials: an Access Key ID, Secret Access Key, and a Session Token — all expiring within a configurable window (15 min to 12 hours). Key STS APIs: AssumeRole (cross-account/service access), AssumeRoleWithWebIdentity (social login/OIDC), AssumeRoleWithSAML (enterprise SSO), and GetSessionToken (adding MFA to programmatic calls)."
+      },
+      {
+        q: "How does an EC2 instance securely access an S3 bucket without hardcoded credentials?",
+        tag: "scenario",
+        options: [
+          "Store the access key and secret key in the EC2 instance's user data script at launch",
+          "Create a .aws/credentials file on the instance with the IAM user's access keys",
+          "Attach an IAM role with the required S3 permissions to the EC2 instance — the instance metadata service automatically provides rotating temporary credentials",
+          "Use the EC2 key pair (PEM file) to authenticate to S3 directly"
+        ],
+        correct: 2,
+        explanation: "The correct pattern: create an IAM role with an S3 permission policy (e.g., s3:GetObject on your bucket), attach it to the EC2 instance as an Instance Profile. The AWS SDK automatically retrieves temporary credentials from the instance metadata service (169.254.169.254/latest/meta-data/iam/security-credentials/). Credentials auto-rotate before expiry. Zero hardcoding, zero credential management — the gold standard for EC2-to-AWS-service authentication."
+      },
+      {
+        q: "A user reports they cannot access an S3 bucket even though their IAM policy allows it — what do you investigate?",
+        tag: "scenario",
+        options: [
+          "Restart the EC2 instance — IAM policy changes require a reboot to take effect",
+          "Delete and recreate the user's IAM policy — policies sometimes get corrupted",
+          "Check for an explicit Deny in any policy (bucket policy, SCP, permission boundary, or another IAM policy) — explicit Deny always overrides Allow",
+          "Check if the S3 bucket is in a different region than the user's default region setting"
+        ],
+        correct: 2,
+        explanation: "IAM evaluation logic: (1) Default DENY — everything is denied unless explicitly allowed. (2) Check for explicit DENY — if ANY attached policy (IAM policy, bucket policy, SCP, permission boundary) has an explicit Deny for this action, access is denied regardless of allows. (3) Check for explicit ALLOW — at least one policy must allow the action. Common culprits: bucket policy with a Deny for certain conditions, an SCP denying the action at the OU level, or a permission boundary restricting the user."
+      },
+      {
+        q: "How do you grant an IAM user read-only access to all S3 buckets using least privilege?",
+        tag: "scenario",
+        options: [
+          "Attach the AdministratorAccess policy — it includes S3 read access",
+          "Attach the AWS managed policy AmazonS3ReadOnlyAccess, which allows s3:GetObject, s3:ListBucket, and related read actions on all buckets",
+          "Create a custom policy with Effect: Allow, Action: s3:*, Resource: * and call it read-only",
+          "Add the user to the 'Administrators' group which has read access to all services by default"
+        ],
+        correct: 1,
+        explanation: "AmazonS3ReadOnlyAccess is the least-privilege AWS managed policy for S3 read access. It allows: s3:GetObject (download objects), s3:ListBucket (list bucket contents), s3:GetBucketLocation, s3:ListAllMyBuckets. For even tighter control, create a custom policy restricting access to specific bucket ARNs. Never grant s3:* when only reads are needed — that also allows s3:DeleteObject, s3:PutObject, and potentially s3:DeleteBucket."
+      },
+      {
+        q: "How do you provide temporary access to an external contractor who needs to access specific AWS resources?",
+        tag: "scenario",
+        options: [
+          "Create a permanent IAM user for them and share the access keys via email",
+          "Give them your own IAM user credentials temporarily and change the password after they're done",
+          "Create an IAM role with the required permissions, configure a trust policy allowing their account or identity to assume it, and share the role ARN — they assume the role via STS for time-limited access",
+          "Grant them access via the AWS root account with a time-limited password"
+        ],
+        correct: 2,
+        explanation: "The correct approach for external/temporary access: create an IAM role with only the needed permissions, set the trust policy to allow the contractor's AWS account (cross-account AssumeRole) or use STS with a time limit. They call sts:AssumeRole to get temporary credentials. When the engagement ends, simply delete the role or revoke the trust — no credential rotation needed. This avoids creating IAM users that might be forgotten and left active."
+      },
+      {
+        q: "What are the best practices for securing the AWS root account?",
+        tag: "security",
+        options: [
+          "Use the root account daily for all administrative tasks to ensure full access to all features",
+          "Share the root account credentials with the entire DevOps team for emergency access",
+          "Enable MFA on the root account immediately, create IAM users/roles for all daily tasks, avoid using root for routine operations, and store root credentials in a secure vault",
+          "Delete the root account after creating IAM administrator users — root is not needed after initial setup"
+        ],
+        correct: 2,
+        explanation: "Root account best practices: (1) Enable hardware MFA immediately — root is the most powerful identity in your account. (2) Never create access keys for root. (3) Don't use root for daily tasks — create IAM users/roles with appropriate permissions. (4) Store root credentials in a secure, physical location. (5) Only use root for tasks that genuinely require it (e.g., changing support plan, closing the account, restoring IAM access if locked out). AWS recommends treating root like a break-glass emergency key."
+      }
+    ]
+  },
+  {
+    label: "Advanced",
+    questions: [
+      {
+        q: "What is an explicit Deny in IAM and why does it matter?",
+        tag: "advanced",
+        options: [
+          "A type of IAM policy that explicitly lists all allowed actions, denying everything else by default",
+          "An explicit Deny statement in any policy overrides any Allow statement — regardless of how many policies grant permission",
+          "A CloudTrail alert that explicitly logs denied API calls for compliance reporting",
+          "A feature that denies all IAM changes unless reviewed by a second administrator"
+        ],
+        correct: 1,
+        explanation: "Explicit Deny has the highest priority in IAM policy evaluation. If ANY policy attached to a principal (IAM policy, resource policy, SCP, permission boundary) contains Effect: Deny for an action, that action is denied — even if 10 other policies have Effect: Allow for the same action. This is intentional: use explicit denies as hard guardrails. Example: deny s3:DeleteBucket for all users except the bucket owner, regardless of what their IAM policies say."
+      },
+      {
+        q: "How does IAM policy evaluation logic work when a request is made?",
+        tag: "advanced",
+        options: [
+          "The most recently attached policy wins — newer policies override older ones",
+          "Only the policy with the most specific resource ARN is evaluated; all others are ignored",
+          "Default Deny for everything, then check for explicit Deny (takes priority), then check for explicit Allow — if neither Allow nor Deny is found, the default Deny applies",
+          "Allow policies are evaluated first; if any Allow is found, the request succeeds without checking Deny policies"
+        ],
+        correct: 2,
+        explanation: "IAM evaluation order: (1) Deny by default — all requests start as implicitly denied. (2) Evaluate SCPs (Service Control Policies) if in an AWS Organization — must Allow the action. (3) Check resource policies (e.g., S3 bucket policy). (4) Check IAM identity policies. (5) Check permission boundaries. (6) Check session policies (for assumed roles). An explicit Deny at any step immediately ends evaluation with a deny. An Allow must exist AND no explicit Deny must be present for access to be granted."
+      },
+      {
+        q: "What is cross-account access in AWS IAM and how is it implemented?",
+        tag: "advanced",
+        options: [
+          "Cross-account access allows two AWS accounts to share the same billing plan",
+          "Cross-account access is implemented by creating identical IAM users in both accounts with the same username and password",
+          "Cross-account access allows principals in one AWS account to access resources in another account — implemented by creating a role in the target account with a trust policy allowing the source account to assume it",
+          "Cross-account access requires AWS Support to manually link two accounts together"
+        ],
+        correct: 2,
+        explanation: "Cross-account role assumption: (1) In Account B (target), create an IAM role with the needed permissions. Set the trust policy's Principal to Account A's ID. (2) In Account A (source), give the user/role permission to sts:AssumeRole on the role ARN in Account B. (3) The Account A user calls sts:AssumeRole — gets temporary credentials scoped to Account B's role. Common uses: centralized logging account, shared tooling account, auditor access across accounts."
+      },
+      {
+        q: "What is an IAM Service Role?",
+        tag: "role",
+        options: [
+          "A role that AWS Support assumes to troubleshoot your account with your permission",
+          "A role that billing administrators use to access Cost Explorer and AWS Budgets",
+          "A role that an AWS service (like Lambda, EC2, or ECS) assumes to perform actions on your behalf on other AWS services",
+          "A role with read-only access used by AWS services to inspect your account for compliance"
+        ],
+        correct: 2,
+        explanation: "Service roles are IAM roles with a trust policy that allows an AWS service principal to assume them. Examples: Lambda execution role (allows lambda.amazonaws.com to assume it, granting Lambda permission to write CloudWatch Logs and access DynamoDB), ECS task role (allows ECS tasks to call S3 and Secrets Manager), CodeDeploy role (allows deployment service to stop/start EC2 instances). Every AWS service that acts on your behalf needs a service role."
+      },
+      {
+        q: "What is Identity Federation in AWS IAM?",
+        tag: "advanced",
+        options: [
+          "A billing feature that federates costs across multiple AWS accounts into a single invoice",
+          "A VPC networking feature that federates routing tables across multiple regions",
+          "The ability to allow users authenticated by an external identity provider (corporate Active Directory, Google, Okta, GitHub) to access AWS resources without creating IAM users",
+          "An IAM feature that automatically federates permissions from one AWS account to all child accounts in an Organization"
+        ],
+        correct: 2,
+        explanation: "Federation lets you use existing identity systems instead of creating IAM users for everyone. Methods: SAML 2.0 (corporate AD/LDAP via ADFS → AWS Console/API), OIDC/Web Identity (Google, Facebook, Amazon Cognito → mobile/web apps calling AWS), and AWS IAM Identity Center (formerly SSO) for centrally managing access across all AWS accounts. Users authenticate to their existing IdP, get a SAML assertion or OIDC token, then exchange it via STS for temporary AWS credentials."
+      }
+    ]
+  }
+];
+
+var currentSection = 0;
+var current = 0;
+var sectionAnswers = sections.map(function(s) { return new Array(s.questions.length).fill(null); });
+
+var tagMeta = {
+  core:     { label: 'Core',     cls: 'tag-core'     },
+  policy:   { label: 'Policy',   cls: 'tag-policy'   },
+  role:     { label: 'Roles',    cls: 'tag-role'     },
+  security: { label: 'Security', cls: 'tag-security' },
+  scenario: { label: 'Scenario', cls: 'tag-scenario' },
+  advanced: { label: 'Advanced', cls: 'tag-advanced'  }
+};
+
+function switchSection(idx) {
+  currentSection = idx; current = 0;
+  document.querySelectorAll('.tab').forEach(function(t, i) { t.classList.toggle('active', i === idx); });
+  render();
+}
+
+function render() {
+  var sec = sections[currentSection];
+  var q = sec.questions[current];
+  var answers = sectionAnswers[currentSection];
+  var ans = answers[current];
+  var isAnswered = ans !== null;
+  var total = sec.questions.length;
+  var tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = ((current + 1) / total * 100) + '%';
+  document.getElementById('progressText').textContent = (current + 1) + ' / ' + total;
+
+  document.getElementById('dotsNav').innerHTML = sec.questions.map(function(_, i) {
+    var cls = 'dot';
+    if (i === current) cls += ' active current';
+    else if (answers[i] !== null) cls += ' answered';
+    return '<div class="' + cls + '" onclick="goTo(' + i + ')"></div>';
+  }).join('');
+
+  var fullformHtml = q.fullform
+    ? '<div class="fullform-box">&#128273; ' + q.fullform + '</div>'
+    : '';
+
+  var optionsHtml = q.options.map(function(opt, i) {
+    var cls = 'option', tag = '';
+    if (isAnswered) {
+      cls += ' locked';
+      if (i === q.correct) { cls += ' correct'; tag = '<span class="option-tag tag-correct">&#10003; CORRECT</span>'; }
+      else if (i === ans)  { cls += ' wrong';   tag = '<span class="option-tag tag-wrong">&#10007; WRONG</span>'; }
+    }
+    return '<div class="' + cls + '" onclick="selectAnswer(' + i + ')"><div class="option-dot"></div><span class="option-label">' + opt + '</span>' + tag + '</div>';
+  }).join('');
+
+  var explanationHtml = isAnswered
+    ? '<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">' + q.explanation + '</div></div>'
+    : '';
+
+  var isLast = current === total - 1;
+  var allAnswered = answers.every(function(a) { return a !== null; });
+
+  var nextBtn = (isLast && allAnswered)
+    ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
+    : '<button class="btn btn-next" onclick="goNext()" ' + (!isAnswered ? 'disabled' : '') + '>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card">' +
+      '<div class="q-number">Question ' + (current+1) + ' of ' + total +
+        ' <span class="q-tag ' + tm.cls + '">' + tm.label + '</span></div>' +
+      fullformHtml +
+      '<div class="question">' + q.q + '</div>' +
+      '<div class="options">' + optionsHtml + '</div>' +
+      explanationHtml +
+      '<div class="nav-row">' +
+        '<button class="btn btn-back" onclick="goBack()" ' + (current === 0 ? 'disabled' : '') + '>&#8592; Back</button>' +
+        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>' +
+        nextBtn +
+      '</div>' +
+    '</div>';
+}
+
+function selectAnswer(i) { if (sectionAnswers[currentSection][current] !== null) return; sectionAnswers[currentSection][current] = i; render(); }
+function goNext() { if (current < sections[currentSection].questions.length - 1) { current++; render(); } }
+function goBack() { if (current > 0) { current--; render(); } }
+function goTo(i)  { current = i; render(); }
+
+function resetSection() {
+  sectionAnswers[currentSection] = new Array(sections[currentSection].questions.length).fill(null);
+  current = 0; render();
+}
+
+function showResults() {
+  var sec = sections[currentSection];
+  var answers = sectionAnswers[currentSection];
+  var score = answers.filter(function(a, i) { return a === sec.questions[i].correct; }).length;
+  var total = sec.questions.length;
+  var pct = Math.round(score / total * 100);
+  var msg = pct === 100 ? '&#127942; Perfect! IAM certified!'
+          : pct >= 70  ? '&#127919; Strong access control knowledge!'
+          :               '&#128218; Review explanations and retry!';
+
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card result-screen">' +
+      '<div class="result-score">' + score + '/' + total + '</div>' +
+      '<div class="result-label">SCORE &middot; ' + sec.label.toUpperCase() + ' &middot; ' + pct + '%</div>' +
+      '<div class="result-msg">' + msg + '</div>' +
+      '<div class="result-list">' +
+        sec.questions.map(function(q, i) {
+          var icon = answers[i] === q.correct ? '&#9989;' : '&#10060;';
+          var label = q.q.length > 48 ? q.q.slice(0,48)+'&hellip;' : q.q;
+          return '<div class="result-item"><span style="font-size:15px">' + icon + '</span>' +
+            '<span class="q-tag ' + tagMeta[q.tag].cls + '" style="font-size:9px">' + tagMeta[q.tag].label + '</span>' +
+            'Q' + (i+1) + ': ' + label + '</div>';
+        }).join('') +
+      '</div>' +
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>' +
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">&#8635; Try Again</button>' +
+    '</div>';
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = score + ' / ' + total + ' correct';
+}
+
+function reviewAnswers() { current = 0; render(); }
+render();
+</script>
+</body>
+</html>
