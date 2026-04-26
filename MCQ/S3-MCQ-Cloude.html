@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS S3 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#facc15;--accent2:#b45309;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(250,204,21,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(250,204,21,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(180,83,9,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(250,204,21,0.1);border:1px solid rgba(250,204,21,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .tab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:8px 18px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .tab:hover{border-color:rgba(250,204,21,0.4);color:var(--text);}
+  .tab.active{background:rgba(250,204,21,0.1);border-color:rgba(250,204,21,0.5);color:var(--accent);}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core    {background:rgba(250,204,21,0.12); border:1px solid rgba(250,204,21,0.3); color:#facc15;}
+  .tag-security{background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.3); color:#fb923c;}
+  .tag-data    {background:rgba(52,211,153,0.12);  border:1px solid rgba(52,211,153,0.3);  color:#34d399;}
+  .tag-perf    {background:rgba(167,139,250,0.12); border:1px solid rgba(167,139,250,0.3); color:#a78bfa;}
+  .tag-scenario{background:rgba(255,77,109,0.12);  border:1px solid rgba(255,77,109,0.3);  color:#ff4d6d;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .tip-box{background:rgba(250,204,21,0.05);border:1px solid rgba(250,204,21,0.15);border-radius:6px;padding:10px 14px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;color:#94a3b8;line-height:1.7;}
+  .tip-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:4px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(250,204,21,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(250,204,21,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(250,204,21,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 20px rgba(250,204,21,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(250,204,21,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.25);color:#d97706;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(180,83,9,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Storage Prep</div>
+  <h1>Amazon <span>S3</span> Quiz</h1>
+  <p class="subtitle">// 30 questions &middot; Core &middot; Security &middot; Data Mgmt &middot; Performance &middot; Scenarios</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core &amp; Security (1&ndash;10)</button>
+    <button class="tab" onclick="switchSection(1)">Data &amp; Performance (11&ndash;20)</button>
+    <button class="tab" onclick="switchSection(2)">&#128293; Scenarios (21&ndash;30)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-security">Security</span>
+    <span class="legend-item tag-data">Data Mgmt</span>
+    <span class="legend-item tag-perf">Performance</span>
+    <span class="legend-item tag-scenario">&#128293; Scenario</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections=[
+{label:"Core & Security",questions:[
+{q:"What is an Amazon S3 bucket?",tag:"core",
+tip:"S3 = Simple Storage Service",
+options:["A virtual hard disk attached to an EC2 instance for block-level storage","A globally unique logical container in Amazon S3 that stores unlimited objects (files) in a specific AWS region","A relational database table that stores structured data with automatic backups","A CloudFront edge cache that stores frequently accessed files near end users"],
+correct:1,
+explanation:"An S3 bucket is the top-level container for data in Amazon S3. Key properties: globally unique name (no two buckets across all AWS accounts can share the same name), region-specific (you pick where data lives — it stays there unless you configure replication), unlimited capacity (no storage quota per bucket), and unlimited objects (each up to 5TB). The bucket name forms part of the URL: https://bucket-name.s3.region.amazonaws.com/key."},
+
+{q:"What are the three components that make up an S3 object?",tag:"core",
+tip:null,
+options:["Filename, File type, and File permissions","Bucket name, Region, and Account ID","Data (the actual file content), Metadata (key-value attributes), and Key (the unique identifier within the bucket)","Version ID, Storage class, and Encryption mode"],
+correct:2,
+explanation:"Every S3 object has three parts: (1) Data — the raw bytes of your file (image, document, video, log, etc.). (2) Key — a unique string within the bucket that identifies the object, like a path (e.g., images/2024/photo.jpg). (3) Metadata — system metadata (content-type, last-modified, size) and optional user-defined key-value pairs. The full address is: s3://bucket-name/key."},
+
+{q:"What is the core difference between an S3 bucket and an S3 object?",tag:"core",
+tip:null,
+options:["A bucket is encrypted by default; an object requires manual encryption setup","A bucket is the container that holds everything; an object is the actual file or data stored inside the bucket","A bucket is regional; an object is global — replicated automatically across all regions","A bucket holds configuration; an object holds the actual infrastructure state"],
+correct:1,
+explanation:"The bucket-object relationship is like a folder and a file — but with key differences. The bucket is the organizational and billing unit: it has a name, region, policies, and settings. Objects are the data inside: each with its own key, content, metadata, version, and storage class. A single bucket can contain millions of objects. You manage settings at the bucket level and data at the object level."},
+
+{q:"Is an S3 bucket region-specific or global?",tag:"core",
+tip:"Names: global namespace. Data: stays in chosen region.",
+options:["Fully global — S3 automatically replicates all data across every AWS region","Buckets are region-specific (data stays in the region you create them), but bucket names must be globally unique across all AWS accounts and regions","AZ-specific — each Availability Zone maintains its own isolated S3 namespace","Region-specific by default but can be made global using Transfer Acceleration"],
+correct:1,
+explanation:"Two separate concepts: Region — when you create a bucket, you choose a region (e.g., ap-south-1). Your data physically lives there and never moves unless you configure Cross-Region Replication. This satisfies data residency and compliance requirements. Namespace — bucket names are globally unique across ALL AWS accounts worldwide. If someone else has 'my-bucket', you cannot use it in any region. This is why bucket names are often prefixed with account IDs or project codes."},
+
+{q:"What are the main S3 storage classes and what drives the choice between them?",tag:"core",
+tip:"Cost ↓ = Access frequency ↓ = Retrieval time ↑",
+options:["SSD, HDD, and Tape — chosen by the underlying hardware type needed","Standard, Intelligent-Tiering, Standard-IA, Glacier, and Deep Archive — chosen based on how frequently data is accessed and cost vs. retrieval time tradeoffs","Premium, Standard, and Basic — tiered by monthly subscription price","S3 only has one storage class — pricing varies only by region, not data tier"],
+correct:1,
+explanation:"Storage class selection is a cost-vs-access-speed decision: Standard — frequently accessed data, lowest latency (~ms), highest price. Standard-IA/One Zone-IA — infrequent access, same latency but lower storage cost + retrieval fee. Intelligent-Tiering — AWS monitors access patterns and automatically moves objects between tiers (no retrieval fees). Glacier Instant/Flexible — archival, retrieval from ms to hours. Deep Archive — cheapest storage (~$1/TB/month), 12-hour retrieval for data accessed once or twice a year. Lifecycle policies automate transitions between classes."},
+
+{q:"How do you control who can access an S3 bucket and its objects?",tag:"security",
+tip:null,
+options:["Through EC2 Security Groups attached to the bucket endpoint","Using IAM policies (on the identity), bucket policies (on the bucket), and ACLs (legacy per-object) — layered together to define access","S3 is always private — the only way to grant access is to make objects public via the console","Through VPC route tables that define which subnets can reach S3 endpoints"],
+correct:1,
+explanation:"S3 access is evaluated through multiple layers: IAM policies travel with the IAM identity (user/role) and define what S3 actions they can perform. Bucket policies are JSON attached to the bucket itself — ideal for cross-account access, public bucket policies, and IP restrictions. ACLs (legacy) grant per-object read/write permissions — mostly replaced by bucket policies. For a request to succeed: the identity must be allowed by IAM AND the bucket policy must not deny it. Block Public Access overrides all of these if enabled."},
+
+{q:"What is an S3 Bucket Policy?",tag:"security",
+tip:'{"Effect":"Allow","Principal":"*","Action":"s3:GetObject","Resource":"arn:aws:s3:::my-bucket/*"}',
+options:["A compliance policy that defines how long objects must be retained before deletion","A JSON-based resource policy attached directly to a bucket that defines which principals can perform which actions on the bucket and its objects","A billing policy that assigns S3 costs to specific AWS cost centers or accounts","A monitoring policy that defines CloudWatch alarms for S3 request rates"],
+correct:1,
+explanation:"Bucket policies are JSON documents attached at the bucket level (not to a user). They use the standard IAM policy structure: Effect (Allow/Deny), Principal (who — specific user, role, account, or '*' for public), Action (s3:GetObject, s3:PutObject, etc.), Resource (specific bucket/object ARNs), and optional Condition (source IP, MFA, HTTPS-only, etc.). Unlike IAM policies, bucket policies can grant access to external AWS accounts and the general public — making them essential for cross-account access and public website hosting."},
+
+{q:"What is the key difference between an IAM policy and an S3 bucket policy?",tag:"security",
+tip:null,
+options:["IAM policies allow only read access; bucket policies allow write access","IAM policies are attached to the IAM identity (user or role) and control what that identity can do; bucket policies are attached to the S3 bucket and control who can access that specific bucket","IAM policies apply globally; bucket policies apply only in the bucket's home region","There is no difference — both are identical JSON documents with the same effect"],
+correct:1,
+explanation:"Identity-based vs. resource-based: IAM policies define permissions FROM an identity's perspective ('this role can do s3:GetObject on any bucket'). Bucket policies define permissions FROM the resource's perspective ('this bucket allows these principals to perform these actions'). For same-account access, either works alone. For cross-account access (Account A accessing Account B's bucket), you need BOTH: Account A's IAM policy allowing the action, AND Account B's bucket policy granting access to Account A's identity."},
+
+{q:"How do you make an S3 bucket publicly accessible?",tag:"security",
+tip:"⚠️ Public buckets are a top cause of data breaches — use CloudFront instead.",
+options:["Set the bucket's replication to 'Public' mode in the Replication settings tab","Create a Security Group with port 443 open to 0.0.0.0/0 and attach it to the bucket","Disable Block Public Access at the bucket level, then add a bucket policy granting s3:GetObject to Principal '*'","Change the bucket's ACL to 'public-read' — this is sufficient without changing any other settings"],
+correct:2,
+explanation:"Two steps required: (1) Disable Block Public Access — AWS enables this by default on all new buckets as a safety net. Even if a policy grants public access, BPA will override and block it. You must explicitly disable it. (2) Add a bucket policy: Effect Allow, Action s3:GetObject, Principal '*', Resource arn:aws:s3:::bucket-name/*. Best practice: avoid public buckets for sensitive data. Instead, use CloudFront with OAC (Origin Access Control) to serve content publicly while keeping the bucket private."},
+
+{q:"What is S3 Block Public Access and why does it matter?",tag:"security",
+tip:"Account-level BPA protects ALL buckets — bucket-level protects one.",
+options:["A firewall that blocks all network traffic to S3 from outside the VPC","An account-level or bucket-level setting that overrides any policies or ACLs that would grant public access — acting as a final safety guardrail regardless of other configurations","A feature that automatically scans uploaded objects for publicly shared content","A billing alert that triggers when public data transfer costs exceed a threshold"],
+correct:1,
+explanation:"Block Public Access is AWS's account-wide safety mechanism introduced after numerous S3 data breaches from misconfigured buckets. Four settings: BlockPublicAcls, IgnorePublicAcls, BlockPublicPolicy, RestrictPublicBuckets. When enabled at the account level, it prevents ANY bucket from ever being made public — even if someone writes a bucket policy granting public access. Critical for organizations: enable account-level BPA as a default, then selectively disable per-bucket only when intentional public access is needed (e.g., static website bucket)."}
+]},
+
+{label:"Data & Performance",questions:[
+{q:"What is S3 Versioning and why is it important?",tag:"data",
+tip:"Delete with versioning ON = adds delete marker (data still there!)",
+options:["Versioning tracks changes to the bucket policy and configuration over time","Versioning keeps multiple versions of every object — each PUT creates a new version rather than overwriting, and DELETE adds a marker without removing previous versions, enabling recovery from accidental changes","Versioning automatically creates daily backups of all S3 objects in a separate bucket","Versioning is a compliance feature that prevents objects from being read more than once"],
+correct:1,
+explanation:"With versioning enabled, every object modification generates a new version with a unique version ID. Key behaviors: Overwrite — new version created, old one preserved. Delete — a delete marker is added on top; previous versions still exist and are retrievable. Recovery — remove the delete marker or restore a specific version ID. Important notes: versioning cannot be disabled once enabled (only suspended). Storage costs increase as versions accumulate — use lifecycle rules to expire old versions. MFA Delete adds extra protection requiring MFA to permanently delete versions."},
+
+{q:"What is an S3 Lifecycle Policy?",tag:"data",
+tip:"Example: Standard (0d) → Standard-IA (30d) → Glacier (90d) → Delete (365d)",
+options:["A policy that defines the maximum life of the S3 service before AWS decommissions it","A set of rules that automatically transition objects to cheaper storage classes or permanently delete them based on age, prefix, or tags — without any manual intervention","A compliance rule that keeps objects immutable for a defined number of years","A replication policy that defines how long before objects are copied to a second region"],
+correct:1,
+explanation:"Lifecycle policies are your automated cost-optimization tool. Rules can: Transition — move objects to Standard-IA after 30 days of no access, to Glacier after 90 days, to Deep Archive after 180 days. Expiration — delete objects after N days (great for log retention policies). Abort incomplete multipart uploads — critical for preventing silent cost accumulation from stalled uploads. Filters: apply rules to all objects, specific prefixes (logs/), or objects with specific tags. These run automatically daily at no extra charge."},
+
+{q:"What is S3 Replication and what are its two types?",tag:"data",
+tip:"Versioning must be enabled on BOTH source and destination buckets.",
+options:["Replication mirrors the bucket metadata to a second location; types are Metadata Replication and Data Replication","Replication automatically copies new objects from a source bucket to a destination bucket; types are Same-Region Replication (SRR) and Cross-Region Replication (CRR)","Replication creates read replicas within the same bucket for parallel read performance","Replication duplicates entire buckets across all AWS regions for global redundancy"],
+correct:1,
+explanation:"S3 Replication copies objects asynchronously to a destination bucket. SRR (Same-Region Replication) — copies within the same region. Use cases: log aggregation from multiple buckets, maintaining a live copy for a different team, compliance requiring data copies within the same country. CRR (Cross-Region Replication) — copies to a different region. Use cases: disaster recovery (data available even if a region fails), lower latency for global users, compliance requiring geographic separation. Existing objects are NOT replicated automatically — only new objects after enabling replication (use S3 Batch Operations for existing objects)."},
+
+{q:"What is S3 Object Lock?",tag:"data",
+tip:"Compliance mode: nobody (not even root) can delete before retention expires.",
+options:["A feature that prevents two users from uploading to the same object key simultaneously","A WORM (Write Once Read Many) mechanism that prevents objects from being deleted or modified for a defined retention period — supporting compliance requirements like SEC 17a-4 and HIPAA","A network lock that prevents S3 from being accessed from outside the VPC","A billing lock that prevents storage costs from exceeding a defined monthly budget"],
+correct:1,
+explanation:"Object Lock implements immutable storage. Two retention modes: Governance mode — only users with s3:BypassGovernanceRetention permission can override. Used for internal data protection. Compliance mode — absolutely no one (including root, AWS Support) can delete or modify before the retention period expires. Used for regulatory compliance (financial, healthcare, legal). Legal Hold — independent of retention period; locks an object indefinitely until explicitly removed. Requires versioning enabled on the bucket."},
+
+{q:"What is an S3 Pre-signed URL?",tag:"security",
+tip:"Generated server-side. Expires in seconds to 7 days. Client uses it directly.",
+options:["A permanent public URL for objects in a public S3 bucket","A URL that requires the user to sign in to AWS Console before accessing the object","A time-limited, cryptographically signed URL that grants temporary access to a specific private S3 object — without exposing AWS credentials or making the bucket public","A URL pre-registered in Route 53 that points to an S3 static website endpoint"],
+correct:2,
+explanation:"Pre-signed URLs embed authentication information in the URL itself. Generation: your server calls the SDK (boto3 s3.generate_presigned_url('get_object', Params={'Bucket':..., 'Key':...}, ExpiresIn=3600)) using IAM credentials. Anyone with the URL can access that specific object until expiry — no AWS account needed. Use cases: sharing private reports with customers, allowing direct browser-to-S3 file uploads (pre-signed PUT URLs avoid routing large files through your server), time-limited download links in email, secure file sharing with external contractors."},
+
+{q:"What consistency model does Amazon S3 provide?",tag:"perf",
+tip:"Changed Dec 2020: strong consistency is now FREE and automatic for all ops.",
+options:["Eventual consistency — reads after writes may return stale data for up to 1 second","Read-your-writes consistency for new objects only; eventual consistency for updates and deletes","Strong read-after-write consistency for all operations — GET, PUT, DELETE, and LIST — with no additional cost or configuration","Consistency depends on storage class — Standard is strong, Glacier is eventual"],
+correct:2,
+explanation:"Since December 2020, S3 provides strong read-after-write consistency for ALL operations. This means: immediately after PUT — any GET of that object returns the new data. Immediately after DELETE — any GET returns 404. LIST operations reflect all recent PUT/DELETE changes. This eliminates the need for workarounds (sleeps, retries, consistency checks) that were common in older S3 applications. The change was made with no performance or cost impact. S3 on Outposts still has its own consistency model."},
+
+{q:"What is S3 Multipart Upload and when should you use it?",tag:"perf",
+tip:"Required for objects > 5GB. Recommended for objects > 100MB.",
+options:["Uploading multiple small files to S3 in a single API call using a batch manifest","Uploading a single large file by splitting it into parts that upload in parallel, then S3 reassembles them — improving speed, reliability, and enabling uploads to begin before file size is known","A feature that uploads the same file to multiple S3 buckets simultaneously for redundancy","Uploading files from multiple geographic locations concurrently for global data ingestion"],
+correct:1,
+explanation:"Multipart Upload breaks large files into parts (5MB minimum, except last part), uploads them in parallel across multiple connections, and S3 reassembles them. Benefits: faster uploads (parallel = better bandwidth utilization), resilience (only failed parts need retry — not the entire file), and start-before-completion (useful for streaming). Maximum: 10,000 parts per upload, up to 5TB total. Critical: abort incomplete multipart uploads with a lifecycle rule (abort-incomplete-multipart-upload) to avoid being charged for partial data silently accumulating."},
+
+{q:"What is S3 Transfer Acceleration?",tag:"perf",
+tip:"Endpoint: bucket-name.s3-accelerate.amazonaws.com",
+options:["An auto-scaling feature that dynamically adds S3 capacity when request rates spike","A CDN-style feature that routes S3 uploads through AWS CloudFront edge locations worldwide — reducing latency for geographically distant uploads by sending data over AWS's optimized global network instead of the public internet","A compression feature that reduces file sizes before storing them in S3","An in-region acceleration feature using AWS Direct Connect for faster internal transfers"],
+correct:1,
+explanation:"Transfer Acceleration is valuable when users are far from the bucket's region. Without it: user in India uploads to us-east-1 bucket → data traverses public internet for thousands of miles (high latency, packet loss). With TA enabled: user uploads to nearest CloudFront edge (e.g., Mumbai) → data travels over AWS's private, optimized backbone to us-east-1 (much faster). Speed improvement: 50-500% faster for inter-continental transfers. Use the speed comparison tool in the S3 console to verify benefit before enabling (there's an additional per-GB cost)."},
+
+{q:"What are S3 Event Notifications?",tag:"perf",
+tip:"Targets: Lambda &#x2192; process, SQS &#x2192; queue, SNS &#x2192; fan-out",
+options:["Email notifications sent to the bucket owner when storage usage exceeds a configured threshold","CloudWatch alerts triggered when S3 API error rates exceed a defined threshold","Automatic triggers sent to Lambda, SQS, or SNS when specific events occur in a bucket (object created, deleted, or restored) — enabling event-driven architectures","Webhook calls sent to external URLs when new buckets are created in the account"],
+correct:2,
+explanation:"Event notifications turn S3 into an event source for your architecture. Supported events: s3:ObjectCreated (Put, Post, Copy, CompleteMultipartUpload), s3:ObjectRemoved (Delete, DeleteMarkerCreated), s3:ObjectRestore (from Glacier), s3:Replication events. Destinations: Lambda (serverless processing), SQS (queue for async processing), SNS (fan-out to multiple subscribers). Real-world patterns: image thumbnail generation on upload (S3 → Lambda → resize → save), log processing pipeline (S3 → SQS → EC2 consumer → analytics), ML inference on new data files."},
+
+{q:"What is S3 Static Website Hosting?",tag:"perf",
+tip:"Website endpoint: bucket-name.s3-website-region.amazonaws.com",
+options:["A feature that converts S3 into a managed web server running PHP/Node.js applications","A paid add-on that attaches an EC2 web server instance to the S3 bucket","A built-in S3 feature that serves static files (HTML, CSS, JS, images) directly via HTTP — without a web server — enabling cost-effective hosting for single-page apps and static sites","An integration with ECS that runs containerized web servers with S3 as persistent storage"],
+correct:2,
+explanation:"S3 static hosting setup: enable it in bucket properties, set index document (index.html) and optional error document (error.html), make objects public. S3 provides a website endpoint URL. S3 does NOT support server-side code (PHP, Python, Node.js) — only static files. For production: pair with CloudFront for HTTPS (S3 website endpoints are HTTP only), custom domain via Route 53, caching at edge, and WAF protection. Cost: pay only for storage + requests — no EC2 or server costs. Perfect for React, Vue, Angular SPAs and marketing sites."}
+]},
+
+{label:"Scenarios",questions:[
+{q:"An EC2 instance cannot access objects in your S3 bucket — what do you investigate?",tag:"scenario",
+tip:"Never hardcode credentials in EC2. Always use IAM roles.",
+options:["Reboot the EC2 instance — IAM credentials are refreshed at boot time only","Check if the S3 bucket is in the same Availability Zone as the EC2 instance","Check: (1) Is an IAM role attached to EC2? (2) Does the role policy grant needed S3 permissions? (3) Does the bucket policy explicitly deny the role? (4) Is Block Public Access blocking the role?","Move the EC2 instance to the same region as the S3 bucket"],
+correct:2,
+explanation:"Systematic EC2-to-S3 troubleshooting: (1) IAM role — is an instance profile attached? Check EC2 console → Security → IAM Role. If none, attach one with s3:GetObject/PutObject on the bucket ARN. (2) Role permissions — does the policy have the right actions and correct bucket ARN? (3) Bucket policy — does it have an explicit Deny overriding the role's Allow? (4) Block Public Access — if the bucket policy uses Principal:'*', BPA might block it. (5) VPC endpoint — if using private connectivity, is the endpoint policy restrictive? (6) KMS — if objects are SSE-KMS encrypted, does the role have kms:Decrypt permission?"},
+
+{q:"An external partner needs to upload files directly to your private S3 bucket — how do you do this securely?",tag:"scenario",
+tip:"Pre-signed PUT URL = secure, temporary, no AWS credentials shared.",
+options:["Create a permanent IAM user for them and email the access keys","Make the bucket public temporarily, ask them to upload, then make it private again","Generate a pre-signed PUT URL with a short expiry — the partner uploads directly to S3 using the URL without needing any AWS credentials","Share your S3 bucket ARN and ask them to create a VPC peering connection to your account"],
+correct:2,
+explanation:"Pre-signed PUT URL workflow: (1) Your server generates a pre-signed URL using your IAM credentials: s3.generate_presigned_url('put_object', Params={'Bucket': 'my-bucket', 'Key': 'uploads/partner-file.csv', 'ContentType': 'text/csv'}, ExpiresIn=900). (2) Share the URL with the partner via your application or secure channel. (3) Partner makes HTTP PUT request directly to S3 using the URL. (4) URL expires automatically after 15 minutes — no cleanup needed. The bucket stays private, credentials are never shared, and you control the key prefix they can write to."},
+
+{q:"A developer accidentally deleted an important file from S3 — how do you recover it?",tag:"scenario",
+tip:"Recovery is only possible if versioning was enabled BEFORE the deletion.",
+options:["Contact AWS Support — they keep 30-day backups of all S3 objects for emergency recovery","If versioning was enabled, find the delete marker in the S3 console (Show versions), delete the marker, and the previous version becomes the current object again","Recovery is impossible — S3 deletions are permanent regardless of any configuration","Restore from the EC2 instance's EBS snapshot which automatically mirrors S3 data"],
+correct:1,
+explanation:"Recovery steps with versioning enabled: (1) In S3 Console → bucket → Show versions toggle. (2) Find the delete marker (shows as 'Delete marker' type with a version ID). (3) Select and delete the delete marker. (4) The previous version immediately becomes the current (live) version — file is restored. Alternatively: use CLI aws s3api delete-object --bucket my-bucket --key file.txt --version-id VERSION_ID_OF_MARKER. Without versioning: recovery requires an external backup, cross-region replica, or application-level backup. This is why enabling versioning BEFORE an incident is critical — you can't go back in time."},
+
+{q:"How do you prevent accidental deletion of important objects in S3?",tag:"scenario",
+tip:"Defense in depth: versioning + MFA Delete + Object Lock + least privilege",
+options:["Enable server-side encryption — encrypted objects cannot be accidentally deleted","Set all objects to Glacier storage class — retrieval time creates a natural delay for accidental deletions","Enable versioning (keeps all versions including deleted ones), enable MFA Delete (requires MFA to permanently delete versions), and use Object Lock with Compliance mode for true WORM protection","Restrict bucket access to read-only for all IAM users — writes must go through AWS Support"],
+correct:2,
+explanation:"Layered deletion protection: Versioning — deletes only add a marker; all versions preserved. MFA Delete — requires physical MFA device to permanently delete object versions or disable versioning; prevents API-based or script-based accidental wipes. Object Lock (Compliance mode) — legally binding retention period; not even AWS or root can delete before it expires. IAM least privilege — grant s3:DeleteObject only to specific roles that need it, not to all developers. Additionally: use S3 Replication to another bucket as a backup copy, and enable CloudTrail for DeleteObject API audit logs."},
+
+{q:"How do you reduce S3 storage costs when you have large amounts of aging data?",tag:"scenario",
+tip:"Incomplete multipart uploads silently cost money — always set abort rules.",
+options:["Delete all objects older than 30 days regardless of business requirements to reduce costs","Switch everything to Glacier immediately — it is always the cheapest option regardless of access patterns","Implement lifecycle policies (transition to Standard-IA then Glacier), enable Intelligent-Tiering for unknown access patterns, abort incomplete multipart uploads, and audit/delete truly unnecessary data","Compress all objects using S3's built-in compression before storing them"],
+correct:2,
+explanation:"Cost reduction playbook: (1) Lifecycle transitions — Standard (0d) → Standard-IA (30d, same durability, ~58% cheaper) → Glacier Flexible (90d, ~85% cheaper) → Deep Archive (180d, ~95% cheaper). (2) S3 Intelligent-Tiering — let AWS optimize automatically for objects with unpredictable access. (3) Abort incomplete multipart uploads — lifecycle rule: abort after 7 days. Stalled uploads silently accumulate costs. (4) S3 Storage Lens — identify buckets with most data, access patterns, and cost drivers. (5) Expire old versions — lifecycle rule to delete non-current versions after 30 days. (6) S3 Inventory — full object report to find and delete orphaned data."},
+
+{q:"How do you restrict S3 bucket access to specific IP addresses only?",tag:"scenario",
+tip:'Condition: {"IpAddress": {"aws:SourceIp": ["203.0.113.0/24"]}}',
+options:["Attach a Security Group to the bucket with inbound rules for the allowed IPs","Configure a Network ACL in the bucket's VPC to block all IPs except the allowed ones","Add a bucket policy with an explicit Deny for NotIpAddress condition — denying access to all requests NOT originating from the specified IP ranges","Enable Transfer Acceleration — it restricts access to AWS edge locations only"],
+correct:2,
+explanation:"IP restriction bucket policy pattern: Effect: Deny, Principal: '*', Action: 's3:*', Resource: ['arn:aws:s3:::my-bucket', 'arn:aws:s3:::my-bucket/*'], Condition: NotIpAddress: {'aws:SourceIp': ['203.0.113.0/24', '198.51.100.10/32']}. This denies ALL access unless the source IP is in the allowed list. Important warnings: (1) This blocks the AWS Console access from other IPs — even for admins. (2) For EC2 instances using NAT Gateway, the NAT Gateway's public IP must be in the allow list. (3) For VPC-internal access, use aws:SourceVpc or aws:SourceVpce conditions instead — more secure than IP-based."},
+
+{q:"How do you encrypt data stored in S3, and what are the options?",tag:"scenario",
+tip:"Since Jan 2023: all new S3 objects are encrypted with SSE-S3 by default.",
+options:["S3 has no native encryption — you must encrypt files before uploading using external tools","Only SSE-KMS is supported — S3 uses KMS for all encryption automatically","SSE-S3 (AWS-managed keys, free), SSE-KMS (customer-controlled KMS keys, auditable), SSE-C (customer-provided keys, not stored by AWS), and client-side encryption before upload","Encryption is only available for Glacier and Deep Archive storage classes"],
+correct:2,
+explanation:"S3 encryption options: SSE-S3 (AES-256) — AWS manages keys entirely. Default since Jan 2023. No extra cost. Good for general use. SSE-KMS — you control keys in AWS KMS. Benefits: key rotation, CloudTrail audit logs of every decrypt, cross-account key sharing, ability to revoke access by disabling the key. Small KMS API cost per request. Required for compliance (HIPAA, PCI-DSS). SSE-C — you provide the encryption key with each API request; AWS uses it but never stores it. You manage key rotation. Client-side — encrypt before upload; S3 never sees plaintext. Use AWS Encryption SDK. Choose SSE-KMS when you need auditability and key control; SSE-S3 for everything else."},
+
+{q:"What is SSE-KMS and when is it preferred over SSE-S3?",tag:"scenario",
+tip:"SSE-KMS adds: CloudTrail logs, key rotation control, cross-account key sharing.",
+options:["SSE-KMS is identical to SSE-S3 but applied only to objects larger than 1GB","SSE-KMS uses KMS for key management — providing key rotation control, CloudTrail audit logs for every decryption, and fine-grained key access policies. Choose it when compliance requires proof of key management and access auditability","SSE-KMS is a client-side encryption method where you generate the KMS key locally","SSE-KMS is only available for objects in the Glacier storage class"],
+correct:1,
+explanation:"SSE-KMS key advantages over SSE-S3: Auditability — every S3:GetObject triggers a KMS Decrypt API call logged in CloudTrail. You can prove who accessed what data and when. Key control — create per-bucket or per-environment keys. Disable a KMS key to instantly revoke access to all objects encrypted with it. Key rotation — automatic annual rotation or on-demand. Cross-account — share a KMS key with another account to give them S3 access. Compliance — HIPAA, SOC2, PCI-DSS, FedRAMP require demonstrable key management. Cost: KMS charges ~$0.03 per 10,000 API calls — for high-throughput buckets, this adds up. Use SSE-S3 for non-compliance data to avoid KMS costs."},
+
+{q:"How do you log and audit all access to an S3 bucket?",tag:"scenario",
+tip:"Two options serve different purposes — use both for full coverage.",
+options:["Enable CloudWatch Container Insights — it automatically captures all S3 API calls","S3 access cannot be logged — use VPC Flow Logs to capture network-level traffic instead","Use S3 Server Access Logging (detailed per-request logs delivered to a separate bucket) and/or AWS CloudTrail (captures S3 API calls with identity, time, and source IP) stored in S3 or CloudWatch Logs","Install a monitoring agent on the S3 service endpoint using Systems Manager"],
+correct:2,
+explanation:"Two complementary logging tools: S3 Server Access Logging — detailed logs of every request to the bucket: requester, bucket, key, action, HTTP status, bytes transferred. Delivered to a separate logging bucket within a few hours. Best for: access pattern analysis, billing verification, troubleshooting 403/404 errors. CloudTrail — records management-plane API calls (CreateBucket, PutBucketPolicy, DeleteBucket) AND data-plane events (GetObject, PutObject, DeleteObject) if you enable S3 data event logging. Best for: security auditing, compliance (who accessed/deleted what), incident investigation. Use Athena to query both log types efficiently."},
+
+{q:"What happens if you try to create a bucket with a name that already exists, and what are S3 bucket naming rules?",tag:"scenario",
+tip:"Bucket names must be globally unique — across ALL AWS accounts worldwide.",
+options:["A new bucket is created in your account with the same name — names are unique per account, not globally","AWS appends a random suffix to make it unique and notifies you of the actual bucket name","Bucket creation fails immediately with an error — bucket names must be globally unique across all AWS accounts and regions. Rules: 3-63 chars, lowercase letters/numbers/hyphens only, start/end with letter or number","The bucket is created but flagged as 'pending' until the naming conflict is resolved"],
+correct:2,
+explanation:"S3 bucket naming rules (all must be met): Globally unique — if 'my-bucket' exists anywhere in AWS worldwide, no one else can create it. Length — 3 to 63 characters. Characters — lowercase letters (a-z), numbers (0-9), hyphens (-). No uppercase, underscores, or special characters. Format — must start and end with a letter or number (not a hyphen). No IP address format — cannot look like 192.168.1.1. No 'xn--' prefix (reserved for international domain names). Practical tip: prefix with your organization name or account ID (mycompany-prod-data-lake-2024) to ensure uniqueness and make buckets identifiable."}
+]}
+];
+
+var currentSection=0,current=0;
+var sectionAnswers=sections.map(function(s){return new Array(s.questions.length).fill(null);});
+var tagMeta={
+  core:{label:'Core',cls:'tag-core'},
+  security:{label:'Security',cls:'tag-security'},
+  data:{label:'Data Mgmt',cls:'tag-data'},
+  perf:{label:'Performance',cls:'tag-perf'},
+  scenario:{label:'Scenario',cls:'tag-scenario'}
+};
+
+function switchSection(idx){
+  currentSection=idx;current=0;
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',i===idx);});
+  render();
+}
+
+function render(){
+  var sec=sections[currentSection];
+  var q=sec.questions[current];
+  var answers=sectionAnswers[currentSection];
+  var ans=answers[current];
+  var isAnswered=ans!==null;
+  var total=sec.questions.length;
+  var tm=tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width=((current+1)/total*100)+'%';
+  document.getElementById('progressText').textContent=(current+1)+' / '+total;
+
+  document.getElementById('dotsNav').innerHTML=sec.questions.map(function(_,i){
+    var cls='dot';
+    if(i===current)cls+=' active current';
+    else if(answers[i]!==null)cls+=' answered';
+    return '<div class="'+cls+'" onclick="goTo('+i+')"></div>';
+  }).join('');
+
+  var tipHtml=q.tip?'<div class="tip-label">&#128161; Quick Tip</div><div class="tip-box">'+q.tip+'</div>':'';
+
+  var optionsHtml=q.options.map(function(opt,i){
+    var cls='option',tag='';
+    if(isAnswered){
+      cls+=' locked';
+      if(i===q.correct){cls+=' correct';tag='<span class="option-tag tag-correct">&#10003; CORRECT</span>';}
+      else if(i===ans){cls+=' wrong';tag='<span class="option-tag tag-wrong">&#10007; WRONG</span>';}
+    }
+    return '<div class="'+cls+'" onclick="selectAnswer('+i+')"><div class="option-dot"></div><span class="option-label">'+opt+'</span>'+tag+'</div>';
+  }).join('');
+
+  var explanationHtml=isAnswered?'<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">'+q.explanation+'</div></div>':'';
+  var isLast=current===total-1;
+  var allAnswered=answers.every(function(a){return a!==null;});
+  var nextBtn=(isLast&&allAnswered)?'<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>':'<button class="btn btn-next" onclick="goNext()" '+((!isAnswered)?'disabled':'')+'>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card">'+
+      '<div class="q-number">Question '+(current+1)+' of '+total+' <span class="q-tag '+tm.cls+'">'+tm.label+'</span></div>'+
+      tipHtml+
+      '<div class="question">'+q.q+'</div>'+
+      '<div class="options">'+optionsHtml+'</div>'+
+      explanationHtml+
+      '<div class="nav-row">'+
+        '<button class="btn btn-back" onclick="goBack()" '+(current===0?'disabled':'')+'>&#8592; Back</button>'+
+        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>'+
+        nextBtn+
+      '</div>'+
+    '</div>';
+}
+
+function selectAnswer(i){if(sectionAnswers[currentSection][current]!==null)return;sectionAnswers[currentSection][current]=i;render();}
+function goNext(){if(current<sections[currentSection].questions.length-1){current++;render();}}
+function goBack(){if(current>0){current--;render();}}
+function goTo(i){current=i;render();}
+function resetSection(){sectionAnswers[currentSection]=new Array(sections[currentSection].questions.length).fill(null);current=0;render();}
+
+function showResults(){
+  var sec=sections[currentSection];
+  var answers=sectionAnswers[currentSection];
+  var score=answers.filter(function(a,i){return a===sec.questions[i].correct;}).length;
+  var total=sec.questions.length;
+  var pct=Math.round(score/total*100);
+  var msg=pct===100?'&#127942; Flawless! S3 certified!':pct>=70?'&#127919; Strong storage knowledge!':'&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card result-screen">'+
+      '<div class="result-score">'+score+'/'+total+'</div>'+
+      '<div class="result-label">SCORE &middot; '+sec.label.toUpperCase()+' &middot; '+pct+'%</div>'+
+      '<div class="result-msg">'+msg+'</div>'+
+      '<div class="result-list">'+
+        sec.questions.map(function(q,i){
+          var icon=answers[i]===q.correct?'&#9989;':'&#10060;';
+          var label=q.q.length>48?q.q.slice(0,48)+'&hellip;':q.q;
+          return '<div class="result-item"><span style="font-size:15px">'+icon+'</span><span class="q-tag '+tagMeta[q.tag].cls+'" style="font-size:9px">'+tagMeta[q.tag].label+'</span>Q'+(i+1)+': '+label+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>'+
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">&#8635; Try Again</button>'+
+    '</div>';
+  document.getElementById('dotsNav').innerHTML='';
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressText').textContent=score+' / '+total+' correct';
+}
+
+function reviewAnswers(){current=0;render();}
+render();
+</script>
+</body>
+</html>

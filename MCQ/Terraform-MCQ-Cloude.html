@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terraform Interview Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+	--bg: #eaf4ff;          /* light blue background */
+	--card: #ffffff;       /* clean white cards */
+	--border: #cfe3ff;     /* soft blue border */
+	--accent: #3b82f6;     /* primary blue */
+	--accent2: #60a5fa;    /* secondary blue */
+	--correct: #10b981;    /* green (kept clean) */
+	--wrong: #ef4444;      /* red (kept clean) */
+	--text: #0f172a;       /* dark text for readability */
+	--muted: #64748b;      /* soft gray-blue */
+    --highlight: rgba(168,255,120,0.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(129,140,248,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(79,70,229,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .tab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:8px 18px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .tab:hover{border-color:rgba(129,140,248,0.4);color:var(--text);}
+  .tab.active{background:rgba(129,140,248,0.1);border-color:rgba(129,140,248,0.5);color:var(--accent);}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-basic    {background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.3);color:#818cf8;}
+  .tag-cmd      {background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8;}
+  .tag-state    {background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399;}
+  .tag-inter    {background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24;}
+  .tag-advanced {background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;}
+  .tag-scenario {background:rgba(255,77,109,0.12); border:1px solid rgba(255,77,109,0.3); color:#ff4d6d;}
+  .tag-tricky   {background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.3);color:#f472b6;}
+  .code-block{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:12px;color:#94a3b8;line-height:1.6;overflow-x:auto;}
+  .code-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(129,140,248,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(129,140,248,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(129,140,248,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(129,140,248,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(129,140,248,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(79,70,229,0.08);border:1px solid rgba(79,70,229,0.25);color:#6366f1;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(79,70,229,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">IaC &amp; DevOps Prep</div>
+  <h1>Terraform <span>Quiz</span></h1>
+  <p class="subtitle">// 40 questions &middot; Basic &middot; Intermediate &middot; Advanced &middot; Scenarios</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Basic (1&ndash;10)</button>
+    <button class="tab" onclick="switchSection(1)">Intermediate (11&ndash;20)</button>
+    <button class="tab" onclick="switchSection(2)">Advanced (21&ndash;30)</button>
+    <button class="tab" onclick="switchSection(3)">&#128293; Scenarios &amp; Tricky (31&ndash;40)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-basic">Basic</span>
+    <span class="legend-item tag-cmd">Commands</span>
+    <span class="legend-item tag-state">State</span>
+    <span class="legend-item tag-inter">Intermediate</span>
+    <span class="legend-item tag-advanced">Advanced</span>
+    <span class="legend-item tag-scenario">&#128293; Scenario</span>
+    <span class="legend-item tag-tricky">Tricky</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections=[
+{label:"Basic Concepts",questions:[
+{q:"What is Terraform?",tag:"basic",
+code:null,
+options:["A container orchestration platform developed by Google for managing Kubernetes clusters","An open-source Infrastructure as Code tool by HashiCorp that lets you define and provision cloud infrastructure using declarative code files","A CI/CD pipeline tool that automates software builds, tests, and deployments","A configuration management tool like Ansible that installs software on existing servers"],
+correct:1,
+explanation:"Terraform is an open-source IaC tool by HashiCorp. You write .tf files describing your desired infrastructure (EC2 instances, VPCs, databases), and Terraform figures out how to create, update, or delete resources to match that desired state. It works across 1000+ providers — AWS, Azure, GCP, Kubernetes, GitHub, and more."},
+
+{q:"What is Infrastructure as Code (IaC)?",tag:"basic",
+code:null,
+options:["Writing application code that runs on cloud infrastructure","The process of managing and provisioning infrastructure through machine-readable code files — enabling version control, automation, and repeatable deployments","A method of monitoring cloud infrastructure using code-based dashboards","Embedding infrastructure details (region, instance type) as comments in application source code"],
+correct:1,
+explanation:"IaC treats infrastructure like software: stored in Git, reviewed via pull requests, tested, and deployed automatically. Benefits: version history (who changed what, when), repeatability (create identical environments on demand), reduced human error (no clicking in consoles), and disaster recovery (rebuild everything from code). Terraform, CloudFormation, and Pulumi are popular IaC tools."},
+
+{q:"What language are Terraform configuration files written in, and what is their extension?",tag:"basic",
+code:null,
+options:["YAML (.yml) — the same language used by Kubernetes and Docker Compose","JSON (.json) — parsed directly by the Terraform CLI","HCL — HashiCorp Configuration Language (.tf) — a human-readable declarative language designed for Terraform","Python (.py) — using the Pulumi framework as a Terraform alternative"],
+correct:2,
+explanation:"HCL (HashiCorp Configuration Language) is purpose-built for Terraform. It's declarative (you describe WHAT you want, not HOW to do it), human-readable, and supports comments. Files end in .tf (main configs) or .tfvars (variable values). Terraform also accepts JSON (.tf.json) but HCL is standard. A project typically has: main.tf (resources), variables.tf (input vars), outputs.tf (outputs), providers.tf (provider config)."},
+
+{q:"What is a Terraform Provider?",tag:"basic",
+code:'provider "aws" {\n  region = "ap-south-1"\n}',
+options:["A Terraform module that provides reusable infrastructure patterns","A plugin that enables Terraform to interact with a specific cloud platform or service (AWS, Azure, GCP, Kubernetes) via that platform's APIs","A backend configuration that provides remote state storage for team collaboration","A Terraform function that provides computed values during resource creation"],
+correct:1,
+explanation:"Providers are plugins that translate Terraform's resource definitions into API calls for a specific platform. Each provider maintains its own resources: the AWS provider knows how to create aws_instance, aws_s3_bucket, etc. Providers are declared in providers.tf, downloaded via terraform init from the Terraform Registry, and versioned to ensure reproducibility."},
+
+{q:"What is a Resource in Terraform?",tag:"basic",
+code:'resource "aws_instance" "web" {\n  ami           = "ami-12345"\n  instance_type = "t2.micro"\n}',
+options:["A reusable Terraform module stored in the Terraform Registry","A data source that fetches existing infrastructure details from a provider","A block in a .tf file that represents a specific piece of infrastructure to be created and managed by Terraform","A variable definition that parameterizes infrastructure configurations"],
+correct:2,
+explanation:"Resources are the core building blocks of Terraform. Each resource block has a type (aws_instance), a local name (web), and configuration arguments. Terraform creates the actual infrastructure object and stores its state. The syntax resource 'TYPE' 'NAME' creates a unique address (aws_instance.web) used to reference this resource elsewhere in your configuration."},
+
+{q:"What does terraform init do?",tag:"cmd",
+code:"$ terraform init",
+options:["Creates all resources defined in .tf files and updates the state file","Shows a preview of what Terraform will create, change, or destroy","Initializes the working directory — downloads provider plugins, configures the backend, and prepares the environment for other commands","Validates that .tf files have correct syntax and valid configurations"],
+correct:2,
+explanation:"terraform init is always the first command run in a new or cloned Terraform project. It: (1) Downloads the required provider plugins (e.g., hashicorp/aws v5.0) into .terraform/providers/. (2) Configures the backend (local or remote state). (3) Installs any required modules. Run it after adding new providers, changing backend config, or cloning a repo. It's safe to run multiple times — idempotent."},
+
+{q:"What does terraform plan do?",tag:"cmd",
+code:"$ terraform plan",
+options:["Applies all changes immediately — creates, updates, and deletes resources","Permanently destroys all resources managed by the current Terraform state","Generates an execution plan showing exactly what Terraform will create, modify, or destroy — without making any actual changes","Validates .tf file syntax and checks for configuration errors only"],
+correct:2,
+explanation:"terraform plan is your preview before committing. It reads .tf files and current state, calls provider APIs to get real resource states, computes the diff, and shows: + (create), ~ (update in-place), - (destroy), -/+ (destroy and recreate). Always review the plan carefully before applying. In CI/CD pipelines, the plan output is often posted as a PR comment for team review before approval to apply."},
+
+{q:"What does terraform apply do?",tag:"cmd",
+code:"$ terraform apply",
+options:["Only validates configuration — no infrastructure changes are made","Shows the execution plan but requires a separate approve command to execute","Executes the Terraform plan — creates, updates, or deletes infrastructure resources as needed and updates the state file","Rolls back the last set of infrastructure changes to the previous state"],
+correct:2,
+explanation:"terraform apply executes the planned changes. It first shows the plan and prompts for confirmation (yes/no) unless --auto-approve is used. After execution, it updates terraform.tfstate with the new resource details. In CI/CD, --auto-approve is common after a plan has been reviewed and approved. If apply fails mid-way, Terraform saves partial state — you can re-run apply to continue from where it left off."},
+
+{q:"What does terraform destroy do?",tag:"cmd",
+code:"$ terraform destroy",
+options:["Removes a single resource from state without deleting the actual cloud resource","Rolls back the last terraform apply operation to the previous configuration","Deletes all resources managed by the current Terraform configuration and clears the state file","Marks resources as tainted so they are recreated on the next apply"],
+correct:2,
+explanation:"terraform destroy is the reverse of apply — it deletes all resources tracked in the current state file. Like apply, it shows a plan first and requires confirmation. Use cases: tearing down dev/test environments to save costs, cleaning up after experiments. For production, add lifecycle { prevent_destroy = true } to critical resources to protect against accidental destruction. Can also use terraform destroy -target=resource_type.name to destroy a specific resource."},
+
+{q:"What is Terraform State?",tag:"state",
+code:"# terraform.tfstate (JSON file)",
+options:["A Git branch that stores the history of all Terraform configuration changes","A read-only snapshot of cloud infrastructure used for comparison but never modified by Terraform","A JSON file (terraform.tfstate) that records the current state of all managed resources — mapping config to real-world infrastructure IDs and attributes","An IAM policy that controls which team members can run terraform apply"]
+,correct:2,
+explanation:"State is Terraform's memory. It maps resource names in your .tf files to real infrastructure IDs (e.g., aws_instance.web → i-0abc123def). Terraform uses state to: determine what already exists (to avoid re-creating), plan diffs (compare desired state vs current state), and track dependencies. By default it's a local terraform.tfstate file — but for teams, always use remote state (S3, Terraform Cloud) to share state safely."}
+]},
+
+{label:"Intermediate",questions:[
+{q:"What is Remote State in Terraform and why is it important for teams?",tag:"state",
+code:'backend "s3" {\n  bucket = "my-tf-state"\n  key    = "prod/state.tfstate"\n  region = "ap-south-1"\n}',
+options:["A Terraform feature that automatically backs up state to Git every hour","Remote State stores the terraform.tfstate file in a shared location (S3, Terraform Cloud, GCS) so all team members work from the same source of truth — preventing conflicts and state loss","A read-only copy of state stored in a second region for disaster recovery","Remote State is a Terraform Cloud-only feature not available in open-source Terraform"],
+correct:1,
+explanation:"With local state, each team member has their own state file — causing conflicts, overwriting each other's changes, and losing track of resources. Remote State centralizes state in a backend like S3. Configure it in the terraform block with backend 's3' {...}. Run terraform init after changing backend config — it migrates local state to remote. Key benefits: single source of truth, team collaboration, no state files committed to Git (they contain sensitive data)."},
+
+{q:"What is State Locking in Terraform?",tag:"state",
+code:"# DynamoDB table: LockID (String, Primary Key)",
+options:["Encrypting the state file to prevent unauthorized access to sensitive resource attributes","A read-only mode that prevents any changes to state during a terraform plan operation","A mechanism that prevents multiple concurrent Terraform runs from modifying state simultaneously — typically implemented with DynamoDB when using S3 backend","A Terraform Cloud feature that locks workspaces during active runs"],
+correct:2,
+explanation:"Without locking, two team members running terraform apply simultaneously could corrupt the state file. State locking prevents this: when a Terraform operation starts, it acquires a lock (DynamoDB item with the state file path as the key). Other runs see 'Error: state locked' and wait or fail. The lock is released when the operation completes. Setup: S3 backend + dynamodb_table = 'terraform-locks'. The DynamoDB table needs a LockID primary key (String type)."},
+
+{q:"What are Terraform Input Variables?",tag:"inter",
+code:'variable "instance_type" {\n  description = "EC2 instance type"\n  type        = string\n  default     = "t2.micro"\n}',
+options:["Variables that Terraform automatically reads from cloud provider metadata at runtime","Hard-coded values embedded directly in resource blocks for better readability","Parameterized values that make configurations flexible and reusable — defined with the variable block and passed via .tfvars files, CLI flags, or environment variables","Output values returned after a Terraform apply that display resource attributes"],
+correct:2,
+explanation:"Variables let you write one Terraform config that works for multiple environments. Set values via: terraform.tfvars file (auto-loaded), -var='key=value' CLI flag, TF_VAR_name environment variables, or interactive prompt (if no default). Best practice: define all variables in variables.tf with types and descriptions. Use sensitive = true for secrets — Terraform won't show them in logs. Reference with var.instance_type in resource blocks."},
+
+{q:"What are Terraform Outputs?",tag:"inter",
+code:'output "instance_ip" {\n  value       = aws_instance.web.public_ip\n  description = "Public IP of web server"\n}',
+options:["Input values passed to Terraform before running apply to configure resources","Log messages that Terraform prints during apply to show progress and errors","Values exposed after terraform apply that display important resource attributes — used for referencing values between modules or displaying key information","Configuration blocks that define the format of the terraform.tfstate file"],
+correct:2,
+explanation:"Outputs are Terraform's return values. After apply, they're printed to the terminal and stored in state. Key uses: (1) Display important info after apply (load balancer DNS, EC2 IP). (2) Pass values between modules — a child module's output becomes the parent's data. (3) Used by terraform output command to retrieve values programmatically in CI/CD. Mark sensitive = true for passwords/tokens to suppress them from CLI output."},
+
+{q:"What are Terraform Modules?",tag:"inter",
+code:'module "vpc" {\n  source = "./modules/vpc"\n  cidr   = "10.0.0.0/16"\n}',
+options:["Terraform plugins that extend provider functionality with new resource types","External tools that Terraform calls to handle configuration management tasks","Reusable, self-contained Terraform configurations — like functions in programming — that encapsulate resources and can be called multiple times with different inputs","Terraform workspaces that separate infrastructure across different environments"],
+correct:2,
+explanation:"Modules are the primary mechanism for code reuse in Terraform. A module is just a directory with .tf files. Sources: local path (./modules/vpc), Terraform Registry (hashicorp/vpc/aws), Git repo (git::https://...). Benefits: DRY (Don't Repeat Yourself), consistent standards across teams, tested components. Large organizations build internal module registries — teams use approved modules instead of writing raw resources, ensuring security and compliance standards are met."},
+
+{q:"What does terraform fmt do?",tag:"cmd",
+code:"$ terraform fmt -recursive",
+options:["Formats and standardizes Terraform code to the canonical HCL style — consistent indentation, spacing, and alignment","Validates that all resource configurations are syntactically correct and provider arguments are valid","Generates formatted documentation from .tf file comments and outputs","Checks that the current state file matches the actual infrastructure resources"],
+correct:0,
+explanation:"terraform fmt rewrites .tf files to the canonical HCL formatting style defined by HashiCorp: 2-space indentation, aligned = signs, consistent spacing. Run it before committing code. Add terraform fmt --check to CI pipelines to fail PRs with unformatted code. Use -recursive to format all subdirectories. Most editors (VS Code with HashiCorp extension) run fmt automatically on save."},
+
+{q:"What does terraform validate do?",tag:"cmd",
+code:"$ terraform validate",
+options:["Checks that actual cloud resources match the state file — detecting infrastructure drift","Shows a plan of what Terraform will create but validates cost estimates before applying","Checks .tf files for syntactic correctness and valid provider configurations without accessing any remote services or state","Downloads and validates the integrity of all provider plugins"],
+correct:2,
+explanation:"terraform validate checks: HCL syntax (brackets, quotes, commas), required arguments for resources (e.g., ami is required for aws_instance), valid attribute types, and variable references. It does NOT check: whether the AMI exists, if you have IAM permissions, or if resources can actually be created. Run it in CI before plan to catch obvious config errors early. Unlike plan, it doesn't need provider credentials or network access."},
+
+{q:"What is the difference between count and for_each in Terraform?",tag:"inter",
+code:'# count\nresource "aws_instance" "web" {\n  count = 3\n}\n# for_each\nresource "aws_s3_bucket" "b" {\n  for_each = toset(["dev","prod"])\n  bucket   = each.key\n}',
+options:["count creates named resources; for_each creates numbered resources","They are identical — count and for_each are interchangeable aliases in Terraform","count takes a number to create N identical resources; for_each takes a map or set to create resources with unique identifiers — for_each is preferred when resources have distinct configurations","count is for AWS resources; for_each is for GCP and Azure resources only"],
+correct:2,
+explanation:"count creates resources indexed by number (aws_instance.web[0], [1], [2]). Problem: removing the middle element causes [1],[2] to shift, forcing recreation. for_each uses string keys (aws_s3_bucket.b['dev'], ['prod']) — stable identifiers. Removing 'dev' only destroys that bucket. Best practice: use for_each for most resources (more stable), count only when you truly need N identical copies. Access current item with each.key and each.value."},
+
+{q:"What is terraform refresh?",tag:"cmd",
+code:"$ terraform refresh",
+options:["Refreshes provider plugin versions to their latest releases","Clears the local cache and re-downloads all provider plugins from the registry","Updates the state file to match the actual current state of real infrastructure — without making any changes to resources","Refreshes temporary AWS credentials in the state file when they expire"],
+correct:2,
+explanation:"terraform refresh queries all real infrastructure resources and updates the state file to reflect their current attributes — without making any changes. Use case: someone manually modified a resource in the console, and you want the state to reflect reality before planning. Note: as of Terraform 0.15+, plan and apply automatically refresh state, so explicit refresh is rarely needed. In some cases, terraform apply -refresh-only is the modern equivalent."},
+
+{q:"What is Dependency Management in Terraform?",tag:"inter",
+code:'resource "aws_subnet" "main" {\n  vpc_id = aws_vpc.main.id  # implicit dependency\n}',
+options:["Using external dependency managers like npm or pip to install Terraform providers","Manually ordering resources in .tf files so they are created in the right sequence","Terraform automatically detects implicit dependencies from resource references and builds a dependency graph — explicit depends_on is used for hidden dependencies","Using Terraform workspaces to separate dependencies between environments"],
+correct:2,
+explanation:"Terraform builds a directed acyclic graph (DAG) of all resources. When resource B references an attribute of resource A (e.g., vpc_id = aws_vpc.main.id), Terraform knows A must be created before B — this is an implicit dependency. For hidden dependencies (e.g., an EC2 instance that needs an IAM policy to exist, but the ARN isn't referenced), use depends_on = [aws_iam_role_policy.example]. Terraform parallelizes independent resources for faster applies."}
+]},
+
+{label:"Advanced",questions:[
+{q:"What are Terraform Backends?",tag:"advanced",
+code:'terraform {\n  backend "s3" {\n    bucket = "my-state-bucket"\n    key    = "terraform.tfstate"\n    region = "us-east-1"\n  }\n}',
+options:["Third-party services that run Terraform on a schedule like a cron job","Terraform providers for backend cloud services like databases and message queues","The configuration that defines where Terraform stores its state file — local (default) or remote (S3, GCS, Terraform Cloud, Azure Blob)","The internal compute engine Terraform uses to execute provider API calls"],
+correct:2,
+explanation:"The backend determines state storage and operation execution. Local backend stores state in terraform.tfstate on your machine. Remote backends (S3+DynamoDB, Terraform Cloud, GCS, Azure Blob) enable team collaboration with shared state and locking. Configure in the terraform block. Terraform Cloud backend also moves plan/apply execution to Terraform Cloud servers. Change backends by updating config and running terraform init -migrate-state."},
+
+{q:"What are Terraform Provisioners and when should you avoid them?",tag:"advanced",
+code:'resource "aws_instance" "web" {\n  # ...\n  provisioner "remote-exec" {\n    inline = ["sudo apt-get install -y nginx"]\n  }\n}',
+options:["Provisioners are the preferred way to run post-creation scripts in Terraform and should be used regularly","Provisioners are Terraform plugins that provision new provider types not available in the Registry","Provisioners execute scripts on resources after creation (local-exec runs locally, remote-exec runs on the resource) — but are considered a last resort because they break Terraform's declarative model and make plans less predictable","Provisioners are lifecycle hooks that run before resource destruction for cleanup"],
+correct:2,
+explanation:"Provisioners run scripts after resource creation (remote-exec via SSH) or on your local machine (local-exec). Problems: if the provisioner fails, the resource is marked tainted; they don't show in terraform plan; they make Terraform imperative. Better alternatives: bake software into AMIs with Packer, use cloud-init user data for EC2 boot scripts, or use Ansible after Terraform provisions infrastructure. Only use provisioners as a true last resort."},
+
+{q:"What is a Data Source in Terraform?",tag:"advanced",
+code:'data "aws_ami" "ubuntu" {\n  most_recent = true\n  owners      = ["099720109477"]\n  filter {\n    name   = "name"\n    values = ["ubuntu/images/hvm-ssd/ubuntu-*"]\n  }\n}',
+options:["A Terraform variable that reads values from an external database at runtime","A block that imports existing infrastructure into Terraform management and state","A read-only query that fetches data about existing infrastructure without creating or managing it — used to reference resources created outside Terraform","A Terraform output that exports data to external systems after apply"],
+correct:2,
+explanation:"Data sources let you query existing resources that Terraform doesn't manage. Examples: latest Ubuntu AMI ID (changes frequently), existing VPC created by another team, Route53 zone ID, secrets from Secrets Manager. Reference with data.aws_ami.ubuntu.id. Key distinction: data sources only READ — they never create or modify anything. Use them to avoid hardcoding values that might change (AMI IDs, account IDs, zone IDs)."},
+
+{q:"What does terraform import do?",tag:"advanced",
+code:"$ terraform import aws_instance.web i-0abc123def456",
+options:["Imports Terraform modules from the Terraform Registry into your local project","Imports provider plugins from a private registry instead of the public Terraform Registry","Brings an existing real-world resource (created manually or by another tool) into Terraform's state management without recreating it","Imports configuration from CloudFormation stacks and converts them to Terraform HCL"],
+correct:2,
+explanation:"terraform import associates an existing resource with a Terraform resource block — adding it to state. The workflow: (1) Write the resource block in .tf with matching config. (2) Run terraform import aws_instance.web i-0abc123456. (3) Run terraform plan — there should be no changes if config matches reality. Use cases: migrating manually-created resources to IaC, adopting Terraform in existing environments. Note: import only creates state entry — you must write the HCL config yourself (or use the new terraform import block in TF 1.5+)."},
+
+{q:"What is Infrastructure Drift in Terraform?",tag:"advanced",
+code:"$ terraform plan  # reveals drift",
+options:["When Terraform's .tf files are out of sync with a newer version of the provider","When two team members have conflicting changes in their local .tf files","When the actual state of cloud resources differs from what's recorded in Terraform's state file — typically caused by manual console changes or external automation","When the Terraform version used locally differs from the version used in CI/CD"],
+correct:2,
+explanation:"Drift happens when someone modifies infrastructure outside Terraform (manual console clicks, another automation tool, AWS auto-scaling changing something). Terraform detects drift by comparing state vs. real infrastructure during plan/apply. Terraform will show changes to bring reality back to desired state. Prevention: enforce IaC-only changes via SCPs/policies, use terraform apply -refresh-only to update state, and run regular drift detection in CI/CD pipelines."},
+
+{q:"How do you handle secrets and sensitive values in Terraform?",tag:"advanced",
+code:"# Never hardcode! Use:\nexport TF_VAR_db_password='secret'\n# Or: variable with sensitive=true",
+options:["Store secrets directly in .tf files and add them to .gitignore to prevent exposure","Use Terraform's built-in vault — secrets are automatically encrypted in the state file and never logged","Use environment variables (TF_VAR_*), mark variables as sensitive = true, use AWS Secrets Manager data sources, or HashiCorp Vault — never hardcode secrets in .tf files or .tfvars committed to Git","Secrets don't need special handling — Terraform encrypts all state file contents automatically"],
+correct:2,
+explanation:"Secret management in Terraform: (1) Never hardcode in .tf files — they go to Git. (2) sensitive = true in variable blocks masks values in plan/apply output. (3) Use TF_VAR_password env vars for CI/CD. (4) Use data 'aws_secretsmanager_secret_version' to fetch secrets at runtime from Secrets Manager. (5) Consider HashiCorp Vault provider for enterprise secret management. Warning: sensitive values still appear in state file — encrypt state at rest (S3 SSE) and restrict access."},
+
+{q:"What is Terraform Cloud?",tag:"advanced",
+options:["A cloud provider like AWS or Azure that Terraform can deploy resources to","An open-source self-hosted version of Terraform with a web UI for plan visualization","A SaaS platform by HashiCorp that provides remote state storage, remote plan/apply execution, team collaboration, policy enforcement (Sentinel), and VCS integration — with free and paid tiers","A Terraform CLI command that deploys configurations to any cloud provider"],
+correct:2,
+explanation:"Terraform Cloud (TFC) is HashiCorp's managed service. Key features: Remote state with encryption and access controls, Remote runs (plan/apply on TFC's infrastructure — not your machine), VCS integration (GitHub/GitLab PR triggers automatic plans), Sentinel policies (policy as code for compliance guardrails), cost estimation (preview resource costs before apply), and private module registry. Free tier available. Alternative: Terraform Enterprise (self-hosted, on-prem version)."},
+
+{q:"What are Terraform Workspaces?",tag:"advanced",
+code:"$ terraform workspace new dev\n$ terraform workspace select prod",
+options:["Isolated project directories that each contain separate provider configurations","Terraform Cloud features that provide shared development environments for teams","Named state file instances within a single backend configuration — allowing multiple independent state files (e.g., dev, staging, prod) from the same .tf files","Terraform modules that workspace-specific variables and configurations"],
+correct:2,
+explanation:"Workspaces let you use the same .tf configuration with separate state files. terraform workspace new dev creates a new workspace with empty state. Switch with terraform workspace select prod. Access current workspace in config: terraform.workspace. Practical use: the same VPC config creates a small dev VPC and a larger prod VPC using different .tfvars per workspace. Limitation: workspaces share the same backend — for truly isolated environments, separate backends per environment is often better."},
+
+{q:"What is the lifecycle block in Terraform?",tag:"advanced",
+code:'resource "aws_db_instance" "main" {\n  lifecycle {\n    prevent_destroy = true\n    ignore_changes  = [password]\n  }\n}',
+options:["A block that defines how long a resource lives before automatic expiration and deletion","A cron-like scheduler that defines when Terraform should run plan and apply automatically","A configuration block on resources that customizes creation/destruction behavior: prevent_destroy (block destruction), create_before_destroy (zero-downtime replacement), and ignore_changes (don't manage specific attributes)","A block that specifies the lifecycle of the Terraform state file (rotation, backup, archival)"],
+correct:2,
+explanation:"lifecycle meta-arguments customize resource behavior: prevent_destroy = true — terraform destroy will error if this resource would be destroyed (protect production databases). create_before_destroy = true — creates replacement resource before destroying old one (for zero-downtime changes). ignore_changes = [tags, user_data] — Terraform ignores drift in listed attributes (useful when external systems manage those attributes). replace_triggered_by — force replacement when another resource changes."},
+
+{q:"What is the depends_on meta-argument?",tag:"advanced",
+code:'resource "aws_instance" "app" {\n  depends_on = [aws_iam_role_policy.app_policy]\n}',
+options:["An argument that specifies which Terraform version this configuration requires","A block that imports external Terraform modules as dependencies","An explicit dependency declaration that forces Terraform to create/destroy resources in a specific order — used when the dependency is not captured through resource references","A variable that depends on another variable's value — computed at plan time"],
+correct:2,
+explanation:"Terraform infers dependencies from references automatically. depends_on is needed for hidden dependencies — when resource B requires resource A to exist, but B's config doesn't reference any of A's attributes. Classic example: an EC2 instance that needs an IAM role policy to exist before it can start successfully, but the policy ARN isn't used in the instance config. Without depends_on, Terraform might create them in parallel, causing the instance to start before the policy exists."}
+]},
+
+{label:"Scenarios & Tricky",questions:[
+{q:"How do you safely update production infrastructure using Terraform?",tag:"scenario",
+options:["Run terraform apply --force immediately to push changes before anyone notices downtime","Edit the state file directly to pre-populate the expected outcome before running apply","Run terraform plan first and carefully review all changes, use lifecycle blocks to protect critical resources, test in a lower environment first, and integrate into a CI/CD pipeline with approval gates","Duplicate the entire production environment and switch DNS after testing"],
+correct:2,
+explanation:"Safe production workflow: (1) terraform plan — review every + (create), ~ (update), -/+ (replace) change. A -/+ means destroy-and-recreate — often unexpected and dangerous. (2) Use create_before_destroy for zero-downtime replacements. (3) Test changes in dev/staging with the same config first. (4) In CI/CD: PR triggers plan (reviewed by team), merge triggers apply with approval gate. (5) Use -target for surgical changes. (6) Keep a rollback plan — know what terraform destroy -target=X does."},
+
+{q:"How do you manage Terraform state safely in a team environment?",tag:"scenario",
+options:["Each team member maintains their own local state file and merges them weekly","Share the state file via Git — commit terraform.tfstate to the repository like any other file","Use remote backend (S3) for shared state, enable state locking (DynamoDB), use CI/CD pipelines for all applies (no local applies in prod), and never commit state files to Git","Use separate AWS accounts for each team member so state conflicts are impossible"],
+correct:2,
+explanation:"Team best practices: (1) Remote backend (S3 + DynamoDB) — one state file, properly locked. (2) Never commit .tfstate to Git — it contains sensitive data (passwords, keys). Add to .gitignore. (3) CI/CD-only applies for production — no one runs terraform apply locally in prod. (4) terraform plan in CI on every PR — comment the plan output for review. (5) Separate state files per environment (different S3 keys or workspaces). (6) Restrict who can run terraform apply in prod via IAM."},
+
+{q:"What happens if the Terraform state file is accidentally deleted?",tag:"scenario",
+options:["Terraform automatically reconstructs the state file from the actual cloud resources on the next run","Nothing — Terraform recreates missing state files from provider metadata automatically","Terraform loses track of existing resources and will attempt to recreate everything from scratch on next apply — potentially causing duplicate resources or errors","The cloud resources are automatically deleted since Terraform can no longer track them"],
+correct:1,
+explanation:"Without state, Terraform doesn't know what it manages — it treats everything as new. Next terraform apply would try to create all resources again, likely failing with 'resource already exists' errors or creating duplicates. Recovery: (1) If using remote backend with versioning (S3 versioning enabled) — restore the previous state version. (2) Use terraform import to manually re-import each resource back into a fresh state. (3) Prevention: enable S3 versioning, use Terraform Cloud (automatic state history)."},
+
+{q:"How do you integrate Terraform into a CI/CD pipeline?",tag:"scenario",
+options:["Run terraform apply in the pre-commit hook so infrastructure changes are applied before code is committed","Store Terraform state in Git and trigger apply on every push to any branch","Code PR opens -> pipeline runs terraform plan (output posted to PR) -> reviewer approves -> merge to main -> pipeline runs terraform apply automatically","Terraform cannot be integrated into CI/CD — it must be run manually by an operator"],
+correct:2,
+explanation:"Standard CI/CD integration: PR stage: checkout code, terraform init, terraform validate, terraform fmt --check, terraform plan (save output as artifact, post as PR comment). Merge stage: terraform apply (auto-approve or with approval gate). Tools: GitLab CI (.gitlab-ci.yml stages), GitHub Actions, Jenkins, Atlantis (specialized Terraform CD tool). Store credentials as CI/CD secrets (TF_VAR_*, AWS_ACCESS_KEY_ID). Use separate pipelines per environment (dev auto-apply, prod requires approval)."},
+
+{q:"Is Terraform mutable or immutable infrastructure?",tag:"tricky",
+options:["Terraform is purely immutable — it always destroys and recreates resources, never updating them in-place","Terraform is purely mutable — it always modifies existing resources in-place, never destroying them","Terraform is mutable by default (it updates resources in-place when possible) but supports immutable patterns — resources that can't be updated in-place trigger a destroy-and-recreate cycle (-/+ in plan)","Terraform is stateless and has no concept of mutable or immutable infrastructure"],
+correct:2,
+explanation:"Terraform's behavior depends on the resource and change type. Some changes are in-place (mutable): updating tags on an EC2 instance, changing a security group rule. Other changes require replacement (immutable pattern): changing an EC2 AMI ID or instance type forces destroy-then-create (-/+ in plan). You can enforce immutability with create_before_destroy = true (creates new first for zero downtime) or by using AMI-based deployment patterns where every deployment creates fresh instances from a new AMI."},
+
+{q:"Can Terraform handle configuration management tasks like installing software?",tag:"tricky",
+options:["Yes — Terraform's provisioner blocks are the recommended way to install software on servers","Yes — Terraform has built-in package management capabilities for all major Linux distributions","No — Terraform's job is infrastructure provisioning (creating/managing cloud resources), not configuration management. Use Ansible, Chef, or Puppet for software installation after infrastructure is provisioned","Yes — Terraform integrates directly with package managers via the package resource type"],
+correct:2,
+explanation:"Terraform and configuration management tools solve different problems. Terraform: 'create an EC2 instance in this VPC with these security groups.' Ansible: 'install Nginx, configure it, and deploy the application.' They complement each other: Terraform provisions infrastructure, then Ansible (or cloud-init, Chef, Puppet) configures it. The provisioner blocks exist but are a last resort — they're not idempotent and break Terraform's declarative model. Most teams run Ansible after Terraform as a separate pipeline step."},
+
+{q:"What is the difference between Terraform and AWS CloudFormation?",tag:"tricky",
+options:["Terraform uses YAML; CloudFormation uses HCL — the only difference is the configuration language","There is no meaningful difference — Terraform and CloudFormation are identical tools with different names","Terraform is multi-cloud (1000+ providers, HCL), open-source, with a rich ecosystem; CloudFormation is AWS-only, uses JSON/YAML, is tightly integrated with AWS services, and has no licensing cost for AWS resources","CloudFormation is faster and more reliable than Terraform for all use cases"],
+correct:2,
+explanation:"Key differences: Provider support — Terraform works with AWS, Azure, GCP, Kubernetes, Datadog, GitHub, etc. CloudFormation is AWS-only. Language — Terraform uses HCL (cleaner), CloudFormation uses JSON/YAML (verbose). State — Terraform manages its own state file; CloudFormation tracks stacks server-side. Ecosystem — Terraform Registry has thousands of modules; CloudFormation has the Serverless Application Repository. Cost — both free for the tooling; CloudFormation has no charges for AWS resources. Choose CloudFormation if AWS-only and want deep native integration; choose Terraform for multi-cloud or richer language features."},
+
+{q:"What is terraform taint and what has replaced it?",tag:"tricky",
+code:"# Old: terraform taint aws_instance.web\n# New: terraform apply -replace=aws_instance.web",
+options:["terraform taint permanently deletes a resource from both state and the cloud provider","terraform taint marks a resource as healthy and forces Terraform to skip it on next plan","terraform taint marks a resource for forced recreation on next apply — deprecated in Terraform 0.15+ and replaced by terraform apply -replace=RESOURCE","terraform taint is used to mark resources that should be ignored by Terraform forever"],
+correct:2,
+explanation:"terraform taint was used to mark a resource as 'tainted' — Terraform would destroy and recreate it on next apply. Deprecated in Terraform 0.15. The modern approach: terraform apply -replace=aws_instance.web (or -replace in the plan). Use cases: an EC2 instance has become unhealthy or misconfigured after manual changes, and you want Terraform to recreate it cleanly without modifying .tf files. The resource appears as -/+ in the plan — destroy old, create new."},
+
+{q:"What does the terraform state command do?",tag:"advanced",
+code:"$ terraform state list\n$ terraform state show aws_instance.web\n$ terraform state rm aws_instance.old",
+options:["terraform state is an alias for terraform apply that applies only state-related resources","terraform state is a read-only command that displays the current state file in human-readable format","A group of subcommands for inspecting and manipulating the Terraform state file: list (show all resources), show (details of one), mv (rename/move), rm (remove from state without deleting), pull/push (download/upload remote state)","terraform state validates that the state file is not corrupted and repairs any inconsistencies"],
+correct:2,
+explanation:"terraform state subcommands: list — lists all resources in state. show aws_instance.web — displays all attributes of a resource (useful for debugging). mv — rename resources or move them between modules (use when refactoring without destroying). rm — removes a resource from state WITHOUT deleting the real resource (use when you want Terraform to stop managing something). pull — downloads remote state to stdout. push — uploads local state to remote (dangerous, use carefully). These are surgical tools for state management — use with caution."},
+
+{q:"How do you handle multiple environments (dev, staging, prod) in Terraform?",tag:"scenario",
+options:["Create separate AWS accounts for each environment and use the same state file for all","Hardcode environment-specific values in different .tf files and comment out the unused environment","Use Terraform workspaces (separate state per workspace) or separate directories/state backends per environment, combined with environment-specific .tfvars files for different configurations","Create a single environment and use tags to logically separate dev, staging, and prod resources"],
+correct:2,
+explanation:"Two main approaches: (1) Workspaces — same .tf files, different state. terraform workspace new prod. Reference terraform.workspace in config for env-specific values. Simple but all envs share backend. (2) Separate directories (recommended for significant env differences) — dev/, staging/, prod/ each with their own terraform block pointing to different S3 keys. Use shared modules for common patterns. Each env has its own .tfvars: dev.tfvars (small instances), prod.tfvars (large, HA). Most teams use separate directories for production isolation."}
+]}
+];
+
+var currentSection=0,current=0;
+var sectionAnswers=sections.map(function(s){return new Array(s.questions.length).fill(null);});
+var tagMeta={
+  basic:{label:'Basic',cls:'tag-basic'},
+  cmd:{label:'Command',cls:'tag-cmd'},
+  state:{label:'State',cls:'tag-state'},
+  inter:{label:'Intermediate',cls:'tag-inter'},
+  advanced:{label:'Advanced',cls:'tag-advanced'},
+  scenario:{label:'Scenario',cls:'tag-scenario'},
+  tricky:{label:'Tricky',cls:'tag-tricky'}
+};
+
+function switchSection(idx){
+  currentSection=idx;current=0;
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',i===idx);});
+  render();
+}
+
+function render(){
+  var sec=sections[currentSection];
+  var q=sec.questions[current];
+  var answers=sectionAnswers[currentSection];
+  var ans=answers[current];
+  var isAnswered=ans!==null;
+  var total=sec.questions.length;
+  var tm=tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width=((current+1)/total*100)+'%';
+  document.getElementById('progressText').textContent=(current+1)+' / '+total;
+
+  document.getElementById('dotsNav').innerHTML=sec.questions.map(function(_,i){
+    var cls='dot';
+    if(i===current)cls+=' active current';
+    else if(answers[i]!==null)cls+=' answered';
+    return '<div class="'+cls+'" onclick="goTo('+i+')"></div>';
+  }).join('');
+
+  var codeHtml=q.code?'<div class="code-label">&#128196; Example</div><div class="code-block">'+q.code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>').replace(/ /g,'&nbsp;')+'</div>':'';
+
+  var optionsHtml=q.options.map(function(opt,i){
+    var cls='option',tag='';
+    if(isAnswered){
+      cls+=' locked';
+      if(i===q.correct){cls+=' correct';tag='<span class="option-tag tag-correct">&#10003; CORRECT</span>';}
+      else if(i===ans){cls+=' wrong';tag='<span class="option-tag tag-wrong">&#10007; WRONG</span>';}
+    }
+    return '<div class="'+cls+'" onclick="selectAnswer('+i+')"><div class="option-dot"></div><span class="option-label">'+opt+'</span>'+tag+'</div>';
+  }).join('');
+
+  var explanationHtml=isAnswered?'<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">'+q.explanation+'</div></div>':'';
+  var isLast=current===total-1;
+  var allAnswered=answers.every(function(a){return a!==null;});
+  var nextBtn=(isLast&&allAnswered)?'<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>':'<button class="btn btn-next" onclick="goNext()" '+((!isAnswered)?'disabled':'')+'>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card">'+
+      '<div class="q-number">Question '+(current+1)+' of '+total+' <span class="q-tag '+tm.cls+'">'+tm.label+'</span></div>'+
+      codeHtml+
+      '<div class="question">'+q.q+'</div>'+
+      '<div class="options">'+optionsHtml+'</div>'+
+      explanationHtml+
+      '<div class="nav-row">'+
+        '<button class="btn btn-back" onclick="goBack()" '+(current===0?'disabled':'')+'>&#8592; Back</button>'+
+        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>'+
+        nextBtn+
+      '</div>'+
+    '</div>';
+}
+
+function selectAnswer(i){if(sectionAnswers[currentSection][current]!==null)return;sectionAnswers[currentSection][current]=i;render();}
+function goNext(){if(current<sections[currentSection].questions.length-1){current++;render();}}
+function goBack(){if(current>0){current--;render();}}
+function goTo(i){current=i;render();}
+function resetSection(){sectionAnswers[currentSection]=new Array(sections[currentSection].questions.length).fill(null);current=0;render();}
+
+function showResults(){
+  var sec=sections[currentSection];
+  var answers=sectionAnswers[currentSection];
+  var score=answers.filter(function(a,i){return a===sec.questions[i].correct;}).length;
+  var total=sec.questions.length;
+  var pct=Math.round(score/total*100);
+  var msg=pct===100?'&#127942; Perfect! Terraform certified!':pct>=70?'&#127919; Strong IaC knowledge!':'&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card result-screen">'+
+      '<div class="result-score">'+score+'/'+total+'</div>'+
+      '<div class="result-label">SCORE &middot; '+sec.label.toUpperCase()+' &middot; '+pct+'%</div>'+
+      '<div class="result-msg">'+msg+'</div>'+
+      '<div class="result-list">'+
+        sec.questions.map(function(q,i){
+          var icon=answers[i]===q.correct?'&#9989;':'&#10060;';
+          var label=q.q.length>48?q.q.slice(0,48)+'&hellip;':q.q;
+          return '<div class="result-item"><span style="font-size:15px">'+icon+'</span><span class="q-tag '+tagMeta[q.tag].cls+'" style="font-size:9px">'+tagMeta[q.tag].label+'</span>Q'+(i+1)+': '+label+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>'+
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">&#8635; Try Again</button>'+
+    '</div>';
+  document.getElementById('dotsNav').innerHTML='';
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressText').textContent=score+' / '+total+' correct';
+}
+
+function reviewAnswers(){current=0;render();}
+render();
+</script>
+</body>
+</html>
