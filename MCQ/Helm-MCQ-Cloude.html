@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helm Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#f97316;--accent2:#c2410c;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(249,115,22,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(249,115,22,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(194,65,12,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .tab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:8px 18px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .tab:hover{border-color:rgba(249,115,22,0.4);color:var(--text);}
+  .tab.active{background:rgba(249,115,22,0.1);border-color:rgba(249,115,22,0.5);color:var(--accent);}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core   {background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);color:#f97316;}
+  .tag-cmd    {background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8;}
+  .tag-struct {background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399;}
+  .tag-tmpl   {background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;}
+  .tag-cicd   {background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24;}
+  .tag-adv    {background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.3);color:#f472b6;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .code-block{background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:12px;color:#94a3b8;line-height:1.7;overflow-x:auto;white-space:pre;}
+  .code-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(249,115,22,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(249,115,22,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(249,115,22,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(249,115,22,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(249,115,22,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(194,65,12,0.08);border:1px solid rgba(194,65,12,0.25);color:#ea580c;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(194,65,12,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Kubernetes Tooling Prep</div>
+  <h1>Helm <span>Package Manager</span> Quiz</h1>
+  <p class="subtitle">// 25 questions &middot; Core &middot; Commands &middot; Templating &middot; CI/CD &middot; Advanced</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core &amp; Commands (1&ndash;12)</button>
+    <button class="tab" onclick="switchSection(1)">Templating &amp; Structure (13&ndash;19)</button>
+    <button class="tab" onclick="switchSection(2)">Advanced &amp; CI/CD (20&ndash;25)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-cmd">Commands</span>
+    <span class="legend-item tag-struct">Structure</span>
+    <span class="legend-item tag-tmpl">Templating</span>
+    <span class="legend-item tag-cicd">CI/CD</span>
+    <span class="legend-item tag-adv">Advanced</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections = [
+{label:"Core & Commands", questions:[
+{q:"What is Helm in the Kubernetes ecosystem?",tag:"core",
+code:null,
+options:["A container runtime that replaces Docker for running Kubernetes Pods","A Kubernetes package manager that defines, installs, and manages applications using reusable templates called charts","A GitOps tool that automatically syncs Kubernetes manifests from Git to a cluster","A monitoring agent that tracks Helm chart deployments and resource usage"],
+correct:1,
+explanation:"Helm is often called the 'apt/yum for Kubernetes'. Without Helm, deploying even a simple app requires writing and managing many separate YAML files (Deployment, Service, ConfigMap, Ingress, ServiceAccount...). Helm bundles all of these into a single chart with configurable values, making deployments repeatable, versioned, and shareable. It's the de-facto standard for Kubernetes application packaging."},
+
+{q:"What is a Helm Chart?",tag:"core",
+code:"my-app/\n  Chart.yaml        # metadata\n  values.yaml       # default config\n  templates/        # K8s YAML templates\n    deployment.yaml\n    service.yaml",
+options:["A visual dashboard that charts Kubernetes resource usage over time","A collection of Kubernetes YAML templates and configuration files packaged together as a reusable deployment blueprint for an application","A Helm CLI command that generates deployment reports for installed releases","A Git branch strategy used when deploying Helm releases to multiple environments"],
+correct:1,
+explanation:"A Helm chart is a directory structure containing everything needed to deploy an application. templates/ contains Go-templated Kubernetes YAML files, values.yaml provides default configuration values that templates reference, and Chart.yaml defines the chart's identity (name, version, description). Charts can be shared via repositories (Artifact Hub has thousands) or stored privately. Think of a chart as an application's deployment blueprint that can be instantiated multiple times with different configs."},
+
+{q:"What is a Helm Release?",tag:"core",
+code:"# Same chart, two releases:\nhelm install myapp-dev ./mychart -f dev-values.yaml\nhelm install myapp-prod ./mychart -f prod-values.yaml",
+options:["A GitHub release that tags the version of a Helm chart in source control","A running instance of a Helm chart installed in a Kubernetes cluster — each installation of a chart creates a uniquely named release","A Helm changelog entry documenting what changed between chart versions","A packaged .tgz archive of a chart ready for upload to a Helm repository"],
+correct:1,
+explanation:"When you run helm install, Helm creates a release — a named, tracked instance of a chart in your cluster. The release has a name, a revision history, and associated Kubernetes resources. The key insight: you can install the same chart multiple times in the same cluster (even the same namespace) by giving each installation a different release name. This enables running separate dev/staging/prod environments from one chart definition. Helm stores release metadata as Kubernetes Secrets in the cluster."},
+
+{q:"What is the values.yaml file in a Helm chart?",tag:"struct",
+code:"# values.yaml\nreplicaCount: 2\nimage:\n  repository: nginx\n  tag: 1.25\nservice:\n  port: 80",
+options:["A YAML file that stores Kubernetes Secret values encrypted with KMS","A configuration file containing default values for chart templates — allowing customization without modifying the templates themselves","A Helm plugin configuration file that defines which Helm extensions to install","A required file that maps Helm release names to Kubernetes namespace assignments"],
+correct:1,
+explanation:"values.yaml is the customization interface of a Helm chart. Templates reference values using .Values.key syntax. The file ships with sensible defaults, but users can override them at install/upgrade time. Override priority (highest to lowest): --set key=value (CLI), -f custom-values.yaml (file), values.yaml (chart defaults). This lets the same chart serve different environments: dev uses small replicas and no persistence, prod uses large replicas with persistent storage — just different values files."},
+
+{q:"What does helm install do?",tag:"cmd",
+code:"helm install my-release bitnami/nginx\n  --namespace production\n  --values prod-values.yaml\n  --set image.tag=1.25",
+options:["Downloads and installs the Helm CLI binary on your local machine","Installs a Kubernetes cluster and deploys Helm into it as the package manager","Renders chart templates with provided values and deploys all resulting Kubernetes resources to the cluster, creating a new named release","Validates a chart's syntax and structure without deploying any resources"],
+correct:2,
+explanation:"helm install is the deployment command. It: (1) Loads the chart (local path, repo, or .tgz). (2) Merges values (chart defaults + -f files + --set overrides). (3) Renders Go templates into final Kubernetes YAML. (4) Submits resources to the Kubernetes API. (5) Creates a release record (stored as a Secret in the namespace). The release name (my-release) is used for all future interactions (upgrade, rollback, uninstall). Use --dry-run to preview without deploying."},
+
+{q:"What does helm upgrade do?",tag:"cmd",
+code:"# Update image version\nhelm upgrade my-release ./mychart \\\n  --set image.tag=2.0\n\n# Install if not exists\nhelm upgrade --install my-release ./mychart",
+options:["Upgrades the Helm CLI to its latest version on your local machine","Creates a completely new release — removing the existing one first then reinstalling","Updates an existing release with new chart version or configuration changes — incrementing the revision number while preserving the release history for rollback","Refreshes the Helm chart repository cache to discover newly published charts"],
+correct:2,
+explanation:"helm upgrade modifies an existing release without deleting it. Each upgrade increments the revision number (revision 1 = install, revision 2 = first upgrade, etc.). Helm computes the diff between old and new manifests and applies changes. The --install flag makes it idempotent — installs if the release doesn't exist, upgrades if it does. This is the standard pattern in CI/CD: helm upgrade --install my-app ./chart -f prod.yaml. The full revision history enables instant rollbacks."},
+
+{q:"What does helm rollback do?",tag:"cmd",
+code:"# List revision history\nhelm history my-release\n\n# Roll back to revision 2\nhelm rollback my-release 2\n\n# Roll back to previous revision\nhelm rollback my-release",
+options:["Permanently deletes the current release and reinstalls the chart from scratch","Rolls back changes to the chart's source YAML files in the Git repository","Reverts a release to a previous revision — restoring the exact Kubernetes resources and configuration from that revision","Rolls back the Kubernetes cluster version to match the Helm chart's minimum version requirement"],
+correct:2,
+explanation:"helm rollback restores a release to a specific previous revision. Helm stores full release state for each revision (the exact rendered manifests). When you rollback, Helm re-applies the old manifests — effectively a new revision that matches the old state. Example: revision 1 (v1 app) -> upgrade to revision 2 (v2 app, broken) -> rollback to revision 2 which re-applies revision 1's manifests -> now at revision 3 (identical to revision 1). This is why Helm is powerful for CI/CD: instant, reliable rollback without manual intervention."},
+
+{q:"What does helm uninstall do?",tag:"cmd",
+code:"# Remove a release\nhelm uninstall my-release\n\n# Keep release history\nhelm uninstall my-release --keep-history",
+options:["Removes the Helm CLI and all associated plugins from your machine","Marks a release as deprecated but keeps all Kubernetes resources running","Removes all Kubernetes resources associated with a release and deletes the release record from the cluster","Uninstalls a specific chart version from the Helm repository cache"],
+correct:2,
+explanation:"helm uninstall deletes all Kubernetes resources that were created as part of the release (Deployments, Services, ConfigMaps, etc.) and removes the release record from the cluster's Secret store. By default, the full history is purged — you cannot rollback after uninstall. Use --keep-history to preserve history (useful for auditing or re-installing with the same name). This is cleaner than manually running kubectl delete for each resource since Helm knows exactly what it created."},
+
+{q:"What is a Helm Repository?",tag:"core",
+code:"# Add a repository\nhelm repo add bitnami https://charts.bitnami.com/bitnami\n\n# Search for charts\nhelm search repo bitnami/postgresql\n\n# Install from repo\nhelm install my-db bitnami/postgresql",
+options:["A Git repository where your Kubernetes application source code and Helm charts are stored together","A private Docker registry that stores container images used by Helm chart templates","A storage server hosting packaged Helm charts (.tgz files) with an index.yaml — similar to Docker Hub but for charts","A Kubernetes namespace dedicated to storing Helm release history and metadata"],
+correct:2,
+explanation:"Helm repositories are HTTP servers hosting chart packages with an index.yaml listing available charts and versions. Artifact Hub (artifacthub.io) is the public discovery hub listing thousands of charts from many publishers (Bitnami, official project repos, community). Commands: helm repo add (register a repo), helm repo update (refresh cache), helm search repo (find charts), helm pull (download chart locally). For private repos: use ChartMuseum, Harbor, AWS ECR, GitHub Pages, or Azure Container Registry."},
+
+{q:"What does helm lint do?",tag:"cmd",
+code:"$ helm lint ./mychart\n\n==> Linting mychart\n[INFO] Chart.yaml: icon is recommended\n[ERROR] templates/: required value missing\n\nError: 1 chart(s) linted, 1 chart(s) failed",
+options:["Runs the Helm chart in a sandbox environment to test it before production deployment","Automatically fixes formatting errors in Helm chart YAML files","Validates a chart's structure, syntax, and best practices — reporting errors and warnings without deploying anything","Checks that all container images referenced in the chart exist in the configured registry"],
+correct:2,
+explanation:"helm lint is your pre-deployment quality check. It validates: required fields in Chart.yaml (apiVersion, name, version), valid YAML syntax in templates, correct use of template functions, required values are provided, and best practices (icon, description). Run it in CI before any deployment to catch issues early. Combined with helm template (renders output) and --dry-run (simulates API calls), you get confidence before touching production. Most CI pipelines run: lint -> template -> diff -> upgrade."},
+
+{q:"What does helm template do?",tag:"cmd",
+code:"$ helm template my-release ./mychart \\\n  --values prod-values.yaml\n\n# Output: rendered K8s YAML\n---\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: my-release-nginx",
+options:["Creates a reusable template from an existing running deployment in the cluster","Connects to the cluster and shows the diff between current and new chart versions","Renders chart templates locally into final Kubernetes YAML without connecting to a cluster or deploying anything — useful for debugging and GitOps","Downloads a chart template from a repository and saves it as a local starter project"],
+correct:2,
+explanation:"helm template is an offline rendering tool. It merges values into templates and outputs the final YAML that WOULD be applied to Kubernetes — without any cluster connection. Essential for: debugging template logic (see exactly what Kubernetes will receive), GitOps workflows (render manifests and commit to Git for ArgoCD/Flux to apply), code reviews (review rendered output in PRs), and piping to kubectl apply (helm template | kubectl apply -f -). Unlike --dry-run, helm template requires no cluster credentials."},
+
+{q:"What does helm package do?",tag:"cmd",
+code:"$ helm package ./mychart\nSuccessfully packaged chart and saved it to: mychart-1.2.3.tgz\n\n$ helm push mychart-1.2.3.tgz oci://registry.example.com/charts",
+options:["Installs all chart dependencies listed in Chart.yaml from their source repositories","Runs security scanning on a chart to identify vulnerabilities in referenced container images","Creates a versioned .tgz archive of a chart directory — ready for sharing or uploading to a Helm repository","Packages multiple Helm releases together for atomic multi-chart deployment operations"],
+correct:2,
+explanation:"helm package bundles a chart directory into a single .tgz archive named chart-name-version.tgz (e.g., mychart-1.2.3.tgz). The version comes from Chart.yaml. This packaged file can be: uploaded to a Helm repo (helm push, or drop into a ChartMuseum), shared directly (copy the .tgz), stored in CI artifacts, or downloaded with helm pull. In a release workflow: bump version in Chart.yaml -> helm package -> helm push to private registry -> helm upgrade in deployment pipeline."}
+]},
+
+{label:"Templating & Structure", questions:[
+{q:"What is the Chart.yaml file and what does it contain?",tag:"struct",
+code:"apiVersion: v2\nname: my-app\ndescription: My application chart\ntype: application\nversion: 1.2.3       # chart version\nappVersion: \"2.0.1\"  # app version\ndependencies:\n  - name: postgresql\n    version: \"12.x.x\"\n    repository: https://charts.bitnami.com/bitnami",
+options:["A YAML file that defines which Kubernetes namespaces the chart can be deployed into","The primary metadata file for a Helm chart — containing the chart name, version, description, type, and optional dependency declarations","A configuration file that maps chart values to environment-specific Kubernetes ConfigMaps","A schema validation file that enforces type constraints on values.yaml fields"],
+correct:1,
+explanation:"Chart.yaml is the identity file for every Helm chart. Required fields: apiVersion (v2 for Helm 3), name (chart name, must match directory), version (chart version — follows SemVer, changes every time chart structure changes). Important optional fields: appVersion (the version of the APPLICATION being packaged — different from chart version), description (shown in helm search), type (application or library), dependencies (sub-charts to install alongside). When you run helm install, Helm reads Chart.yaml to understand what it's dealing with."},
+
+{q:"What is Helm dependency management?",tag:"struct",
+code:"# Chart.yaml\ndependencies:\n  - name: mysql\n    version: \"9.x.x\"\n    repository: https://charts.bitnami.com/bitnami\n    condition: mysql.enabled\n\n# Install dependencies\nhelm dependency update ./mychart",
+options:["A feature that automatically updates Helm to its latest version when a newer release is detected","Helm's ability to declare other charts as dependencies — automatically installing them alongside your chart, like a database chart alongside an application chart","A locking mechanism that prevents two Helm operations from modifying the same release simultaneously","A chart versioning system that tracks which chart versions are compatible with which Kubernetes versions"],
+correct:1,
+explanation:"Helm dependency management lets your chart declare sub-charts it needs. Example: your app chart declares a dependency on bitnami/postgresql. When you install your chart, Helm automatically installs PostgreSQL too — with correct lifecycle ordering. Use helm dependency update to download dependencies into the charts/ subdirectory (generates Chart.lock for reproducible builds). The condition field (condition: mysql.enabled) lets users disable optional dependencies via values. This composability is how complex applications (app + DB + cache + monitoring) are packaged as one installable unit."},
+
+{q:"What are Helm Hooks?",tag:"adv",
+code:"# templates/pre-install-job.yaml\napiVersion: batch/v1\nkind: Job\nmetadata:\n  annotations:\n    \"helm.sh/hook\": pre-install,pre-upgrade\n    \"helm.sh/hook-weight\": \"-5\"\n    \"helm.sh/hook-delete-policy\": hook-succeeded",
+options:["Webhook configurations that notify external systems when a Helm release is created or deleted","Event listeners in Helm values.yaml that trigger custom actions when specific values are changed","Kubernetes resources annotated to execute at specific points in the Helm release lifecycle (pre-install, post-install, pre-upgrade, post-delete) — used for database migrations, health checks, and cleanup","Go functions in Helm templates that transform values before rendering YAML output"],
+correct:2,
+explanation:"Hooks let you inject actions at key lifecycle points. Common hook types: pre-install/pre-upgrade — run before resources are deployed (perfect for DB schema migrations, secret rotation). post-install/post-upgrade — run after deployment succeeds (smoke tests, notifications). pre-delete — cleanup tasks before uninstall. test — helm test runs these for integration testing. Hooks are regular Kubernetes resources (Jobs, Pods) with helm.sh/hook annotation. hook-weight controls execution order. hook-delete-policy controls cleanup (hook-succeeded deletes on success, before-hook-creation deletes before next run)."},
+
+{q:"What is the --set flag in Helm and when do you use it?",tag:"cmd",
+code:"# Simple value\nhelm install myapp ./chart --set replicaCount=3\n\n# Nested value\nhelm install myapp ./chart --set image.tag=v2.0\n\n# Array value\nhelm install myapp ./chart \\\n  --set ingress.hosts[0].host=example.com",
+options:["A Helm flag that configures which Kubernetes namespace the release is installed into","A flag that sets the chart's apiVersion field in Chart.yaml before installation","A command-line flag that overrides specific values from values.yaml at install/upgrade time without editing any files — highest priority override","A flag that sets resource limits and requests for all containers in the chart templates"],
+correct:2,
+explanation:"--set provides quick value overrides directly from the command line. It has the highest priority in the override hierarchy: --set > -f values-file.yaml > values.yaml defaults. Format: --set key=value, --set parent.child=value for nested, --set list[0]=value for arrays. Best practices: use -f values-file.yaml for many overrides (more readable, version-controllable), use --set only for simple one-off overrides or injecting CI-generated values like --set image.tag=$CI_COMMIT_SHA. Avoid using --set for secrets — use sealed-secrets or Vault instead."},
+
+{q:"What is Go templating in Helm?",tag:"tmpl",
+code:"# templates/deployment.yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: {{ .Release.Name }}-app\n  labels:\n    version: {{ .Values.image.tag | quote }}\nspec:\n  replicas: {{ .Values.replicaCount }}\n  {{- if .Values.autoscaling.enabled }}\n  # HPA handles scaling\n  {{- end }}",
+options:["A Helm-specific scripting language for writing deployment automation scripts","A JavaScript-based templating engine that generates Kubernetes YAML from React-style components","Go's text/template engine used by Helm to generate dynamic Kubernetes YAML — replacing placeholders with actual values and supporting conditionals, loops, and functions","A YAML anchoring syntax that Helm uses to share configuration blocks across multiple template files"],
+correct:2,
+explanation:"Helm uses Go's text/template package extended with the Sprig function library. Key syntax: {{ .Values.key }} inserts a value, {{ .Release.Name }} inserts release metadata, {{- if condition }} / {{- end }} for conditionals, {{- range .Values.list }} / {{- end }} for loops, | pipe function calls ({{ .Values.name | upper | quote }}). The - in {{- trims surrounding whitespace. Built-in objects: .Values (user config), .Release (name, namespace, revision), .Chart (Chart.yaml fields), .Capabilities (Kubernetes version). This makes one chart template work for any environment."},
+
+{q:"What are .Release and .Values objects in Helm templates?",tag:"tmpl",
+code:"# .Release provides release metadata:\n{{ .Release.Name }}       # release name\n{{ .Release.Namespace }}  # target namespace\n{{ .Release.Revision }}   # revision number\n\n# .Values provides user config:\n{{ .Values.image.tag }}   # from values.yaml\n{{ .Values.replicaCount }}",
+options:["System environment variables injected into Helm templates from the CI/CD runner","Kubernetes API objects that Helm queries to check existing cluster resources before deployment","Built-in Helm template objects: .Release provides metadata about the current release (name, namespace, revision), .Values provides the merged configuration values from values.yaml and overrides","Go standard library packages imported into Helm templates for string manipulation and math operations"],
+correct:2,
+explanation:".Release and .Values are the two most-used built-in Helm objects. .Release.Name is essential for generating unique resource names (prevents collisions when installing multiple releases in the same namespace): name: {{ .Release.Name }}-nginx. .Release.Namespace ensures resources land in the right namespace. .Values is your entire merged configuration — all values.yaml defaults plus user overrides. Combined: a Deployment named {{ .Release.Name }}-api with {{ .Values.replicaCount }} replicas running image {{ .Values.image.repository }}:{{ .Values.image.tag }} is fully dynamic and reusable."},
+
+{q:"What is the difference between Helm 2 and Helm 3?",tag:"adv",
+code:"# Helm 2 required Tiller in cluster:\nkubectl get pods -n kube-system | grep tiller\n# tiller-deploy-xxx   1/1   Running\n\n# Helm 3: no Tiller, client-only:\nhelm version\n# version.BuildInfo{Version:\"v3.12.0\"...}",
+options:["Helm 3 added support for multiple Kubernetes clusters while Helm 2 only supported single-cluster deployments","Helm 3 introduced the values.yaml file and chart repositories which did not exist in Helm 2","Helm 2 required a server-side component called Tiller (a security risk with cluster-admin privileges) — Helm 3 removed Tiller entirely, communicating directly with the Kubernetes API using the user's own credentials","Helm 3 changed the chart format from JSON to YAML while Helm 2 used HCL (HashiCorp Configuration Language)"],
+correct:2,
+explanation:"The Tiller removal is the defining change in Helm 3. In Helm 2, Tiller ran inside the cluster with broad permissions — a security nightmare (privilege escalation, multi-tenancy issues). Helm 3 eliminated Tiller: the Helm client talks directly to the Kubernetes API using YOUR kubeconfig credentials. This means Helm inherits your RBAC permissions — if you can't create Deployments, neither can Helm. Other Helm 3 improvements: release data stored as Secrets (not ConfigMaps), 3-way strategic merge for upgrades (comparing old manifest + cluster state + new manifest), namespaced releases, and improved CRD handling."}
+]},
+
+{label:"Advanced & CI/CD", questions:[
+{q:"How is Helm used in a CI/CD pipeline?",tag:"cicd",
+code:"# .gitlab-ci.yml example\ndeploy:\n  stage: deploy\n  script:\n    - helm repo add myrepo $HELM_REPO_URL\n    - helm upgrade --install myapp myrepo/myapp \\\n        --namespace production \\\n        --set image.tag=$CI_COMMIT_SHA \\\n        --values prod-values.yaml\n    - helm test myapp",
+options:["Helm replaces the CI server — it schedules pipeline stages and manages build artifacts","Helm is only used for local development; production deployments always use raw kubectl commands","Helm automates Kubernetes deployments in CI/CD pipelines — upgrading releases with new image tags on code push, providing rollback on failure, and maintaining deployment history","Helm CI/CD integration requires a dedicated Helm server running alongside Jenkins or GitLab"],
+correct:2,
+explanation:"Helm is the standard Kubernetes deployment tool in CI/CD. Typical pipeline: (1) Build stage: docker build + push, image tagged with $CI_COMMIT_SHA. (2) Test stage: unit tests, security scan. (3) Deploy stage: helm upgrade --install with --set image.tag=$CI_COMMIT_SHA. (4) Verify: helm test runs smoke tests. (5) On failure: automated helm rollback. The --install flag makes it idempotent (works for first deploy and all subsequent upgrades). Store Helm credentials and repo URLs as CI/CD secrets. Use separate pipelines or values files per environment."},
+
+{q:"What is the Helm rollback strategy and why is it valuable?",tag:"cicd",
+code:"# Check history\nhelm history myapp -n production\nREV  STATUS      CHART        DESCRIPTION\n1    superseded  myapp-1.0.0  Install complete\n2    superseded  myapp-1.1.0  Upgrade complete\n3    failed      myapp-1.2.0  Upgrade failed\n\n# Instant rollback\nhelm rollback myapp 2 -n production",
+options:["Helm rollback recreates the entire Kubernetes cluster from the previous Infrastructure as Code state","Helm rollback strategy means manually rewriting deployment YAML to match the previous version","Helm maintains a revision history for every release — each install/upgrade is a numbered revision. Rollback instantly re-applies a previous revision's manifests, making recovery from bad deployments fast and reliable","Helm rollback is only available in Helm 3 Enterprise and requires a paid HashiCorp license"],
+correct:2,
+explanation:"Helm's revision history is its killer feature for production safety. Every helm install (revision 1) and helm upgrade (revisions 2, 3...) is stored as a Kubernetes Secret containing the exact rendered manifests. When revision 3 breaks production: helm rollback myapp 2 immediately re-applies revision 2's resources — this itself creates revision 4 (identical to 2). The whole process takes seconds. In CI/CD: configure helm upgrade to automatically rollback on failure with --atomic (installs/upgrades atomically, rolling back on any failure). This makes deployments as safe as a feature flag toggle."},
+
+{q:"What is the Helm chart directory structure?",tag:"struct",
+code:"my-chart/\n  Chart.yaml          # required: metadata\n  values.yaml         # required: defaults\n  charts/             # sub-chart dependencies\n  templates/          # K8s manifest templates\n    deployment.yaml\n    service.yaml\n    ingress.yaml\n    _helpers.tpl      # reusable template snippets\n    NOTES.txt         # post-install instructions\n  .helmignore         # files to exclude",
+options:["A flat directory of YAML files with no required naming conventions or structure","A Docker-compose-style directory where each service has its own subdirectory with independent configuration","A standardized directory structure: Chart.yaml (metadata), values.yaml (defaults), templates/ (K8s manifest templates), charts/ (dependency sub-charts), and optional helper files","A Terraform-style structure where main.tf equivalents define resources and variables.tf defines inputs"],
+correct:2,
+explanation:"The chart structure is defined and enforced by Helm. Key files: Chart.yaml (required — chart identity), values.yaml (required — default values), templates/ (required — Kubernetes manifests with Go template syntax), _helpers.tpl (convention — reusable named templates called with {{ include 'mychart.labels' . }}), NOTES.txt (shown after install — good for usage instructions), charts/ (auto-populated by helm dependency update), .helmignore (like .gitignore for helm package). Understanding this structure is essential for writing, debugging, and maintaining Helm charts."},
+
+{q:"What is helm diff plugin and how does it help?",tag:"adv",
+code:"$ helm plugin install https://github.com/databus23/helm-diff\n\n$ helm diff upgrade myapp ./chart \\\n  --values prod-values.yaml\n\n# Shows before/after diff:\n- replicas: 2\n+ replicas: 5\n- image: nginx:1.24\n+ image: nginx:1.25",
+options:["A built-in Helm command that shows resource usage differences between namespaces","A Helm plugin that compares two chart versions for licensing and copyright differences","A Helm plugin that shows a diff of what would change in the cluster if you ran helm upgrade — without actually applying changes, enabling safe review before deployment","A monitoring tool that tracks differences in resource consumption between Helm releases over time"],
+correct:2,
+explanation:"helm diff (a popular community plugin) is a must-have for production safety. Before running helm upgrade, you run helm diff upgrade myapp ./chart to see exactly which Kubernetes resources would change and how. It shows colored diffs of the rendered manifests (before vs after). This is crucial in CI/CD: post the diff output as a PR comment for team review before merging triggers the actual deployment. It prevents surprises — you can catch accidental replicas changes, wrong image tags, or removed resources before they hit production."},
+
+{q:"What are Helm library charts?",tag:"adv",
+code:"# type: library in Chart.yaml\ntype: library\n\n# Define reusable template:\n{{- define \"common.labels\" -}}\napp: {{ .Values.app }}\nenv: {{ .Values.env }}\n{{- end }}\n\n# Use in another chart:\n{{ include \"common.labels\" . }}",
+options:["Charts that are pre-installed in every Kubernetes cluster by default for common infrastructure needs","Paid Helm charts from the official Helm library that require a subscription to use","Special chart type (type: library) that contains only reusable template helpers — cannot be installed directly but can be used as a dependency by application charts to share template logic","Charts stored in a private library that only authorized team members can access via token authentication"],
+correct:2,
+explanation:"Library charts solve code duplication across multiple application charts. Instead of copy-pasting the same label generation, resource naming, or affinity templates into every chart, you extract them into a library chart. Library charts: have type: library in Chart.yaml, contain only _helpers.tpl files (no deployable templates), cannot be installed with helm install (they have no resources), but can be declared as dependencies and their named templates are available via {{ include 'lib.templateName' . }}. Big organizations maintain internal library charts with company-standard labels, security contexts, and resource limits."},
+
+{q:"Why is Helm important and what problem does it fundamentally solve?",tag:"core",
+code:"# Without Helm: manually manage each file\nkubectl apply -f deployment.yaml\nkubectl apply -f service.yaml\nkubectl apply -f ingress.yaml\nkubectl apply -f configmap.yaml\n# ... and track versions yourself\n\n# With Helm: one command\nhelm upgrade --install myapp ./chart \\\n  --values prod.yaml",
+options:["Helm solves Kubernetes authentication by providing built-in SSO and RBAC management for all cluster users","Helm is only valuable for open-source projects — enterprise teams should write raw YAML files for better control","Helm solves application packaging and lifecycle management for Kubernetes — replacing scattered manual YAML files with versioned, reusable, configurable packages that have upgrade and rollback capabilities","Helm eliminates the need for Kubernetes entirely by providing its own container orchestration layer"],
+correct:2,
+explanation:"Helm's core value proposition: (1) Packaging — bundle 10+ YAML files into one installable unit. (2) Configuration — one chart, many environments via values files (no copy-paste YAML). (3) Versioning — chart versions track changes; revision history enables rollback. (4) Shareability — Artifact Hub has charts for PostgreSQL, Redis, Prometheus, NGINX — don't write what others have built. (5) Lifecycle management — install, upgrade, rollback, uninstall as first-class operations. (6) CI/CD integration — helm upgrade --install is the standard Kubernetes deployment command in pipelines. Helm is not perfect (complexity, debugging templates), but it's the industry standard for Kubernetes application delivery."}
+]}
+];
+
+var currentSection = 0, current = 0;
+var sectionAnswers = sections.map(function(s){ return new Array(s.questions.length).fill(null); });
+
+var tagMeta = {
+  core:   {label:'Core',        cls:'tag-core'},
+  cmd:    {label:'Command',     cls:'tag-cmd'},
+  struct: {label:'Structure',   cls:'tag-struct'},
+  tmpl:   {label:'Templating',  cls:'tag-tmpl'},
+  cicd:   {label:'CI/CD',       cls:'tag-cicd'},
+  adv:    {label:'Advanced',    cls:'tag-adv'}
+};
+
+function switchSection(idx){
+  currentSection = idx; current = 0;
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', i===idx); });
+  render();
+}
+
+function render(){
+  var sec = sections[currentSection];
+  var q = sec.questions[current];
+  var answers = sectionAnswers[currentSection];
+  var ans = answers[current];
+  var isAnswered = ans !== null;
+  var total = sec.questions.length;
+  var tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = ((current+1)/total*100) + '%';
+  document.getElementById('progressText').textContent = (current+1) + ' / ' + total;
+
+  document.getElementById('dotsNav').innerHTML = sec.questions.map(function(_,i){
+    var cls = 'dot';
+    if(i===current) cls += ' active current';
+    else if(answers[i]!==null) cls += ' answered';
+    return '<div class="' + cls + '" onclick="goTo(' + i + ')"></div>';
+  }).join('');
+
+  var codeHtml = q.code
+    ? '<div class="code-label">&#128196; Example</div><div class="code-block">' + q.code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+    : '';
+
+  var optionsHtml = q.options.map(function(opt,i){
+    var cls = 'option', tag = '';
+    if(isAnswered){
+      cls += ' locked';
+      if(i===q.correct){ cls += ' correct'; tag = '<span class="option-tag tag-correct">&#10003; CORRECT</span>'; }
+      else if(i===ans) { cls += ' wrong';   tag = '<span class="option-tag tag-wrong">&#10007; WRONG</span>'; }
+    }
+    return '<div class="' + cls + '" onclick="selectAnswer(' + i + ')"><div class="option-dot"></div><span class="option-label">' + opt + '</span>' + tag + '</div>';
+  }).join('');
+
+  var explanationHtml = isAnswered
+    ? '<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">' + q.explanation + '</div></div>'
+    : '';
+
+  var isLast = current === total - 1;
+  var allAnswered = answers.every(function(a){ return a !== null; });
+  var nextBtn = (isLast && allAnswered)
+    ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
+    : '<button class="btn btn-next" onclick="goNext()" ' + (!isAnswered ? 'disabled' : '') + '>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card">' +
+      '<div class="q-number">Question ' + (current+1) + ' of ' + total + ' <span class="q-tag ' + tm.cls + '">' + tm.label + '</span></div>' +
+      codeHtml +
+      '<div class="question">' + q.q + '</div>' +
+      '<div class="options">' + optionsHtml + '</div>' +
+      explanationHtml +
+      '<div class="nav-row">' +
+        '<button class="btn btn-back" onclick="goBack()" ' + (current===0?'disabled':'') + '>&#8592; Back</button>' +
+        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>' +
+        nextBtn +
+      '</div>' +
+    '</div>';
+}
+
+function selectAnswer(i){ if(sectionAnswers[currentSection][current]!==null) return; sectionAnswers[currentSection][current]=i; render(); }
+function goNext(){ if(current < sections[currentSection].questions.length-1){ current++; render(); } }
+function goBack(){ if(current > 0){ current--; render(); } }
+function goTo(i){ current=i; render(); }
+function resetSection(){ sectionAnswers[currentSection]=new Array(sections[currentSection].questions.length).fill(null); current=0; render(); }
+
+function showResults(){
+  var sec = sections[currentSection];
+  var answers = sectionAnswers[currentSection];
+  var score = answers.filter(function(a,i){ return a===sec.questions[i].correct; }).length;
+  var total = sec.questions.length;
+  var pct = Math.round(score/total*100);
+  var msg = pct===100 ? '&#127942; Perfect! Helm certified!' : pct>=70 ? '&#127919; Strong Helm knowledge!' : '&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card result-screen">' +
+      '<div class="result-score">' + score + '/' + total + '</div>' +
+      '<div class="result-label">SCORE &middot; ' + sec.label.toUpperCase() + ' &middot; ' + pct + '%</div>' +
+      '<div class="result-msg">' + msg + '</div>' +
+      '<div class="result-list">' +
+        sec.questions.map(function(q,i){
+          var icon = answers[i]===q.correct ? '&#9989;' : '&#10060;';
+          var label = q.q.length>48 ? q.q.slice(0,48)+'&hellip;' : q.q;
+          return '<div class="result-item"><span style="font-size:15px">' + icon + '</span><span class="q-tag ' + tagMeta[q.tag].cls + '" style="font-size:9px">' + tagMeta[q.tag].label + '</span>Q' + (i+1) + ': ' + label + '</div>';
+        }).join('') +
+      '</div>' +
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>' +
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">&#8635; Try Again</button>' +
+    '</div>';
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = score + ' / ' + total + ' correct';
+}
+
+function reviewAnswers(){ current=0; render(); }
+render();
+</script>
+</body>
+</html>

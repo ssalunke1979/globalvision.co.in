@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kubernetes Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#4ade80;--accent2:#15803d;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(74,222,128,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(74,222,128,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(21,128,61,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .tab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:8px 18px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .tab:hover{border-color:rgba(74,222,128,0.4);color:var(--text);}
+  .tab.active{background:rgba(74,222,128,0.1);border-color:rgba(74,222,128,0.5);color:var(--accent);}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core     {background:rgba(74,222,128,0.12); border:1px solid rgba(74,222,128,0.3); color:#4ade80;}
+  .tag-workload {background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8;}
+  .tag-network  {background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24;}
+  .tag-config   {background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;}
+  .tag-storage  {background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.3); color:#fb923c;}
+  .tag-ctrl     {background:rgba(244,114,182,0.12);border:1px solid rgba(244,114,182,0.3);color:#f472b6;}
+  .tag-scaling  {background:rgba(45,212,191,0.12); border:1px solid rgba(45,212,191,0.3); color:#2dd4bf;}
+  .tag-advanced {background:rgba(255,77,109,0.12); border:1px solid rgba(255,77,109,0.3); color:#ff4d6d;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .visual-box{background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;color:#94a3b8;line-height:1.9;}
+  .visual-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(74,222,128,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(74,222,128,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(74,222,128,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 20px rgba(74,222,128,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(74,222,128,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.25);color:#22c55e;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(21,128,61,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Container Orchestration Prep</div>
+  <h1>Kubernetes <span>K8s</span> Quiz</h1>
+  <p class="subtitle">// 25 questions &middot; Core &middot; Workloads &middot; Networking &middot; Storage &middot; Control Plane</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core Objects (1&ndash;10)</button>
+    <button class="tab" onclick="switchSection(1)">Workloads &amp; Config (11&ndash;18)</button>
+    <button class="tab" onclick="switchSection(2)">Control Plane &amp; Advanced (19&ndash;25)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-workload">Workload</span>
+    <span class="legend-item tag-network">Networking</span>
+    <span class="legend-item tag-config">Config</span>
+    <span class="legend-item tag-storage">Storage</span>
+    <span class="legend-item tag-ctrl">Control Plane</span>
+    <span class="legend-item tag-scaling">Scaling</span>
+    <span class="legend-item tag-advanced">Advanced</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections=[
+{label:"Core Objects",questions:[
+{q:"What is Kubernetes (K8s)?",tag:"core",
+visual:"Developer pushes container image\n  → Kubernetes schedules it on a Node\n    → Runs, scales, and self-heals automatically",
+options:["A container build tool that compiles Dockerfiles into optimized container images","An open-source platform that automates the deployment, scaling, and management of containerized applications across a cluster of machines","A cloud provider like AWS or GCP that offers managed container hosting","A CI/CD pipeline tool that builds and tests container images before deployment"],
+correct:1,
+explanation:"Kubernetes (K8s — 8 letters between K and s) originated at Google and was open-sourced in 2014. It solves the core problem of running containers at scale: instead of manually starting containers on servers, you declare what you want (e.g., 'run 3 replicas of my web app') and Kubernetes continuously works to make reality match that desired state — scheduling containers, replacing failures, scaling on load, and rolling out updates without downtime."},
+
+{q:"What is a Pod in Kubernetes?",tag:"core",
+visual:"Pod\n  → Container 1 (app)\n  → Container 2 (sidecar/helper)\n  → Shared network + storage",
+options:["A physical or virtual machine that Kubernetes schedules containers onto","A group of worker nodes that share the same hardware configuration","The smallest deployable unit in Kubernetes — a wrapper around one or more containers that share the same network namespace, IP address, and storage volumes","A Kubernetes control plane component that manages scheduling decisions"],
+correct:2,
+explanation:"Kubernetes never runs containers directly — it runs them inside Pods. A Pod gives containers a shared context: they share the same IP address and port space (communicate via localhost), can share mounted volumes, and are always co-located and co-scheduled on the same node. Most Pods run a single container, but multi-container Pods are used for sidecar patterns (e.g., main app + log shipper, main app + proxy). Pods are ephemeral — when they die, a controller creates a replacement."},
+
+{q:"What is a Node in Kubernetes?",tag:"core",
+visual:"Node (Worker Machine)\n  → kubelet (agent)\n  → kube-proxy (networking)\n  → Container Runtime (Docker/containerd)\n  → Pods running inside",
+options:["The smallest deployable unit in Kubernetes that wraps one or more containers","A logical namespace that separates workloads within a cluster","A physical or virtual machine that runs Pods — each node has a container runtime, kubelet agent, and kube-proxy for networking","A Kubernetes object that manages DNS resolution for Pods and Services"],
+correct:2,
+explanation:"Nodes are the worker machines in a Kubernetes cluster. Each node runs three key components: kubelet (an agent that receives instructions from the control plane and ensures containers inside Pods are running), kube-proxy (manages network rules to allow communication to/from Pods), and a container runtime (containerd or Docker — actually runs the containers). Nodes can be VMs (EC2, GCE) or physical servers. The control plane schedules Pods onto nodes based on available resources."},
+
+{q:"What is a Kubernetes Cluster?",tag:"core",
+visual:"Cluster\n  → Control Plane (kube-apiserver, etcd, scheduler)\n  → Worker Node 1 → Pods\n  → Worker Node 2 → Pods\n  → Worker Node 3 → Pods",
+options:["A single powerful server running all containerized applications","A Docker network that connects multiple containers on one machine","A group of nodes managed together by Kubernetes — consisting of a Control Plane (managing state and decisions) and Worker Nodes (running application Pods)","A Kubernetes namespace that groups related applications and services"],
+correct:2,
+explanation:"A cluster is the complete Kubernetes environment. The Control Plane (sometimes called master) is the brain: it stores desired state in etcd, makes scheduling decisions, accepts API calls, and continuously reconciles desired vs actual state. Worker Nodes are the muscles: they run the actual application Pods. A highly-available cluster has multiple control plane nodes and multiple worker nodes. AWS EKS, Google GKE, and Azure AKS are managed Kubernetes services where the cloud provider runs the control plane for you."},
+
+{q:"What is a Kubernetes Deployment?",tag:"workload",
+visual:"Deployment\n  → manages ReplicaSet\n    → ensures N Pods always running\n  → rolling update: old pods ↓ new pods ↑",
+options:["A Kubernetes object for running stateful applications with persistent storage","A one-time job that runs a container to completion and exits","A Kubernetes object that manages stateless applications — declaring the desired number of Pod replicas, enabling rolling updates, and supporting rollbacks","A network policy that controls traffic between Pods in different namespaces"],
+correct:2,
+explanation:"Deployments are the standard way to run stateless applications in Kubernetes. You declare: which container image to run, how many replicas, resource limits, and update strategy. Kubernetes continuously ensures the desired number of healthy Pods are running. Updates: when you change the image version, Deployment performs a rolling update — creating new Pods gradually while terminating old ones, ensuring zero downtime. Rollback: kubectl rollout undo deployment/app instantly reverts to the previous version."},
+
+{q:"What is a Kubernetes Service?",tag:"network",
+visual:"Client → Service (stable IP/DNS)\n  → Pod 1 (10.0.0.1)\n  → Pod 2 (10.0.0.2)\n  → Pod 3 (10.0.0.3)",
+options:["A background process that monitors Pod health and restarts failed containers","A Kubernetes resource that exposes Pods via a stable IP address and DNS name, load balancing traffic across matching Pods — abstracting away their changing IPs","A configuration object that stores environment variables for Pod containers","A storage class that provisions persistent volumes for stateful applications"],
+correct:1,
+explanation:"Pods are ephemeral — when they restart, their IP address changes. Services solve this by providing a stable virtual IP (ClusterIP) and DNS name that never changes. kube-proxy implements rules so traffic to the Service IP is load-balanced across healthy Pods. Service types: ClusterIP (internal only, default), NodePort (exposes on each node's IP at a static port, for testing), LoadBalancer (creates a cloud load balancer, for production external access), ExternalName (DNS alias to external service). Services use label selectors to find their target Pods."},
+
+{q:"What is a Kubernetes Ingress?",tag:"network",
+visual:"Internet → Ingress Controller\n  /api → API Service → API Pods\n  /app → App Service → App Pods\n  api.example.com → API Service",
+options:["A Kubernetes storage resource that allows Pods to read data from external sources","A firewall rule that controls which external IP addresses can reach the cluster","A Kubernetes resource that manages external HTTP/HTTPS access to Services — routing traffic based on URL paths or hostnames using an Ingress Controller","A network policy that restricts Pod-to-Pod communication within a namespace"],
+correct:2,
+explanation:"Ingress is a smart HTTP router at the edge of your cluster. It requires an Ingress Controller (NGINX, Traefik, AWS ALB Controller) running in the cluster. Features: path-based routing (/api → API service, /images → Image service), host-based routing (api.example.com → API service, app.example.com → App service), TLS termination (HTTPS certificates managed centrally), and rewrite rules. Without Ingress, you'd need one LoadBalancer Service per application — expensive and hard to manage. Ingress gives you one entry point for all HTTP services."},
+
+{q:"What is a Kubernetes ConfigMap?",tag:"config",
+visual:"ConfigMap\n  → key: DATABASE_URL = postgres://...\n  → key: LOG_LEVEL = info\n  → Mounted as env vars or files in Pods",
+options:["A Kubernetes object that stores encrypted secrets like passwords and API keys","A network configuration map that defines routing rules between Services","A Kubernetes object that stores non-sensitive configuration data as key-value pairs — injected into Pods as environment variables or mounted as files","A YAML template that defines the desired state of a Kubernetes Deployment"],
+correct:2,
+explanation:"ConfigMaps decouple configuration from container images, enabling the same image to run in dev, staging, and production with different configs. Usage: inject as env vars (env.valueFrom.configMapKeyRef), mount as a volume (files in a directory inside the container), or reference in command args. Key distinction from Secrets: ConfigMaps store non-sensitive data only — database hostnames, feature flags, log levels, API endpoints. Never store passwords or tokens in ConfigMaps — use Secrets instead."},
+
+{q:"What is a Kubernetes Secret?",tag:"config",
+visual:"Secret (base64 encoded)\n  → key: DB_PASSWORD = cGFzc3dvcmQ=\n  → Mounted as env var or file\n  → Never in plain text in YAML",
+options:["A Kubernetes RBAC object that grants Pods permission to access cluster resources","A network firewall rule that hides internal Pod IP addresses from external traffic","A Kubernetes object that stores sensitive data (passwords, tokens, TLS certs, API keys) — base64 encoded and handled with additional security controls compared to ConfigMaps","A read-only configuration snapshot that Kubernetes takes before each deployment"],
+correct:2,
+explanation:"Secrets store sensitive data separately from your application code and images. Base64 encoding is NOT encryption — it's just encoding for binary-safe transmission. For true security: enable Kubernetes Secrets encryption at rest (encrypt etcd data), use RBAC to restrict which Pods/ServiceAccounts can read which Secrets, or integrate with external secret stores (AWS Secrets Manager via External Secrets Operator, HashiCorp Vault). Secrets can be referenced as env vars or volume mounts — never hardcode passwords in Pod specs or container images."},
+
+{q:"What is a ReplicaSet?",tag:"workload",
+visual:"ReplicaSet: desired=3\n  → Pod 1 ✅\n  → Pod 2 ✅\n  → Pod 3 ❌ crashed → Auto-creates Pod 4",
+options:["A Kubernetes load balancer that distributes requests across multiple Pods","A group of identical nodes that run the same type of workloads","A Kubernetes controller that ensures a specified number of identical Pod replicas are always running — automatically creating replacements when Pods fail","A storage replication mechanism that copies PersistentVolume data across nodes"],
+correct:2,
+explanation:"A ReplicaSet continuously monitors its Pods using a label selector. If the count drops below the desired number (Pod crashes, node fails), it creates new Pods. If count exceeds desired (manual Pod creation), it terminates excess ones. In practice, you rarely create ReplicaSets directly — Deployments create and manage ReplicaSets for you (one RS per deployment version). This is the key enabler of Kubernetes self-healing: the control loop constantly reconciles actual vs desired state."}
+]},
+
+{label:"Workloads & Config",questions:[
+{q:"What is a StatefulSet in Kubernetes?",tag:"workload",
+visual:"StatefulSet: mysql\n  → mysql-0 (stable name, own PVC)\n  → mysql-1 (stable name, own PVC)\n  → mysql-2 (stable name, own PVC)",
+options:["A Deployment variant that stores application state in ConfigMaps","A Kubernetes object identical to Deployment but with higher scheduling priority","A Kubernetes controller for stateful applications — providing stable, unique Pod names, ordered deployment/scaling, and stable persistent storage that survives Pod restarts","A type of Service that maintains connection state between clients and Pods"],
+correct:2,
+explanation:"StatefulSets are designed for databases and distributed systems (MySQL, PostgreSQL, Cassandra, Kafka, Elasticsearch). Key guarantees: stable Pod names (mysql-0, mysql-1, mysql-2 — never random hashes), stable DNS (mysql-0.mysql-service.namespace.svc), ordered deployment (mysql-0 fully running before mysql-1 starts), and each Pod gets its own PersistentVolumeClaim that is never shared or reassigned. When a StatefulSet Pod restarts, it gets the same name and reattaches to the same storage — critical for data integrity."},
+
+{q:"What is a DaemonSet in Kubernetes?",tag:"workload",
+visual:"DaemonSet: fluentd-logger\n  → Node 1 → fluentd Pod\n  → Node 2 → fluentd Pod\n  → Node 3 → fluentd Pod\n  New node added → auto-scheduled",
+options:["A Deployment that uses daemon threads for higher CPU performance","A Kubernetes object that runs exactly one Pod replica across all nodes — automatically adding a Pod to every new node that joins the cluster","A background job that runs on a schedule using cron syntax","A resource that runs multiple Pods on a single node for maximum resource utilization"],
+correct:1,
+explanation:"DaemonSets are perfect for infrastructure-level agents that must run on every node: log collectors (Fluentd, Filebeat — must collect logs from every node's filesystem), monitoring agents (Prometheus node-exporter, Datadog agent — must gather every node's metrics), network plugins (Calico, Weave — must configure networking on every node), and security agents (Falco, CrowdStrike — must inspect every node). When a new node joins the cluster, the DaemonSet controller automatically schedules the Pod on it. When a node is removed, the Pod is garbage collected."},
+
+{q:"What is Horizontal Pod Autoscaler (HPA)?",tag:"scaling",
+visual:"HPA: target CPU = 50%\n  Traffic spike: CPU=80% → scale OUT to 6 pods\n  Traffic drops: CPU=20% → scale IN to 2 pods",
+options:["A Kubernetes feature that automatically upgrades Pod container images when new versions are released","HPA automatically adjusts the number of Pod replicas in a Deployment/ReplicaSet based on observed metrics (CPU, memory, custom metrics) to match current demand","A load balancer that horizontally distributes HTTP requests across Pod replicas","A cluster autoscaler that adds or removes nodes based on pending Pod count"],
+correct:1,
+explanation:"HPA implements elastic scaling for your applications. It queries the Metrics Server (or custom metrics API) every 15 seconds, calculates desired replicas = ceil(current replicas × current metric / target metric), and updates the Deployment. Example: target CPU 50%, current 80%, 3 replicas → desired = ceil(3 × 80/50) = ceil(4.8) = 5. HPA respects min/max replica bounds you configure. For custom metrics (queue depth, requests per second), integrate with KEDA (Kubernetes Event-Driven Autoscaling). Note: HPA scales Pods; Cluster Autoscaler scales Nodes."},
+
+{q:"What is a Persistent Volume (PV) in Kubernetes?",tag:"storage",
+visual:"PV (cluster resource)\n  → 100GB EBS volume\n  → exists independently of any Pod\n  → data survives Pod deletion",
+options:["A temporary volume mounted inside a Pod that is deleted when the Pod terminates","A Kubernetes network volume that stores data in etcd for fast access","A cluster-level storage resource that exists independently of Pods — representing actual storage (EBS, NFS, GCS) that persists even when Pods are deleted or rescheduled","A read-only configuration volume that mounts ConfigMap or Secret data into Pods"],
+correct:2,
+explanation:"Persistent Volumes abstract underlying storage from Pod definitions. A PV is provisioned by an administrator (or dynamically by a StorageClass) and represents real storage: AWS EBS volume, GCP Persistent Disk, Azure Disk, NFS share, or local disk. Key property: PVs have a lifecycle independent of any Pod — data persists when Pods restart, reschedule, or die. Access modes: ReadWriteOnce (one node at a time), ReadOnlyMany (multiple nodes, read-only), ReadWriteMany (multiple nodes, read-write — requires NFS or similar). Capacity and access mode are matched when a PVC requests a PV."},
+
+{q:"What is a Persistent Volume Claim (PVC)?",tag:"storage",
+visual:"Pod → PVC (request: 10GB, RWO)\n  → Kubernetes binds to matching PV\n    → 100GB EBS volume",
+options:["A claim that a Pod makes to reserve CPU and memory resources on a specific node","A Kubernetes API call made by administrators to provision new storage in the cloud","A request for storage made by a Pod — specifying size and access mode. Kubernetes binds the PVC to a matching PV, abstracting away the underlying storage implementation","A permission claim that grants a Pod access to read Secrets in the same namespace"],
+correct:2,
+explanation:"PVCs are how applications request storage without knowing infrastructure details. A developer writes: storageClassName: gp3, resources.requests.storage: 10Gi, accessModes: ReadWriteOnce. Kubernetes finds a matching PV and binds them. With StorageClasses, PVs are provisioned dynamically on demand (Kubernetes automatically creates an EBS volume). The Pod mounts the PVC as a volume — it just sees a directory. This abstraction means the same application YAML works in dev (local storage) and prod (EBS) just by changing the StorageClass."},
+
+{q:"What are Taints and Tolerations in Kubernetes?",tag:"advanced",
+visual:"Node: taint=gpu:NoSchedule\n  → Regular pods: REJECTED\n  → GPU pod with toleration: ACCEPTED\n\nUse: dedicated GPU nodes, special hardware",
+options:["Security labels that control which users can access specific nodes in the cluster","Taints are applied to Nodes to repel Pods; Tolerations are added to Pods to allow them to schedule on tainted nodes — together they ensure only appropriate workloads run on specific nodes","Network policies that taint traffic from untrusted sources and tolerate internal cluster traffic","Resource quotas that taint Pods exceeding CPU limits and tolerate compliant Pods"],
+correct:1,
+explanation:"Taints and tolerations work together for node specialization. Taint a node: kubectl taint nodes gpu-node-1 hardware=gpu:NoSchedule — this prevents any Pod without a matching toleration from scheduling on it. Add toleration to a Pod: tolerations: [{key: 'hardware', value: 'gpu', effect: 'NoSchedule'}] — this Pod can now schedule on the tainted node (but so can Pods on untainted nodes). Common use cases: dedicated GPU nodes (only ML workloads), spot instance nodes (only fault-tolerant workloads), high-memory nodes (only memory-intensive apps). Combine with nodeAffinity to both push Pods away from nodes AND pull them toward specific nodes."},
+
+{q:"What is Helm in the Kubernetes ecosystem?",tag:"advanced",
+visual:"Helm Chart\n  → templates/ (K8s manifests)\n  → values.yaml (default config)\n  → Chart.yaml (metadata)\n\nhelm install myapp ./chart --values prod.yaml",
+options:["A Kubernetes built-in dashboard for visualizing cluster resources and metrics","A container image registry for storing and versioning Kubernetes application images","A package manager for Kubernetes — using reusable templates called charts that define, install, and upgrade complex applications with customizable values","A GitOps tool that syncs Kubernetes manifests from a Git repository to the cluster"],
+correct:2,
+explanation:"Helm is the de-facto Kubernetes package manager. A Helm chart is a collection of YAML templates with a values.yaml for customization. Deploy the same chart to multiple environments: helm install app ./chart -f dev-values.yaml vs helm install app ./chart -f prod-values.yaml. Helm Registry (Artifact Hub) has thousands of pre-built charts: PostgreSQL, Redis, NGINX, Prometheus, Grafana. Key commands: helm install (first deploy), helm upgrade (update existing), helm rollback (revert), helm uninstall (remove all resources). Values override: --set key=value for quick overrides without a values file."},
+
+{q:"What is the difference between a Deployment and a StatefulSet?",tag:"advanced",
+visual:"Deployment: web-app\n  → pod-random-abc, pod-random-xyz (interchangeable)\n  → shared nothing, stateless\n\nStatefulSet: mysql\n  → mysql-0, mysql-1, mysql-2 (identity matters)\n  → own storage, ordered lifecycle",
+options:["Deployment uses rolling updates; StatefulSet uses blue-green deployments exclusively","Deployment is for cloud applications; StatefulSet is for on-premises applications only","Deployment manages stateless applications where Pods are interchangeable; StatefulSet manages stateful applications where each Pod has a stable identity, stable storage, and ordered lifecycle","Deployment supports auto-scaling; StatefulSet has a fixed replica count that cannot be changed"],
+correct:2,
+explanation:"The fundamental distinction is identity. Deployment Pods are cattle — interchangeable, replaceable, no stable identity. The web-app-abc123 Pod is identical to web-app-xyz789. Perfect for web servers, APIs, workers. StatefulSet Pods are pets — each has a permanent name (mysql-0), stable DNS, and its own dedicated PVC. mysql-0 is the primary; mysql-1 and mysql-2 are replicas — they're NOT interchangeable. Ordered operations: StatefulSets scale up 0→1→2 in sequence and scale down 2→1→0 in reverse. This guarantees database cluster integrity (primary always starts first)."}
+]},
+
+{label:"Control Plane & Advanced",questions:[
+{q:"What is the kube-apiserver?",tag:"ctrl",
+visual:"Everything talks to kube-apiserver:\n  kubectl → API Server\n  Scheduler → API Server\n  kubelet → API Server\n  Your app → API Server",
+options:["An agent on each worker node that manages container lifecycle","A distributed database that stores all cluster state and configuration","The front-end of the Kubernetes control plane — the central API hub that all components, kubectl commands, and external tools communicate with","A network proxy that routes traffic between Pods across different nodes"],
+correct:2,
+explanation:"The kube-apiserver is the only control plane component that any other component or user directly talks to. It: authenticates and authorizes every request, validates and processes API objects, stores state in etcd, and notifies relevant controllers of changes. When you run kubectl apply -f deployment.yaml: kubectl sends the YAML to the API server → API server validates it, authenticates you, checks RBAC → stores in etcd → notifies the Deployment controller → controller creates a ReplicaSet → scheduler assigns Pods to nodes → kubelet on the node starts the containers. The API server is the single source of truth."},
+
+{q:"What is the kube-scheduler?",tag:"ctrl",
+visual:"New Pod created (no node assigned)\n  → Scheduler checks all nodes:\n    → Node 1: insufficient memory ❌\n    → Node 2: has GPU? ❌\n    → Node 3: fits! ✅ → assigns Pod",
+options:["A time-based job scheduler that runs Pods on a cron schedule","A load balancer that distributes HTTP requests across Pod replicas","A control plane component that watches for new Pods with no assigned node and selects the best node for each Pod based on resource requirements, constraints, and policies","A daemon on each node that schedules CPU time between running containers"],
+correct:2,
+explanation:"The scheduler is a matchmaker between Pods and Nodes. When a Pod is created without a node assignment, the scheduler: (1) Filters — eliminates nodes that don't meet requirements (insufficient CPU/memory, missing required labels, taint mismatch, affinity rules). (2) Scores — ranks remaining nodes (most available resources, spread across AZs, matching preferred labels). (3) Binds — assigns the Pod to the highest-scoring node. Customization: nodeSelector (match node labels), nodeAffinity (preferred/required rules), podAffinity/antiAffinity (co-locate or spread Pods), resource requests (minimum CPU/memory guaranteed)."},
+
+{q:"What is kubelet?",tag:"ctrl",
+visual:"Control Plane → (assigns Pod) → kubelet on Node\n  → Pulls container image\n  → Starts container via runtime\n  → Reports health back to API server",
+options:["A kubectl plugin that provides advanced debugging capabilities","A Kubernetes API proxy that runs on developer machines to simplify kubectl commands","An agent that runs on every worker node — receiving Pod specifications from the API server, ensuring containers are running and healthy, and reporting node/Pod status back to the control plane","A control plane daemon that monitors the health of the entire cluster"],
+correct:2,
+explanation:"The kubelet is the node-level Kubernetes agent. Responsibilities: watches the API server for Pods assigned to its node, instructs the container runtime (containerd) to pull images and start/stop containers, executes liveness and readiness probes (and restarts containers that fail them), mounts volumes and ConfigMaps/Secrets into containers, reports Pod status (Running, Pending, Failed) and node capacity back to the API server. If the kubelet cannot reach the API server, it continues running existing containers (fail-open), but no new Pods can be scheduled to that node."},
+
+{q:"What is etcd in Kubernetes?",tag:"ctrl",
+visual:"etcd = Kubernetes brain memory\n  → stores all cluster state\n  → distributed, HA (odd number: 3/5/7 nodes)\n  → only kube-apiserver talks to it directly",
+options:["A container networking plugin that manages Pod IP addresses and routing","A lightweight HTTP proxy that caches Kubernetes API responses for better performance","A distributed, highly-available key-value store that is the sole persistent storage for all Kubernetes cluster state — configurations, Pod specs, Service definitions, Secrets, and RBAC rules","A container registry that stores container images used by Pods in the cluster"],
+correct:2,
+explanation:"etcd is Kubernetes' source of truth. Everything that exists in Kubernetes is stored in etcd: every Deployment, Pod, Service, ConfigMap, Secret, node registration, and RBAC rule. It's distributed (uses Raft consensus — always deploy 3, 5, or 7 etcd nodes for HA), consistent (all reads see the same data), and highly available. Critical operational fact: losing etcd = losing your entire cluster state. Best practices: regular etcd backups (etcdctl snapshot save), dedicated SSDs for etcd (it's latency-sensitive), and monitoring etcd health metrics. Only the API server should communicate with etcd directly."},
+
+{q:"What is a Rolling Update in Kubernetes?",tag:"workload",
+visual:"Rolling Update (maxSurge=1, maxUnavailable=0):\n  v1 v1 v1 → v1 v1 v1 v2 → v1 v1 v2 → v1 v2 v2 → v2 v2 v2",
+options:["A Kubernetes feature that updates container images in bulk — all old Pods deleted first, then all new Pods created","A strategy where updates roll back automatically if health checks fail after deployment","A zero-downtime deployment strategy that gradually replaces old Pod versions with new ones — creating new Pods incrementally while old ones are terminated, ensuring availability throughout","An update mechanism that updates one node at a time while draining Pods to other nodes"],
+correct:2,
+explanation:"Rolling updates are the default Deployment strategy. Controlled by two parameters: maxUnavailable (max Pods unavailable during update, e.g., 25% means at most 25% of Pods can be down) and maxSurge (max extra Pods above desired count, e.g., 25% means 25% more Pods can be created temporarily). The update proceeds gradually — Kubernetes creates new Pods, waits for them to pass readiness probes, then terminates old ones. If issues arise: kubectl rollout undo deployment/app instantly reverts. Check rollout status: kubectl rollout status deployment/app."},
+
+{q:"What is Self-Healing in Kubernetes?",tag:"core",
+visual:"Pod crashes → ReplicaSet detects count < desired\n  → Creates replacement Pod automatically\n  → No human intervention needed",
+options:["A Kubernetes feature that automatically patches security vulnerabilities in running containers","Self-healing means Kubernetes automatically detects and recovers from failures — restarting crashed containers, replacing failed Pods, rescheduling Pods from failed nodes, and killing containers that fail health checks","A backup mechanism that restores deleted Kubernetes resources from etcd snapshots","A feature that automatically scales up resources when performance degrades"],
+correct:1,
+explanation:"Self-healing is a core Kubernetes design principle. Multiple mechanisms work together: Liveness probes — if a container's liveness check fails (HTTP 500, TCP timeout, command exit != 0), kubelet restarts the container. Readiness probes — if a container isn't ready, it's removed from Service load balancing (no traffic) until it recovers. ReplicaSet controller — if Pod count drops below desired (crash, node failure), new Pods are created. Node failure — if a node goes offline, the node controller marks its Pods for rescheduling on healthy nodes after a timeout. This continuous reconciliation loop is what makes Kubernetes reliable for production workloads."},
+
+{q:"What is a Kubernetes Namespace?",tag:"core",
+visual:"Cluster\n  → namespace: dev (dev team)\n  → namespace: staging (QA team)\n  → namespace: prod (ops team)\n  → namespace: monitoring (prometheus, grafana)",
+options:["A Kubernetes equivalent of a DNS domain that routes external traffic to Services","A virtual machine boundary that prevents containers from sharing the host kernel","A logical partition within a Kubernetes cluster that provides scope for resources — enabling multiple teams or environments to share one cluster with separate resource quotas, RBAC, and network policies","A node label that groups worker machines into logical pools for scheduling purposes"],
+correct:2,
+explanation:"Namespaces are Kubernetes' multi-tenancy mechanism. Within a namespace: names must be unique (two Deployments named 'app' can coexist in different namespaces), RBAC policies can grant teams access only to their namespace, ResourceQuotas limit CPU/memory/Pods per namespace, and NetworkPolicies can isolate traffic. Default namespaces: default (user workloads), kube-system (Kubernetes internals — don't touch), kube-public (readable by all), kube-node-lease (node heartbeats). Communication across namespaces: use the full DNS name — my-service.other-namespace.svc.cluster.local."}
+]}
+];
+
+var currentSection=0,current=0;
+var sectionAnswers=sections.map(function(s){return new Array(s.questions.length).fill(null);});
+var tagMeta={
+  core:{label:'Core',cls:'tag-core'},
+  workload:{label:'Workload',cls:'tag-workload'},
+  network:{label:'Networking',cls:'tag-network'},
+  config:{label:'Config',cls:'tag-config'},
+  storage:{label:'Storage',cls:'tag-storage'},
+  ctrl:{label:'Control Plane',cls:'tag-ctrl'},
+  scaling:{label:'Scaling',cls:'tag-scaling'},
+  advanced:{label:'Advanced',cls:'tag-advanced'}
+};
+
+function switchSection(idx){
+  currentSection=idx;current=0;
+  document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('active',i===idx);});
+  render();
+}
+
+function render(){
+  var sec=sections[currentSection];
+  var q=sec.questions[current];
+  var answers=sectionAnswers[currentSection];
+  var ans=answers[current];
+  var isAnswered=ans!==null;
+  var total=sec.questions.length;
+  var tm=tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width=((current+1)/total*100)+'%';
+  document.getElementById('progressText').textContent=(current+1)+' / '+total;
+
+  document.getElementById('dotsNav').innerHTML=sec.questions.map(function(_,i){
+    var cls='dot';
+    if(i===current)cls+=' active current';
+    else if(answers[i]!==null)cls+=' answered';
+    return '<div class="'+cls+'" onclick="goTo('+i+')"></div>';
+  }).join('');
+
+  var visualHtml=q.visual?'<div class="visual-label">⚙ Concept Visual</div><div class="visual-box">'+q.visual+'</div>':'';
+
+  var optionsHtml=q.options.map(function(opt,i){
+    var cls='option',tag='';
+    if(isAnswered){
+      cls+=' locked';
+      if(i===q.correct){cls+=' correct';tag='<span class="option-tag tag-correct">✓ CORRECT</span>';}
+      else if(i===ans){cls+=' wrong';tag='<span class="option-tag tag-wrong">✗ WRONG</span>';}
+    }
+    return '<div class="'+cls+'" onclick="selectAnswer('+i+')"><div class="option-dot"></div><span class="option-label">'+opt+'</span>'+tag+'</div>';
+  }).join('');
+
+  var explanationHtml=isAnswered?'<div class="explanation-box"><div class="explanation-title">⚡ Explanation</div><div class="explanation-text">'+q.explanation+'</div></div>':'';
+  var isLast=current===total-1;
+  var allAnswered=answers.every(function(a){return a!==null;});
+  var nextBtn=(isLast&&allAnswered)?'<button class="btn btn-next" onclick="showResults()">See Results →</button>':'<button class="btn btn-next" onclick="goNext()" '+((!isAnswered)?'disabled':'')+'>Next →</button>';
+
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card">'+
+      '<div class="q-number">Question '+(current+1)+' of '+total+' <span class="q-tag '+tm.cls+'">'+tm.label+'</span></div>'+
+      visualHtml+
+      '<div class="question">'+q.q+'</div>'+
+      '<div class="options">'+optionsHtml+'</div>'+
+      explanationHtml+
+      '<div class="nav-row">'+
+        '<button class="btn btn-back" onclick="goBack()" '+(current===0?'disabled':'')+'>← Back</button>'+
+        '<button class="btn btn-reset" onclick="resetSection()">↻ Reset</button>'+
+        nextBtn+
+      '</div>'+
+    '</div>';
+}
+
+function selectAnswer(i){if(sectionAnswers[currentSection][current]!==null)return;sectionAnswers[currentSection][current]=i;render();}
+function goNext(){if(current<sections[currentSection].questions.length-1){current++;render();}}
+function goBack(){if(current>0){current--;render();}}
+function goTo(i){current=i;render();}
+function resetSection(){sectionAnswers[currentSection]=new Array(sections[currentSection].questions.length).fill(null);current=0;render();}
+
+function showResults(){
+  var sec=sections[currentSection];
+  var answers=sectionAnswers[currentSection];
+  var score=answers.filter(function(a,i){return a===sec.questions[i].correct;}).length;
+  var total=sec.questions.length;
+  var pct=Math.round(score/total*100);
+  var msg=pct===100?'🏆 Perfect! K8s certified!':pct>=70?'🎯 Strong orchestration knowledge!':'📚 Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card result-screen">'+
+      '<div class="result-score">'+score+'/'+total+'</div>'+
+      '<div class="result-label">SCORE &middot; '+sec.label.toUpperCase()+' &middot; '+pct+'%</div>'+
+      '<div class="result-msg">'+msg+'</div>'+
+      '<div class="result-list">'+
+        sec.questions.map(function(q,i){
+          var icon=answers[i]===q.correct?'✅':'❌';
+          var label=q.q.length>48?q.q.slice(0,48)+'&hellip;':q.q;
+          return '<div class="result-item"><span style="font-size:15px">'+icon+'</span><span class="q-tag '+tagMeta[q.tag].cls+'" style="font-size:9px">'+tagMeta[q.tag].label+'</span>Q'+(i+1)+': '+label+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>'+
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">↻ Try Again</button>'+
+    '</div>';
+  document.getElementById('dotsNav').innerHTML='';
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressText').textContent=score+' / '+total+' correct';
+}
+
+function reviewAnswers(){current=0;render();}
+render();
+</script>
+</body>
+</html>
