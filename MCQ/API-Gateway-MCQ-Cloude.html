@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS API Gateway Deep Dive Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#22d3ee;--accent2:#0e7490;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(34,211,238,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(34,211,238,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(14,116,144,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .tabs{display:flex;gap:8px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+  .tab{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:8px 18px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;text-transform:uppercase;}
+  .tab:hover{border-color:rgba(34,211,238,0.4);color:var(--text);}
+  .tab.active{background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.5);color:var(--accent);}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core   {background:rgba(34,211,238,0.12); border:1px solid rgba(34,211,238,0.3); color:#22d3ee;}
+  .tag-integ  {background:rgba(52,211,153,0.12);  border:1px solid rgba(52,211,153,0.3);  color:#34d399;}
+  .tag-auth   {background:rgba(251,191,36,0.12);  border:1px solid rgba(251,191,36,0.3);  color:#fbbf24;}
+  .tag-perf   {background:rgba(167,139,250,0.12); border:1px solid rgba(167,139,250,0.3); color:#a78bfa;}
+  .tag-sec    {background:rgba(255,77,109,0.12);  border:1px solid rgba(255,77,109,0.3);  color:#ff4d6d;}
+  .tag-deploy {background:rgba(251,146,60,0.12);  border:1px solid rgba(251,146,60,0.3);  color:#fb923c;}
+  .tag-adv    {background:rgba(244,114,182,0.12); border:1px solid rgba(244,114,182,0.3); color:#f472b6;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .tip-box{background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.15);border-radius:6px;padding:10px 14px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;color:#94a3b8;line-height:1.7;}
+  .tip-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:4px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(34,211,238,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(34,211,238,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(34,211,238,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;box-shadow:0 4px 20px rgba(34,211,238,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(34,211,238,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(14,116,144,0.08);border:1px solid rgba(14,116,144,0.25);color:#06b6d4;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(14,116,144,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Serverless Deep Dive</div>
+  <h1>API Gateway <span>Advanced</span> Quiz</h1>
+  <p class="subtitle">// 30 questions &middot; Core &middot; Integration &middot; Auth &middot; Performance &middot; Security</p>
+</header>
+
+<div class="quiz-container">
+  <div class="tabs" id="tabsRow">
+    <button class="tab active" onclick="switchSection(0)">Core &amp; Integration (1&ndash;10)</button>
+    <button class="tab" onclick="switchSection(1)">Auth &amp; Traffic (11&ndash;20)</button>
+    <button class="tab" onclick="switchSection(2)">Performance &amp; Advanced (21&ndash;30)</button>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-integ">Integration</span>
+    <span class="legend-item tag-auth">Auth</span>
+    <span class="legend-item tag-perf">Performance</span>
+    <span class="legend-item tag-sec">Security</span>
+    <span class="legend-item tag-deploy">Deployment</span>
+    <span class="legend-item tag-adv">Advanced</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText"></div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var sections = [
+{label:"Core & Integration", questions:[
+{q:"What is AWS API Gateway?",tag:"core",
+tip:"Client -> API Gateway -> Lambda / EC2 / HTTP backend",
+options:["A managed load balancer that routes traffic to EC2 instances based on health checks","A fully managed service to create, publish, secure, monitor, and manage APIs at any scale — acting as the front door between clients and backend services","A DNS service that maps API domain names to backend service IP addresses","A VPN gateway that exposes internal AWS services to the public internet securely"],
+correct:1,
+explanation:"API Gateway is AWS's fully managed API management layer. It handles request routing, authentication, throttling, caching, monitoring, and versioning — all without managing servers. It integrates natively with Lambda (serverless), EC2, ECS containers, HTTP endpoints, and other AWS services. Every HTTP request your application receives passes through API Gateway before reaching your backend, giving you a centralized control plane for all API traffic."},
+
+{q:"What are the three types of APIs you can create in API Gateway, and when do you use each?",tag:"core",
+tip:"REST: enterprise features | HTTP: cheap+fast | WebSocket: real-time",
+options:["GET API, POST API, and DELETE API -- each type is named after the primary HTTP method it supports","Public API, Private API, and Internal API -- chosen based on network access requirements","REST API (feature-rich, supports usage plans and API keys), HTTP API (lightweight, cheaper, faster), and WebSocket API (real-time bidirectional communication)","JSON API, XML API, and Binary API -- chosen based on the payload format your backend consumes"],
+correct:2,
+explanation:"REST APIs support the full API Gateway feature set: usage plans, API keys, request/response transformation, private APIs, and all authorization types. Use for complex enterprise APIs requiring fine-grained control. HTTP APIs are simpler, up to 71% cheaper, with lower latency -- ideal for Lambda proxy integrations and simple microservices. WebSocket APIs maintain persistent connections, enabling real-time apps (chat, live dashboards, multiplayer games) where the server can push data to clients without polling."},
+
+{q:"What is an Endpoint in API Gateway?",tag:"core",
+tip:"https://{api-id}.execute-api.{region}.amazonaws.com/{stage}/{resource}",
+options:["A backend server URL that API Gateway connects to for processing requests","The public-facing URL where your API is accessible -- a unique address per API, stage, and resource combination","A health check URL that API Gateway polls to verify backend availability","A VPC endpoint that provides private connectivity between API Gateway and AWS services"],
+correct:1,
+explanation:"Every API Gateway deployment generates a unique invoke URL: https://abc123xyz.execute-api.ap-south-1.amazonaws.com/prod/users. Structure: {api-id} (auto-generated), execute-api (service subdomain), {region} (where the API lives), {stage} (deployment environment), and optionally a resource path. Custom domains (api.mycompany.com) use Route 53 and ACM certificates to replace the auto-generated URL. Edge-optimized endpoints use CloudFront CDN URLs for global performance."},
+
+{q:"What is Integration in API Gateway, and what are the types?",tag:"integ",
+tip:"Integration = how API Gateway talks to your backend",
+options:["Integration is the process of deploying an API to a stage for public access","Integration defines how API Gateway connects to and communicates with a backend service -- types include Lambda, HTTP, AWS Service, VPC Link, and Mock integrations","Integration is the configuration for combining multiple API endpoints into a single unified API","Integration is the authentication mechanism that connects API Gateway to IAM"],
+correct:1,
+explanation:"Integration is the backend connection configuration per API method. Types: Lambda Integration (invoke a Lambda function -- most common serverless pattern), HTTP Integration (forward to any HTTP/HTTPS endpoint), AWS Service Integration (directly call AWS services like SQS, DynamoDB, SNS without Lambda), VPC Link Integration (connect to private resources inside a VPC via NLB), Mock Integration (return a static response without calling any backend -- useful for testing and stubbing). Each integration type can be proxy (pass-through) or managed (with request/response mapping)."},
+
+{q:"What is Lambda Proxy Integration?",tag:"integ",
+tip:"Full request object passed to Lambda. Lambda owns the response format.",
+options:["A Lambda function that acts as a reverse proxy, routing requests to other Lambda functions based on the URL path","A type of integration where API Gateway forwards the entire HTTP request as a structured event to Lambda and expects a specific response format back","A feature that pre-warms Lambda functions by sending proxy health-check requests every minute","A VPC proxy that routes Lambda invocations through a private network endpoint"],
+correct:1,
+explanation:"With Lambda Proxy Integration, API Gateway passes the complete request to Lambda as a JSON event: HTTP method, headers, query string parameters, path parameters, body, and request context. Lambda MUST return a specific response object: {statusCode: 200, headers: {...}, body: JSON.stringify(data)}. Benefits: maximum flexibility (Lambda handles all routing and transformation logic), single integration setup covers all methods and resources (using /{proxy+}). Trade-off: more code responsibility in Lambda vs. managed non-proxy transformations in API Gateway."},
+
+{q:"What is Non-Proxy (Custom) Integration in API Gateway?",tag:"integ",
+tip:"API Gateway transforms request/response using VTL mapping templates",
+options:["An integration type where Lambda calls API Gateway instead of API Gateway calling Lambda","A configuration where API Gateway applies mapping templates (using Velocity Template Language) to transform requests before sending to the backend and transform responses before returning to the client","A type of integration that only works with non-Lambda backends like EC2 or HTTP endpoints","An integration that uses custom authorization logic instead of IAM or Cognito"],
+correct:1,
+explanation:"Non-proxy integration gives API Gateway responsibility for request/response transformation. You write Velocity Template Language (VTL) mapping templates that reshape the incoming request (extract specific fields, rename parameters, restructure JSON) before it hits the backend, and reshape the response before returning it to the client. Benefits: backend receives clean, consistent data regardless of how the client sends it, backend can return any format and API Gateway standardizes it. Best for legacy backends that expect specific payload formats, or when you want to keep transformation logic out of Lambda."},
+
+{q:"What is a Resource in API Gateway?",tag:"core",
+tip:"/users -> /users/{id} -> /users/{id}/orders",
+options:["A physical compute resource (EC2 instance) that backs an API Gateway endpoint","A logical URL path segment in the API hierarchy -- each resource represents a noun in your REST API and can have HTTP methods configured on it","An IAM resource policy that controls which AWS accounts can invoke the API","A CloudFormation resource block that defines API Gateway configuration"],
+correct:1,
+explanation:"Resources define the URL structure of your API. They are hierarchical: /users (list all users), /users/{id} (specific user by ID), /users/{id}/orders (orders for a user). The {id} syntax creates a path parameter captured in the request. Each resource can have multiple HTTP methods (GET, POST, PUT, DELETE, PATCH, OPTIONS) each with its own integration, authorization, and request/response configuration. The root resource (/) is created automatically. ANY method matches all HTTP methods not explicitly configured."},
+
+{q:"What is a Method in API Gateway?",tag:"core",
+tip:"Resource: /users | Methods: GET (list), POST (create), DELETE (remove)",
+options:["A programming method (function) inside a Lambda function that API Gateway calls directly","An HTTP operation (GET, POST, PUT, DELETE, PATCH) configured on a resource -- each method defines its own integration, authorization settings, request validators, and response mappings","A deployment method that controls how changes are promoted from development to production stages","A monitoring method that defines how API Gateway collects and exports metrics to CloudWatch"],
+correct:1,
+explanation:"Each method on a resource represents one API operation. Method configuration includes: Method Request (authentication, request validation, required headers/query params), Integration Request (how to call the backend, including request transformation), Integration Response (how to map backend response codes and transform the response body), and Method Response (HTTP status codes and response models to return to clients). This four-part pipeline gives fine-grained control over every API operation. In REST API design, methods map to CRUD: GET=Read, POST=Create, PUT/PATCH=Update, DELETE=Delete."},
+
+{q:"What is an API Gateway Stage?",tag:"deploy",
+tip:"Same API, three stages: dev / staging / prod -- each independent",
+options:["A sequential processing phase that every API request passes through (authentication stage, routing stage, backend stage)","A named snapshot of a deployed API configuration -- each stage has its own URL, independent throttling, caching, logging settings, and stage variables","A feature flag system that gradually rolls out new API versions to a percentage of traffic","A Git branch equivalent for API Gateway configurations stored in CodeCommit"],
+correct:1,
+explanation:"Stages are deployment environments for your API. Each stage gets a unique URL: https://api.execute-api.region.amazonaws.com/{stage-name}/. Stage capabilities: Stage Variables (like environment variables -- reference ${stageVariables.lambdaAlias} to point to different Lambda versions per stage), independent throttling and caching settings, CloudWatch logging levels, X-Ray tracing toggle, Canary deployments (route X% of traffic to new deployment), and independent access log formats. Common stages: dev (rapid iteration), staging (QA and integration testing), prod (live traffic). Never deploy untested changes directly to prod."},
+
+{q:"What is API Deployment in API Gateway?",tag:"deploy",
+tip:"Changes to API config are NOT live until deployed to a stage",
+options:["Deployment is the initial creation of an API -- once created, APIs automatically update when you change configurations","Deployment is the process of publishing API configuration changes to a specific stage, making them live and accessible to clients","Deployment automatically scales API Gateway capacity based on incoming request volume","Deployment creates a CloudFormation stack that manages all API Gateway resources and dependencies"],
+correct:1,
+explanation:"API Gateway uses an explicit deploy-to-stage model. Any changes (new routes, modified integrations, updated authorizers, changed throttling) exist only as a draft until you deploy them to a stage. This deliberate separation prevents accidental production changes. Deployment options: Console (Deploy API button), CLI (aws apigateway create-deployment), CDK/Terraform (automatic on resource changes), CI/CD pipeline (deploy after automated tests pass). Each deployment creates an immutable snapshot -- you can roll back by redeploying a previous snapshot. For REST APIs, changes require explicit deployment; HTTP APIs auto-deploy by default."}
+]},
+
+{label:"Auth & Traffic", questions:[
+{q:"What is Throttling in API Gateway?",tag:"perf",
+tip:"Default: 10,000 RPS account limit, 5,000 burst. Returns 429 when exceeded.",
+options:["A feature that compresses API responses to reduce payload size and improve transfer speed","A rate-limiting mechanism that restricts the number of requests API Gateway accepts per second -- protecting backend services from overload and returning 429 Too Many Requests when exceeded","A load-balancing algorithm that distributes requests evenly across multiple backend instances","An auto-scaling trigger that adds more Lambda concurrency when request rates increase"],
+correct:1,
+explanation:"Throttling is your backend's protection layer. Two throttle dimensions: Rate (sustained requests per second -- e.g., 1000 RPS) and Burst (maximum concurrent requests at a spike peak -- e.g., 2000). Throttling hierarchy: account-level defaults (10,000 RPS, 5,000 burst), stage-level overrides, per-method overrides, and usage plan limits per API key. When throttled, clients receive HTTP 429 with a Retry-After header. Design pattern: place SQS between API Gateway and Lambda to absorb traffic spikes -- API Gateway writes to SQS (fast), Lambda processes at its own pace."},
+
+{q:"What is the difference between Rate Limiting and Throttling in API Gateway?",tag:"perf",
+tip:"Rate limiting = sustained quota | Throttling = spike protection",
+options:["They are identical concepts -- rate limiting and throttling are interchangeable terms for the same API Gateway feature","Rate limiting controls the sustained average request rate over time (e.g., 1000 requests/day per API key via usage plans), while throttling controls burst behavior (handling sudden traffic spikes without crashing backends)","Rate limiting applies only to authenticated requests while throttling applies to all requests including unauthenticated ones","Rate limiting is configured at the API level while throttling is configured at the individual Lambda function level"],
+correct:1,
+explanation:"Two complementary traffic controls: Rate Limiting (usage plans) -- sets a quota over a time window. Example: 10,000 requests per day per API key. When exceeded, client gets 429 and must wait until the quota resets. Best for B2B API monetization and preventing API abuse by specific clients. Throttling (stage/method settings) -- controls requests per second and burst size. Protects against sudden traffic spikes regardless of quota. All clients are affected equally. Together: usage plans for per-client limits, throttling for system-wide protection. Both return 429 but for different reasons."},
+
+{q:"What is an API Key in API Gateway?",tag:"auth",
+tip:"API Key = tracking identifier, NOT authentication. Use Cognito/IAM for auth.",
+options:["A cryptographic key that encrypts all data transmitted between clients and API Gateway using AES-256","A unique alphanumeric string that identifies a client and controls API access when combined with usage plans -- used for tracking and rate limiting, not authentication","An SSH key pair used to authenticate API Gateway when it calls backend EC2 instances","An AWS KMS key that API Gateway uses to encrypt cached responses and CloudWatch logs"],
+correct:1,
+explanation:"API keys are 20-40 character alphanumeric strings sent in the x-api-key request header. Critical distinction: API keys are NOT authentication -- they don't verify identity. They are identifiers for tracking and quotas. Use cases: monetized APIs (each paying customer gets a unique key tied to their usage plan), developer portals (issue keys to API consumers for tracking), rate limiting specific clients differently. Important: API keys can be passed in plaintext headers -- they're easily stolen if not used over HTTPS. For actual security, layer API keys with IAM Cognito or Lambda authorizers."},
+
+{q:"What is a Usage Plan in API Gateway?",tag:"auth",
+tip:"Usage Plan = throttle + quota settings linked to one or more API keys",
+options:["A billing plan that determines how AWS charges for API Gateway usage based on request volume","A configuration object linking API keys to throttling limits and request quotas -- defining how much API access a specific client (key) is allowed","A deployment plan that schedules API updates during low-traffic maintenance windows","An auto-scaling plan that adjusts API Gateway capacity based on historical traffic patterns"],
+correct:1,
+explanation:"Usage plans define API access tiers for different client categories. Configuration: throttle rate (requests/second for this key), burst limit (max concurrent for this key), quota (requests per day/week/month). Workflow: Create usage plan -> Set throttle and quota -> Associate with one or more API stages -> Generate API keys -> Add keys to the usage plan. Real-world example: Free tier plan (100 req/day, 1 RPS), Basic plan (10,000 req/day, 10 RPS), Enterprise plan (1M req/day, 1000 RPS). Track usage per key in CloudWatch. Quota exceeded returns 429 with 'Limit Exceeded' message."},
+
+{q:"What are the authorization options in API Gateway?",tag:"auth",
+tip:"IAM=AWS services | Cognito=end users | Lambda=custom logic | API Keys=tracking",
+options:["API Gateway only supports HTTP Basic Authentication with a username and password configured in the stage settings","Authorization options include IAM (AWS SigV4 signatures for service-to-service), Cognito User Pools (JWT tokens for end users), Lambda Authorizers (custom token/header validation), and API Keys (tracking only)","API Gateway delegates all authorization to the backend Lambda function -- it has no built-in authorization capabilities","Authorization is handled automatically by AWS Shield and cannot be customized per API endpoint"],
+correct:1,
+explanation:"API Gateway has four authorization layers: (1) IAM Authorization -- callers sign requests with AWS credentials (SigV4). Used for service-to-service calls within AWS. (2) Cognito User Pools -- clients authenticate via Cognito, receive a JWT, include it in the Authorization header. API Gateway validates the JWT natively without Lambda. (3) Lambda Authorizer -- a Lambda function receives the token/header and returns an IAM policy (allow or deny). Supports any custom auth logic: JWT from non-Cognito IdP, API token validation, IP-based access. (4) Resource Policies -- JSON policies restricting which AWS accounts or IPs can invoke the API. Layers can be combined."},
+
+{q:"What is IAM Authorization in API Gateway?",tag:"auth",
+tip:"Caller must sign request with AWS credentials (SigV4). Used for internal AWS services.",
+options:["A feature that creates IAM users automatically for each API client that registers","IAM Authorization requires callers to sign their HTTP requests using AWS Signature Version 4 (SigV4) -- the API Gateway validates the signature against IAM policies before forwarding to the backend","A mechanism where API Gateway assumes an IAM role to call backend services on behalf of the client","An authorization method where API Gateway reads IAM group membership to determine access levels"],
+correct:1,
+explanation:"IAM authorization uses the standard AWS request signing process. The caller computes an HMAC-SHA256 signature over the request using their AWS access key and secret, adds Authorization headers, and API Gateway validates by recomputing the signature. Benefits: no additional tokens, integrates with existing AWS IAM roles and policies, supports cross-account access via resource policies. Limitations: every client must have AWS credentials (not suitable for browser-based apps or mobile users without Cognito). Best for: internal microservices, Lambda-to-API calls, server-to-server integrations within AWS."},
+
+{q:"What is a Lambda Authorizer in API Gateway?",tag:"auth",
+tip:"Token authorizer: validates JWT/OAuth. Request authorizer: inspects headers/params.",
+options:["A pre-built Lambda function provided by AWS that handles OAuth 2.0 token validation automatically","A custom Lambda function you write that receives the incoming request token or parameters, validates them using any logic you choose, and returns an IAM policy that API Gateway enforces","A Lambda function that the client invokes separately to obtain a token before calling the API","A monitoring Lambda that logs all authorization attempts to CloudWatch for security auditing"],
+correct:1,
+explanation:"Lambda Authorizers give you complete flexibility over authorization logic. Two types: Token-based -- receives a single token (from Authorization header), validates it (JWT signature check, OAuth token introspection, custom token lookup), returns an Allow/Deny IAM policy. Request-based -- receives the entire request context (headers, query params, path, method), useful for multi-factor authorization logic. Key feature: response caching -- cache the authorization decision for up to 1 hour (by token) to avoid invoking the Lambda on every request. Use cases: third-party OAuth (Google, GitHub), proprietary token systems, IP-based access, multi-tenant SaaS authorization."},
+
+{q:"What is CORS in API Gateway and when do you need it?",tag:"sec",
+tip:"CORS needed: frontend on example.com calling API on abc.execute-api.amazonaws.com",
+options:["CORS is a compression algorithm that reduces API response size for faster cross-region data transfer","Cross-Origin Resource Sharing is a browser security mechanism -- API Gateway must return specific CORS headers when browser-based clients on one domain call an API on a different domain","CORS is a caching strategy that stores API responses at CloudFront edge locations closest to users","CORS is an encryption protocol that secures data transmitted between the browser and API Gateway"],
+correct:1,
+explanation:"Browsers enforce the Same-Origin Policy -- JavaScript cannot make requests to a different domain unless the server explicitly allows it via CORS headers. When your React app at app.example.com calls your API at abc.execute-api.amazonaws.com, the browser first sends a preflight OPTIONS request. API Gateway must respond with: Access-Control-Allow-Origin (which origins are allowed), Access-Control-Allow-Methods (GET, POST, etc.), Access-Control-Allow-Headers. For REST APIs: enable CORS per resource (adds OPTIONS method and headers). For HTTP APIs: configure CORS in the API settings (applies globally). Lambda Proxy Integration: Lambda must include CORS headers in its response object."},
+
+{q:"What is API Gateway Caching?",tag:"perf",
+tip:"Cache hit: response from APIGW in ~1ms. Cache miss: call backend, ~100-500ms.",
+options:["A feature that caches Lambda function code in memory to eliminate cold starts for frequently invoked functions","API Gateway stores backend responses in a cache for a configurable TTL period -- serving repeated identical requests from cache instead of forwarding to the backend, reducing latency and backend load","A CDN feature that replicates API responses to all CloudFront edge locations worldwide","A client-side caching directive that API Gateway adds to responses instructing browsers to cache results locally"],
+correct:1,
+explanation:"API Gateway caching is a stage-level response cache. Configuration: cache capacity (0.5 GB to 237 GB), TTL (0-3600 seconds, default 300s), per-method override, cache key customization (include specific query parameters or headers in the cache key). Cache hit: API Gateway returns the cached response immediately without calling the backend -- reduces latency to single-digit milliseconds and eliminates Lambda invocation cost. Cache invalidation: TTL expiry, or clients can bypass cache with Cache-Control: max-age=0 header (if you allow it). Cost: cache incurs an hourly charge based on cache size. Best for read-heavy APIs with data that doesn't change frequently."},
+
+{q:"What is Logging in API Gateway?",tag:"perf",
+tip:"Execution logs = detailed debug | Access logs = structured request records",
+options:["Logging stores API definition YAML/JSON files for version control and rollback purposes","API Gateway captures request and response details, routing decisions, and errors -- stored in CloudWatch Logs for debugging, monitoring, and compliance auditing","Logging automatically notifies your team via SNS when API errors exceed a threshold","Logging records changes to API configuration for auditing who modified routes and integrations"],
+correct:1,
+explanation:"API Gateway has two logging modes: Execution Logging -- detailed logs of the request/response lifecycle (what API Gateway received, the integration call, the response transformation). Very verbose. Use for debugging only in dev/staging (expensive at scale). Access Logging -- structured log records of who called what, when, and the result. You define the format (JSON recommended) including: requestId, caller IP, user agent, resource path, HTTP method, status code, latency, and integration latency. Use in production for monitoring and compliance. Both go to CloudWatch Logs. Combine with CloudWatch Insights queries or export to S3 for analysis with Athena."}
+]},
+
+{label:"Performance & Advanced", questions:[
+{q:"What is Integration Latency in API Gateway?",tag:"perf",
+tip:"Total latency = API Gateway overhead (~5-10ms) + Integration Latency (backend time)",
+options:["The time API Gateway takes to authenticate and authorize a request before forwarding it to the backend","The time elapsed from when API Gateway forwards the request to the backend until it receives the response back -- measuring pure backend processing time","The network latency between the client and the nearest API Gateway edge location","The time API Gateway spends transforming request/response payloads using VTL mapping templates"],
+correct:1,
+explanation:"Integration Latency is a key CloudWatch metric: IntegrationLatency measures how long the backend (Lambda, HTTP, AWS service) took to respond. Latency measures the total time including API Gateway overhead. The difference (Latency - IntegrationLatency) is API Gateway's own processing time (~5-10ms typically). High IntegrationLatency indicates a slow backend -- investigate Lambda cold starts, database query times, or external API calls. Use X-Ray to get a distributed trace showing time breakdown across API Gateway, Lambda, and downstream calls. Set CloudWatch alarms on P99 IntegrationLatency to detect degradation before users notice."},
+
+{q:"What is an Edge-Optimized Endpoint in API Gateway?",tag:"adv",
+tip:"Edge-optimized = CloudFront CDN in front. Best for globally distributed clients.",
+options:["An API endpoint deployed at the AWS network edge with reduced API Gateway functionality","An API Gateway endpoint type that routes requests through AWS CloudFront edge locations -- reducing latency for globally distributed clients by routing to the nearest edge point of presence before traversing the AWS backbone to the region","A serverless edge computing endpoint that runs API Gateway Lambda@Edge functions","An endpoint type that places API Gateway replicas in every AWS Availability Zone for maximum redundancy"],
+correct:1,
+explanation:"Edge-optimized endpoints use CloudFront as a front-end layer. Client request flow: Client -> nearest CloudFront PoP (100+ locations worldwide) -> AWS backbone -> API Gateway in one region -> backend. Benefits: reduced latency for clients far from the API's home region (a user in Singapore calling a us-east-1 API routes through a Singapore PoP), CloudFront connection optimizations (keep-alive, HTTP/2, TLS offload). Limitations: SSL certificates must be in us-east-1 (CloudFront requirement), some API Gateway features behave slightly differently. Best for public-facing consumer APIs with a global user base."},
+
+{q:"What is a Regional Endpoint in API Gateway?",tag:"adv",
+tip:"Regional = direct to APIGW in that region. Pair with your own CloudFront for control.",
+options:["An API Gateway endpoint with routing rules based on the geographic region of the incoming request","An API endpoint deployed directly in a specific AWS region without a CloudFront layer -- requests go directly to API Gateway without CDN routing","A multi-region active-active deployment where API Gateway automatically fails over between regions","An endpoint type restricted to internal AWS traffic within a single region's Availability Zones"],
+correct:1,
+explanation:"Regional endpoints deploy API Gateway directly in the chosen region with no CloudFront intermediary. Client request flow: Client -> API Gateway in the region -> backend. Benefits: lower latency for clients in the same region (no CloudFront routing overhead), ability to attach your own CloudFront distribution (giving full CDN control -- custom cache behaviors, WAF, geo-restriction, custom origins), and better for APIs consumed by backend services in the same region. Use cases: APIs called by EC2 or Lambda in the same region, APIs where you want to manage your own CloudFront configuration, single-region B2B integrations."},
+
+{q:"What is a Private API in API Gateway?",tag:"sec",
+tip:"Private API: accessible ONLY from within a VPC via VPC Endpoint (Interface Endpoint)",
+options:["An API with all endpoints password-protected requiring HTTP Basic Authentication","An API accessible only from within a specific Amazon VPC -- requests must come through a VPC Endpoint (Interface Endpoint for execute-api), never traversing the public internet","An API with encrypted payloads where only clients with the decryption key can read responses","An API deployed in a private subnet that is unreachable from the AWS Console"],
+correct:1,
+explanation:"Private APIs are fully isolated from the internet. Setup: create a VPC Interface Endpoint (type: execute-api) in your VPC, then create the API with endpoint type PRIVATE. Only traffic from that VPC (or peered VPCs) can reach the API. Use resource policies to further restrict which VPCs or VPC endpoints can invoke it. Use cases: internal microservices calling each other, backends that should never be exposed to the internet, on-premises applications connected via Direct Connect or VPN calling internal AWS APIs. No data ever leaves the AWS network -- maximum security for sensitive internal workloads."},
+
+{q:"Describe the API Gateway + Lambda serverless architecture.",tag:"adv",
+tip:"Client -> APIGW -> Lambda -> DB/Service -> Response. Zero servers, auto-scale.",
+options:["Lambda and API Gateway share a server -- Lambda handles routing logic while API Gateway manages the compute","API Gateway acts as an HTTP router that triggers Lambda functions -- Lambda executes business logic, calls databases or other services, and returns a formatted response that API Gateway sends to the client","Lambda calls API Gateway as a webhook whenever it completes processing to notify clients of results","API Gateway and Lambda both run inside EC2 instances that AWS manages and automatically scales"],
+correct:1,
+explanation:"The API Gateway + Lambda architecture is the foundation of AWS serverless. Request flow: (1) Client sends HTTP request to API Gateway endpoint. (2) API Gateway authenticates, validates, and rate-limits the request. (3) API Gateway invokes Lambda synchronously, passing the request as a JSON event. (4) Lambda executes: reads from DynamoDB/RDS, calls other services, processes business logic. (5) Lambda returns a response object (statusCode, headers, body). (6) API Gateway formats and returns the HTTP response to the client. Benefits: no servers to manage, scales automatically from 0 to millions of requests, pay per request (first 1M free/month), deploy in seconds."},
+
+{q:"How do you secure API Gateway comprehensively?",tag:"sec",
+tip:"Layers: WAF -> resource policy -> Cognito/IAM -> Lambda authorizer -> HTTPS only",
+options:["API Gateway is secure by default -- no additional configuration is required after creation","Security is handled entirely by IAM -- no other security mechanisms are available or needed","Use layered security: WAF (block bad traffic), resource policies (restrict by IP/account), IAM or Cognito (identity authentication), Lambda Authorizers (custom validation), API keys (client tracking), HTTPS enforcement, and request validation","Security in API Gateway is optional -- only enable it for APIs handling sensitive data like healthcare or finance"],
+correct:2,
+explanation:"Defense-in-depth for API Gateway: (1) AWS WAF -- attach a Web ACL to block SQL injection, XSS, known bad IPs, rate-based rules. (2) Resource Policy -- restrict which AWS accounts or IP CIDRs can invoke the API. (3) Authentication -- Cognito User Pools for end-user JWT auth, IAM for service-to-service. (4) Lambda Authorizer -- custom business logic authorization. (5) API Keys + Usage Plans -- per-client rate limiting and quota enforcement. (6) HTTPS only -- disable HTTP, enforce TLS. (7) Request Validation -- validate required headers, query params, and body schema before hitting the backend. (8) CloudTrail -- audit all API management calls. (9) VPC endpoint -- for private APIs."},
+
+{q:"What is API Gateway + VPC Integration using VPC Link?",tag:"adv",
+tip:"VPC Link: API Gateway -> NLB (private) -> ALB/ECS/EC2 inside VPC",
+options:["A feature that moves API Gateway inside your VPC so it shares the same private IP address space","VPC Link allows API Gateway to connect to private resources inside a VPC (like an internal ALB, NLB, or EC2 instances) without those resources needing a public IP or internet exposure","A VPN connection between API Gateway and an on-premises data center for hybrid API deployments","A peering connection between two API Gateways in different VPCs for cross-account API sharing"],
+correct:1,
+explanation:"VPC Link solves the private backend problem. Without VPC Link, API Gateway can only reach publicly accessible endpoints. With VPC Link: API Gateway -> VPC Link -> NLB (in your VPC) -> internal targets (ALB, ECS service, EC2 fleet). The NLB acts as the private bridge. Setup: create a Network Load Balancer targeting your private resources, create a VPC Link pointing to the NLB, configure API Gateway HTTP integration using the VPC Link. Your backend instances never need public IPs or internet gateways. REST APIs use VPC Link for HTTP proxy integration. HTTP APIs use VPC Link with Application Load Balancers or Cloud Map for service discovery."},
+
+{q:"What is Binary Support in API Gateway?",tag:"adv",
+tip:"Binary types: image/*, application/pdf, audio/*, video/* -- not JSON",
+options:["A feature that processes binary (Base2) numbers in API requests for mathematical computation APIs","API Gateway's ability to handle non-text payloads (images, PDFs, audio, video) by base64-encoding them for transport -- required when your API needs to receive or return binary data","A deployment mode that uses binary (on/off) feature flags to control API behavior","A compression algorithm that reduces JSON payload size using binary encoding"],
+correct:1,
+explanation:"By default, API Gateway treats payloads as text (UTF-8 strings). For binary media types (images, PDFs, audio/video, protobuf), you configure binary support by listing the MIME types (e.g., image/*, application/octet-stream, application/pdf) in the Binary Media Types setting. API Gateway then base64-encodes binary request bodies when passing to Lambda and base64-decodes Lambda's base64-encoded responses. Lambda must set isBase64Encoded: true in its response. Use cases: file upload APIs, image processing pipelines, document generation APIs. For large files (over 10MB), use pre-signed S3 URLs instead -- API Gateway has a 10MB payload limit."},
+
+{q:"What is Error Handling and Custom Error Responses in API Gateway?",tag:"adv",
+tip:"Default: 502 (bad integration), 504 (timeout), 429 (throttle), 4xx (client), 5xx (server)",
+options:["Error handling in API Gateway means catching exceptions in Lambda and logging them to CloudWatch","Custom error responses allow you to map specific HTTP error codes or regex-matched error messages from your backend to specific HTTP status codes and response body templates returned to clients","Error handling automatically retries failed requests up to three times before returning an error to the client","Custom errors are only available for 5xx server errors -- 4xx client errors always return the default API Gateway response format"],
+correct:1,
+explanation:"API Gateway error customization works differently by integration type. For non-proxy Lambda integration: configure Integration Response mappings -- regex match the error message Lambda throws (e.g., .*NotFound.* maps to 404 with a custom body). For proxy integration: Lambda must return the statusCode and error body itself. For HTTP integrations: map backend status codes to different API Gateway status codes. Gateway errors (throttling=429, invalid API key=403, timeout=504) can be customized using Gateway Responses in the API settings. Always customize error responses to avoid leaking internal implementation details (stack traces, backend URLs) to clients."},
+
+{q:"Why should you use API Gateway instead of exposing your backend directly?",tag:"core",
+tip:"API Gateway = centralized control: auth + throttle + monitor + version + transform",
+options:["API Gateway is required by AWS compliance -- you cannot expose EC2 or Lambda endpoints without it","You should expose backends directly -- API Gateway adds unnecessary latency and complexity for simple APIs","API Gateway provides centralized management: a single layer handling authentication, authorization, throttling, caching, monitoring, SSL termination, request transformation, and API versioning -- without modifying backend code","API Gateway is only beneficial for high-traffic APIs over 1M requests per day -- smaller APIs don't benefit from the overhead"],
+correct:2,
+explanation:"API Gateway solves the cross-cutting concerns problem. Without it, every backend service must implement: authentication, rate limiting, logging, CORS, SSL, versioning, and monitoring independently. With API Gateway: one place to configure security (all backends protected by one authorizer), one place to monitor (unified CloudWatch metrics and logs), one place to throttle (protect all backends from overload), request/response transformation (backends receive clean data), API versioning (/v1/, /v2/ stages), developer experience (usage plans, API keys, developer portal). The architectural pattern: thin, dumb backends focused on business logic; fat, smart API Gateway handling all cross-cutting concerns."}
+]}
+];
+
+var currentSection = 0, current = 0;
+var sectionAnswers = sections.map(function(s){ return new Array(s.questions.length).fill(null); });
+var tagMeta = {
+  core:   {label:'Core',        cls:'tag-core'},
+  integ:  {label:'Integration', cls:'tag-integ'},
+  auth:   {label:'Auth',        cls:'tag-auth'},
+  perf:   {label:'Performance', cls:'tag-perf'},
+  sec:    {label:'Security',    cls:'tag-sec'},
+  deploy: {label:'Deployment',  cls:'tag-deploy'},
+  adv:    {label:'Advanced',    cls:'tag-adv'}
+};
+
+function switchSection(idx){
+  currentSection=idx; current=0;
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active',i===idx); });
+  render();
+}
+
+function render(){
+  var sec=sections[currentSection];
+  var q=sec.questions[current];
+  var answers=sectionAnswers[currentSection];
+  var ans=answers[current];
+  var isAnswered=ans!==null;
+  var total=sec.questions.length;
+  var tm=tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width=((current+1)/total*100)+'%';
+  document.getElementById('progressText').textContent=(current+1)+' / '+total;
+
+  document.getElementById('dotsNav').innerHTML=sec.questions.map(function(_,i){
+    var cls='dot';
+    if(i===current) cls+=' active current';
+    else if(answers[i]!==null) cls+=' answered';
+    return '<div class="'+cls+'" onclick="goTo('+i+')"></div>';
+  }).join('');
+
+  var tipHtml=q.tip
+    ? '<div class="tip-label">&#128161; Interview Tip</div><div class="tip-box">'+q.tip+'</div>'
+    : '';
+
+  var optionsHtml=q.options.map(function(opt,i){
+    var cls='option',tag='';
+    if(isAnswered){
+      cls+=' locked';
+      if(i===q.correct){ cls+=' correct'; tag='<span class="option-tag tag-correct">&#10003; CORRECT</span>'; }
+      else if(i===ans) { cls+=' wrong';   tag='<span class="option-tag tag-wrong">&#10007; WRONG</span>'; }
+    }
+    return '<div class="'+cls+'" onclick="selectAnswer('+i+')"><div class="option-dot"></div><span class="option-label">'+opt+'</span>'+tag+'</div>';
+  }).join('');
+
+  var explanationHtml=isAnswered
+    ? '<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">'+q.explanation+'</div></div>'
+    : '';
+
+  var isLast=current===total-1;
+  var allAnswered=answers.every(function(a){ return a!==null; });
+  var nextBtn=(isLast&&allAnswered)
+    ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
+    : '<button class="btn btn-next" onclick="goNext()" '+(!isAnswered?'disabled':'')+'>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card">'+
+      '<div class="q-number">Question '+(current+1)+' of '+total+' <span class="q-tag '+tm.cls+'">'+tm.label+'</span></div>'+
+      tipHtml+
+      '<div class="question">'+q.q+'</div>'+
+      '<div class="options">'+optionsHtml+'</div>'+
+      explanationHtml+
+      '<div class="nav-row">'+
+        '<button class="btn btn-back" onclick="goBack()" '+(current===0?'disabled':'')+'>&#8592; Back</button>'+
+        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>'+
+        nextBtn+
+      '</div>'+
+    '</div>';
+}
+
+function selectAnswer(i){ if(sectionAnswers[currentSection][current]!==null) return; sectionAnswers[currentSection][current]=i; render(); }
+function goNext(){ if(current<sections[currentSection].questions.length-1){ current++; render(); } }
+function goBack(){ if(current>0){ current--; render(); } }
+function goTo(i){ current=i; render(); }
+function resetSection(){ sectionAnswers[currentSection]=new Array(sections[currentSection].questions.length).fill(null); current=0; render(); }
+
+function showResults(){
+  var sec=sections[currentSection];
+  var answers=sectionAnswers[currentSection];
+  var score=answers.filter(function(a,i){ return a===sec.questions[i].correct; }).length;
+  var total=sec.questions.length;
+  var pct=Math.round(score/total*100);
+  var msg=pct===100?'&#127942; Perfect! API Gateway expert!':pct>=70?'&#127919; Solid API knowledge!':'&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML=
+    '<div class="card result-screen">'+
+      '<div class="result-score">'+score+'/'+total+'</div>'+
+      '<div class="result-label">SCORE &middot; '+sec.label.toUpperCase()+' &middot; '+pct+'%</div>'+
+      '<div class="result-msg">'+msg+'</div>'+
+      '<div class="result-list">'+
+        sec.questions.map(function(q,i){
+          var icon=answers[i]===q.correct?'&#9989;':'&#10060;';
+          var label=q.q.length>48?q.q.slice(0,48)+'&hellip;':q.q;
+          return '<div class="result-item"><span style="font-size:15px">'+icon+'</span><span class="q-tag '+tagMeta[q.tag].cls+'" style="font-size:9px">'+tagMeta[q.tag].label+'</span>Q'+(i+1)+': '+label+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>'+
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetSection()">&#8635; Try Again</button>'+
+    '</div>';
+  document.getElementById('dotsNav').innerHTML='';
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressText').textContent=score+' / '+total+' correct';
+}
+
+function reviewAnswers(){ current=0; render(); }
+render();
+</script>
+</body>
+</html>

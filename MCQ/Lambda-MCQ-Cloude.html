@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Lambda Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#c084fc;--accent2:#7e22ce;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(192,132,252,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(192,132,252,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(126,34,206,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(192,132,252,0.1);border:1px solid rgba(192,132,252,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core    {background:rgba(192,132,252,0.12);border:1px solid rgba(192,132,252,0.3);color:#c084fc;}
+  .tag-perf    {background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24;}
+  .tag-scale   {background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399;}
+  .tag-trigger {background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8;}
+  .tag-limits  {background:rgba(255,77,109,0.12); border:1px solid rgba(255,77,109,0.3); color:#ff4d6d;}
+  .tag-best    {background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.3); color:#fb923c;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .flow-box{background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;color:#94a3b8;line-height:1.9;}
+  .flow-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(192,132,252,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(192,132,252,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(192,132,252,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(192,132,252,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(192,132,252,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(126,34,206,0.08);border:1px solid rgba(126,34,206,0.25);color:#a855f7;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(126,34,206,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Serverless Prep</div>
+  <h1>AWS <span>Lambda</span> Quiz</h1>
+  <p class="subtitle">// 10 questions &middot; Core &middot; Performance &middot; Scaling &middot; Triggers &middot; Best Practices</p>
+</header>
+
+<div class="quiz-container">
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-perf">Performance</span>
+    <span class="legend-item tag-scale">Scaling</span>
+    <span class="legend-item tag-trigger">Triggers</span>
+    <span class="legend-item tag-limits">Limits</span>
+    <span class="legend-item tag-best">Best Practice</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">1 / 10</div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var questions = [
+{q:"What is AWS Lambda?",tag:"core",
+flow:"Event (S3/API/Timer)\n  -> Lambda triggered\n    -> Your code runs\n      -> Result returned\n  No servers to manage",
+options:["A managed virtual machine service where you provision CPU and RAM for your workloads","A serverless compute service that runs your code in response to events without provisioning or managing any servers","A container orchestration platform that deploys Docker images on a managed Kubernetes cluster","A batch processing service that runs long-running jobs on dedicated EC2 worker instances"],
+correct:1,
+explanation:"Lambda is AWS's serverless compute engine. You upload code (Python, Node.js, Java, Go, etc.), configure a trigger, and Lambda handles everything else — hardware, OS, runtime patches, capacity provisioning, and auto-scaling. The billing model is pay-per-invocation (first 1M invocations/month free) + duration (GB-seconds). No requests = no cost. This makes it extremely cost-effective for variable or low-traffic workloads. Lambda is the foundation of serverless architecture on AWS."},
+
+{q:"How does Lambda work internally when an event occurs?",tag:"core",
+flow:"Warm start: reuse existing container (~ms)\nCold start: provision -> runtime -> init code -> handler\n  [download image] [start container] [load deps] [run handler]",
+options:["Lambda deploys a dedicated EC2 instance for each function and keeps it running 24/7","AWS provisions a lightweight execution environment (microVM via Firecracker), loads your runtime and code, executes the handler, and either keeps the environment warm for reuse or freezes it","Lambda runs inside the same EC2 instance as the API Gateway, sharing memory and CPU resources","Lambda uses AWS Fargate to run your code inside Docker containers that are pre-warmed in every region"],
+correct:1,
+explanation:"Lambda uses AWS Firecracker (a microVM technology) for isolation. Each execution environment has a runtime (Python/Node/Java), your deployment package, and any initialized code outside the handler. The lifecycle: (1) Init phase - download code, start runtime, run initialization code (outside handler). (2) Invoke phase - run your handler function. (3) Freeze - environment is frozen after invocation. (4) Thaw or terminate - frozen environments are reused (warm) or discarded after inactivity. Lambda can run up to 1000 concurrent executions by default per region."},
+
+{q:"What is a Lambda cold start and why does it matter?",tag:"perf",
+flow:"Cold start timeline:\n  ~100-500ms: provision microVM\n  ~50-200ms:  load runtime\n  ~50-500ms:  init your code\n  -> handler executes\nWarm start: ~1-10ms overhead only",
+options:["A Lambda function that processes data from cold storage like S3 Glacier or Deep Archive","The delay experienced when Lambda must initialize a completely new execution environment because no warm environment is available — adding latency before your handler code runs","A Lambda billing mode where you pay only for cold invocations that access DynamoDB without a cache layer","A Lambda timeout error that occurs when the function runs for more than the configured maximum duration"],
+correct:1,
+explanation:"Cold starts happen when: no existing warm environment is available (first invocation, after a period of inactivity, or when scaling beyond current concurrent environments). The cold start duration varies by runtime (Python/Node.js: ~100-300ms, Java/.NET: 500-2000ms) and package size. Impact: high for synchronous, user-facing APIs (adds perceived latency). Low for async processing (S3, SQS) where sub-second delays don't matter. Cold starts are measured as the Init Duration in CloudWatch Logs. Most production functions see ~0.5-5% cold start rate."},
+
+{q:"How do you reduce Lambda cold start latency?",tag:"perf",
+flow:"Provisioned Concurrency:\n  -> keeps N environments pre-initialized\n  -> handler starts immediately\n  -> cost: pay for idle time too",
+options:["Increase the Lambda function's memory allocation to maximum (10GB) to speed up initialization","Switch to a interpreted language like Python which always has faster cold starts than any compiled language","Use Provisioned Concurrency (pre-warms environments), minimize package size (fewer dependencies = faster init), use lighter runtimes (Node.js/Python over Java), and move heavy init code outside the handler","Disable CloudWatch logging since log writes add significant cold start overhead to every invocation"],
+correct:2,
+explanation:"Cold start reduction strategies: (1) Provisioned Concurrency - pays AWS to keep N environments pre-initialized and ready. Zero cold starts for those slots. Cost: pay for reserved capacity even when idle. (2) Minimize package size - only include required dependencies, use Lambda Layers for shared libs, use tree-shaking. (3) Runtime choice - Python/Node.js cold start faster than Java/C#. (4) SnapStart (Java) - Lambda takes a snapshot of the initialized environment and restores it instead of re-initializing. (5) Keep init code lean - lazy-load connections, cache after first init. (6) Ping functions - scheduled EventBridge rule invokes function every few minutes to keep it warm (not recommended for production)."},
+
+{q:"What is Lambda concurrency?",tag:"scale",
+flow:"Concurrency = simultaneous executions\n\nReserved: guarantee N for this function\nProvisioned: pre-warm N environments\nUnreserved pool: shared by all functions\n\nDefault limit: 1000/region (soft limit)",
+options:["The number of CPU cores allocated to a single Lambda function execution environment","The maximum number of times a Lambda function can be invoked per hour before rate limiting applies","The number of Lambda function instances running simultaneously — each request gets its own execution environment, and AWS automatically scales this up to handle concurrent traffic","The number of different event sources that can trigger a single Lambda function at the same time"],
+correct:2,
+explanation:"Lambda concurrency is horizontal scaling in action. Each simultaneous request gets its own isolated execution environment. If 500 requests arrive at the same moment, Lambda spins up 500 environments. Controls: Reserved Concurrency - dedicates a fixed number of concurrent executions to one function (guarantees capacity, prevents throttling from other functions). Provisioned Concurrency - pre-warms environments to eliminate cold starts. Throttling - when concurrency limit is hit, Lambda returns 429 errors. Account-level default: 1000 concurrent executions per region (request increase via AWS Support). Monitor with ConcurrentExecutions CloudWatch metric."},
+
+{q:"What are Lambda triggers, and which AWS services can trigger Lambda?",tag:"trigger",
+flow:"Synchronous triggers:\n  API Gateway, ALB, Cognito\nAsynchronous triggers:\n  S3, SNS, EventBridge, SES\nStream/queue triggers:\n  SQS, Kinesis, DynamoDB Streams",
+options:["Lambda can only be triggered manually via the AWS Console or CLI — automatic triggers are not supported","Triggers are only available for S3 and API Gateway — other services require polling Lambda manually","Triggers are event sources that automatically invoke Lambda — including S3 (file uploads), API Gateway (HTTP requests), SQS/SNS (messages), EventBridge (scheduled/custom events), DynamoDB Streams, Kinesis, and more","Lambda triggers are billing events that activate when your function usage exceeds the free tier threshold"],
+correct:2,
+explanation:"Lambda integrates with nearly every AWS service as a trigger. Key categories: (1) Synchronous (caller waits for response) - API Gateway/ALB (HTTP APIs), Cognito (auth flows), CloudFront. (2) Asynchronous (fire-and-forget) - S3 events, SNS notifications, EventBridge rules, SES, CloudFormation. (3) Stream/queue polling - SQS (Lambda polls and processes batches), Kinesis Data Streams, DynamoDB Streams, MSK (Managed Kafka). This breadth makes Lambda the glue between AWS services — process uploaded files, respond to API calls, react to database changes, run scheduled tasks, all with the same programming model."},
+
+{q:"Is Lambda stateless, and how do you persist data between invocations?",tag:"core",
+flow:"Each invocation: isolated environment\n  -> NO shared memory between calls\n  -> /tmp: 512MB-10GB (within one env)\n\nFor persistence:\n  S3, DynamoDB, ElastiCache, RDS",
+options:["Lambda is stateful — it automatically persists global variables between invocations using an internal key-value store","Lambda maintains state within a session using HTTP cookies, similar to traditional web application servers","Lambda is stateless by design — each invocation is independent with no guaranteed access to previous state. Persist data using external services: DynamoDB (NoSQL), S3 (files), ElastiCache (cache), or RDS (SQL)","Lambda shares state within the same function version — different versions have separate state stores"],
+correct:2,
+explanation:"Lambda's stateless design is intentional for scalability. You cannot rely on in-memory variables persisting between invocations (they MIGHT persist if the environment is reused, but this is never guaranteed). Stateless patterns: Use DynamoDB for session data, counters, and user state. Use S3 for processed files, reports, and datasets. Use ElastiCache (Redis) for caching and real-time leaderboards. Use RDS/Aurora for relational data (use RDS Proxy to manage connection pools — Lambda can exhaust DB connections at scale). The /tmp directory (up to 10GB) persists within a warm environment but is not shared across instances and is wiped on cold start."},
+
+{q:"What is the Lambda timeout limit and why does it matter?",tag:"limits",
+flow:"Timeout range: 1 second to 15 minutes\nDefault: 3 seconds\n\nTimeout = function terminates hard\nCost: billed only for actual duration\nAnti-pattern: Lambda for 10+ min jobs",
+options:["Lambda timeout is 60 seconds maximum and cannot be changed — use EC2 for longer workloads","Lambda functions run until completion with no timeout — AWS will never terminate a running function","Lambda has a configurable timeout from 1 second to 15 minutes maximum. When reached, the function is hard-terminated regardless of state — preventing runaway executions and controlling cost","Lambda timeout is 5 minutes for synchronous invocations and unlimited for asynchronous invocations"],
+correct:2,
+explanation:"Timeout is a safety mechanism and cost control. Set it close to the expected worst-case execution time (e.g., if your function usually takes 2s, set timeout to 10s). Too short: legitimate slow operations get killed. Too long: runaway/stuck functions bill you and block concurrency. Best practices: set alarms on Duration P99 approaching timeout, use Step Functions for workflows exceeding 15 minutes (orchestrate multiple short Lambda calls), use async patterns (SQS + Lambda) for long processing, and set timeouts explicitly (default 3s is often too short for functions doing DB/API calls)."},
+
+{q:"How does Lambda scale automatically?",tag:"scale",
+flow:"Request rate increases:\n  Lambda adds more concurrent environments\n  Each request = isolated environment\n  No manual intervention needed\n\nScale limit: account concurrency limit\nThrottled requests: 429 status",
+options:["Lambda scales vertically — you must manually increase memory and CPU allocation as load increases","Lambda uses Auto Scaling Groups of EC2 instances — you configure min/max instance counts","Lambda scales horizontally and automatically — each concurrent request gets its own execution environment, AWS adds capacity instantly up to the concurrency limit, with no manual configuration required","Lambda only scales during scheduled maintenance windows you configure in advance"],
+correct:2,
+explanation:"Lambda's scaling model is fundamentally different from server-based scaling. There's no warm-up period, no Auto Scaling policies to configure, no load balancer to set up. Every concurrent request gets its own isolated environment. Scaling speed: Lambda can scale from 0 to thousands of concurrent executions within seconds (initial burst: 500-3000 new executions per minute depending on region, then 500/minute after that). This makes Lambda ideal for spiky, unpredictable workloads. The flip side: sudden traffic spikes can exhaust the concurrency limit — use Reserved Concurrency to protect critical functions and SQS as a buffer to smooth spikes."},
+
+{q:"When should you NOT use AWS Lambda?",tag:"best",
+flow:"Lambda limits:\n  Max timeout:  15 minutes\n  Max memory:   10 GB\n  Cold starts:  ~100-2000ms\n  State:        none\n\nBetter alternatives for:\n  Long jobs -> ECS/EC2/Batch\n  Stateful  -> ECS/EC2\n  High perf -> EC2 bare metal",
+options:["Lambda should never be used for production workloads — it is only suitable for development and testing environments","Lambda is unsuitable for any workload that receives more than 100 requests per second due to scaling limitations","Lambda is a poor fit for long-running tasks (over 15 min), stateful applications requiring persistent connections, high-performance compute (GPU, bare metal), workloads needing predictable low latency without cold starts, or applications with heavy inter-service communication overhead","Lambda cannot be used with databases — it only integrates with S3 and API Gateway"],
+correct:2,
+explanation:"Lambda has real limitations. When to avoid it: (1) Long-running jobs (video transcoding, ML training, ETL) - 15-minute max. Use AWS Batch, ECS, or EC2. (2) Stateful workloads - no persistent connections or shared memory. Use ECS/EC2 with in-memory stores. (3) High-performance compute - no GPU, no bare metal, limited memory (10GB max). Use EC2 GPU instances. (4) Latency-sensitive APIs at high volume - cold starts and the overhead of serverless execution add up. Use ECS/Fargate for consistently hot APIs. (5) Heavy DB connection workloads - Lambda can exhaust RDS connections. Use RDS Proxy or switch to DynamoDB. (6) Legacy apps needing persistent OS processes - use containers instead."}
+];
+
+var current = 0;
+var answers = new Array(questions.length).fill(null);
+
+var tagMeta = {
+  core:    {label:'Core',         cls:'tag-core'},
+  perf:    {label:'Performance',  cls:'tag-perf'},
+  scale:   {label:'Scaling',      cls:'tag-scale'},
+  trigger: {label:'Triggers',     cls:'tag-trigger'},
+  limits:  {label:'Limits',       cls:'tag-limits'},
+  best:    {label:'Best Practice',cls:'tag-best'}
+};
+
+function render(){
+  var q = questions[current];
+  var ans = answers[current];
+  var isAnswered = ans !== null;
+  var total = questions.length;
+  var tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = ((current+1)/total*100) + '%';
+  document.getElementById('progressText').textContent = (current+1) + ' / ' + total;
+
+  document.getElementById('dotsNav').innerHTML = questions.map(function(_,i){
+    var cls = 'dot';
+    if(i===current) cls += ' active current';
+    else if(answers[i]!==null) cls += ' answered';
+    return '<div class="' + cls + '" onclick="goTo(' + i + ')"></div>';
+  }).join('');
+
+  var flowHtml = q.flow
+    ? '<div class="flow-label">&#9881; Flow / Key Facts</div><div class="flow-box">' + q.flow.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>') + '</div>'
+    : '';
+
+  var optionsHtml = q.options.map(function(opt,i){
+    var cls = 'option', tag = '';
+    if(isAnswered){
+      cls += ' locked';
+      if(i===q.correct){ cls += ' correct'; tag = '<span class="option-tag tag-correct">&#10003; CORRECT</span>'; }
+      else if(i===ans) { cls += ' wrong';   tag = '<span class="option-tag tag-wrong">&#10007; WRONG</span>'; }
+    }
+    return '<div class="' + cls + '" onclick="selectAnswer(' + i + ')"><div class="option-dot"></div><span class="option-label">' + opt + '</span>' + tag + '</div>';
+  }).join('');
+
+  var explanationHtml = isAnswered
+    ? '<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">' + q.explanation + '</div></div>'
+    : '';
+
+  var isLast = current === total - 1;
+  var allAnswered = answers.every(function(a){ return a !== null; });
+  var nextBtn = (isLast && allAnswered)
+    ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
+    : '<button class="btn btn-next" onclick="goNext()" ' + (!isAnswered ? 'disabled' : '') + '>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card">' +
+      '<div class="q-number">Question ' + (current+1) + ' of ' + total + ' <span class="q-tag ' + tm.cls + '">' + tm.label + '</span></div>' +
+      flowHtml +
+      '<div class="question">' + q.q + '</div>' +
+      '<div class="options">' + optionsHtml + '</div>' +
+      explanationHtml +
+      '<div class="nav-row">' +
+        '<button class="btn btn-back" onclick="goBack()" ' + (current===0?'disabled':'') + '>&#8592; Back</button>' +
+        '<button class="btn btn-reset" onclick="resetQuiz()">&#8635; Reset</button>' +
+        nextBtn +
+      '</div>' +
+    '</div>';
+}
+
+function selectAnswer(i){ if(answers[current]!==null) return; answers[current]=i; render(); }
+function goNext(){ if(current < questions.length-1){ current++; render(); } }
+function goBack(){ if(current > 0){ current--; render(); } }
+function goTo(i){ current=i; render(); }
+function resetQuiz(){ answers=new Array(questions.length).fill(null); current=0; render(); }
+
+function showResults(){
+  var score = answers.filter(function(a,i){ return a===questions[i].correct; }).length;
+  var pct = Math.round(score/questions.length*100);
+  var msg = pct===100 ? '&#127942; Perfect! Lambda master!' : pct>=70 ? '&#127919; Solid serverless knowledge!' : '&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card result-screen">' +
+      '<div class="result-score">' + score + '/' + questions.length + '</div>' +
+      '<div class="result-label">FINAL SCORE &middot; ' + pct + '%</div>' +
+      '<div class="result-msg">' + msg + '</div>' +
+      '<div class="result-list">' +
+        questions.map(function(q,i){
+          var icon = answers[i]===q.correct ? '&#9989;' : '&#10060;';
+          var label = q.q.length>46 ? q.q.slice(0,46)+'&hellip;' : q.q;
+          return '<div class="result-item"><span style="font-size:15px">' + icon + '</span><span class="q-tag ' + tagMeta[q.tag].cls + '" style="font-size:9px">' + tagMeta[q.tag].label + '</span>Q' + (i+1) + ': ' + label + '</div>';
+        }).join('') +
+      '</div>' +
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>' +
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetQuiz()">&#8635; Try Again</button>' +
+    '</div>';
+  document.getElementById('dotsNav').innerHTML = '';
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressText').textContent = score + ' / ' + questions.length + ' correct';
+}
+
+function reviewAnswers(){ current=0; render(); }
+render();
+</script>
+</body>
+</html>
