@@ -308,7 +308,13 @@ function render(){
   }).join('');
 
   var codeHtml = q.code
-    ? '<div class="code-label">&#128196; Example</div><div class="code-block">' + q.code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div>'
+    ? '<div class="code-label">&#128196; Example</div>' +
+      '<pre class="code-block"><code>' +
+      q.code
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;') +
+      '</code></pre>'
     : '';
 
   var optionsHtml = q.options.map(function(opt,i){
@@ -331,19 +337,23 @@ function render(){
     ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
     : '<button class="btn btn-next" onclick="goNext()" ' + (!isAnswered ? 'disabled' : '') + '>Next &#8594;</button>';
 
-  document.getElementById('quizArea').innerHTML =
-    '<div class="card">' +
-      '<div class="q-number">Question ' + (current+1) + ' of ' + total + ' <span class="q-tag ' + tm.cls + '">' + tm.label + '</span></div>' +
-      codeHtml +
-      '<div class="question">' + q.q + '</div>' +
-      '<div class="options">' + optionsHtml + '</div>' +
-      explanationHtml +
-      '<div class="nav-row">' +
-        '<button class="btn btn-back" onclick="goBack()" ' + (current===0?'disabled':'') + '>&#8592; Back</button>' +
-        '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>' +
-        nextBtn +
-      '</div>' +
-    '</div>';
+document.getElementById('quizArea').innerHTML =
+  '<div class="card">' +
+    '<div class="q-number">Question ' + (current+1) + ' of ' + total + 
+    ' <span class="q-tag ' + tm.cls + '">' + tm.label + '</span></div>' +
+
+    '<div class="question">' + q.q + '</div>' +   // 👈 Question first
+    codeHtml +                                    // 👈 Then example
+
+    '<div class="options">' + optionsHtml + '</div>' +
+    explanationHtml +
+
+    '<div class="nav-row">' +
+      '<button class="btn btn-back" onclick="goBack()" ' + (current===0?'disabled':'') + '>&#8592; Back</button>' +
+      '<button class="btn btn-reset" onclick="resetSection()">&#8635; Reset</button>' +
+      nextBtn +
+    '</div>' +
+  '</div>';
 }
 
 function selectAnswer(i){ if(sectionAnswers[currentSection][current]!==null) return; sectionAnswers[currentSection][current]=i; render(); }
