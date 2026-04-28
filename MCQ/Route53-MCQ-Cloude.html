@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Route 53 Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0a0e1a;--card:#111827;--border:#1e2d40;--accent:#f43f5e;--accent2:#9f1239;--correct:#00e5a0;--wrong:#ff4d6d;--text:#e2e8f0;--muted:#64748b;--highlight:rgba(244,63,94,0.07);}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px;background-image:radial-gradient(ellipse at 15% 10%,rgba(244,63,94,0.07) 0%,transparent 50%),radial-gradient(ellipse at 85% 90%,rgba(159,18,57,0.06) 0%,transparent 50%);}
+  header{text-align:center;margin-bottom:36px;}
+  .badge{display:inline-block;background:rgba(244,63,94,0.1);border:1px solid rgba(244,63,94,0.3);color:var(--accent);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:3px;padding:6px 16px;border-radius:2px;margin-bottom:16px;text-transform:uppercase;}
+  h1{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.1;}
+  h1 span{color:var(--accent);}
+  .subtitle{color:var(--muted);margin-top:8px;font-size:14px;font-family:'Space Mono',monospace;}
+  .quiz-container{width:100%;max-width:780px;}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px;}
+  .legend-item{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:4px 10px;border-radius:3px;text-transform:uppercase;}
+  .progress-bar-wrap{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .progress-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width 0.4s ease;}
+  .progress-text{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);white-space:nowrap;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:36px 40px;position:relative;overflow:hidden;animation:slideIn 0.35s ease;}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+  @keyframes slideIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+  .q-number{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .q-tag{font-size:9px;letter-spacing:1.5px;padding:2px 8px;border-radius:2px;text-transform:uppercase;font-weight:700;}
+  .tag-core    {background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.3);  color:#f43f5e;}
+  .tag-dns     {background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.3); color:#38bdf8;}
+  .tag-routing {background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.3); color:#34d399;}
+  .tag-ha      {background:rgba(251,191,36,0.12); border:1px solid rgba(251,191,36,0.3); color:#fbbf24;}
+  .tag-record  {background:rgba(167,139,250,0.12);border:1px solid rgba(167,139,250,0.3);color:#a78bfa;}
+  .tag-adv     {background:rgba(251,146,60,0.12); border:1px solid rgba(251,146,60,0.3); color:#fb923c;}
+  .question{font-size:21px;font-weight:600;line-height:1.4;margin-bottom:28px;}
+  .tip-box{background:rgba(244,63,94,0.05);border:1px solid rgba(244,63,94,0.15);border-radius:6px;padding:10px 14px;margin-bottom:20px;font-family:'Space Mono',monospace;font-size:11px;color:#94a3b8;line-height:1.7;}
+  .tip-label{font-size:9px;letter-spacing:2px;color:var(--accent);margin-bottom:4px;text-transform:uppercase;}
+  .options{display:flex;flex-direction:column;gap:12px;}
+  .option{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:16px 20px;cursor:pointer;display:flex;align-items:flex-start;gap:14px;transition:all 0.2s;font-size:15px;line-height:1.5;}
+  .option:hover:not(.locked){border-color:rgba(244,63,94,0.4);background:var(--highlight);transform:translateX(4px);}
+  .option-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;margin-top:2px;transition:all 0.2s;}
+  .option.correct{border-color:var(--correct);background:rgba(0,229,160,0.06);}
+  .option.correct .option-dot{border-color:var(--correct);background:var(--correct);}
+  .option.wrong{border-color:var(--wrong);background:rgba(255,77,109,0.06);}
+  .option.wrong .option-dot{border-color:var(--wrong);background:var(--wrong);}
+  .option-label{flex:1;}
+  .option-tag{font-family:'Space Mono',monospace;font-size:10px;padding:2px 8px;border-radius:2px;margin-left:auto;flex-shrink:0;align-self:center;font-weight:700;letter-spacing:1px;}
+  .tag-correct{background:rgba(0,229,160,0.15);color:var(--correct);}
+  .tag-wrong{background:rgba(255,77,109,0.15);color:var(--wrong);}
+  .explanation-box{margin-top:20px;padding:16px 20px;background:rgba(244,63,94,0.04);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+  .explanation-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--accent);margin-bottom:6px;text-transform:uppercase;}
+  .explanation-text{font-size:14px;color:#94a3b8;line-height:1.6;}
+  .nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px;}
+  .btn{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;letter-spacing:0.5px;padding:12px 28px;border-radius:6px;border:none;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:8px;}
+  .btn-back{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-back:hover{border-color:rgba(244,63,94,0.4);color:var(--text);}
+  .btn-back:disabled{opacity:0.3;cursor:not-allowed;}
+  .btn-next{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 20px rgba(244,63,94,0.2);}
+  .btn-next:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(244,63,94,0.35);}
+  .btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .btn-reset{background:rgba(159,18,57,0.08);border:1px solid rgba(159,18,57,0.25);color:#e11d48;padding:10px 20px;font-size:13px;}
+  .btn-reset:hover{background:rgba(159,18,57,0.18);}
+  .dots-nav{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:24px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--border);cursor:pointer;transition:all 0.2s;border:1px solid transparent;}
+  .dot.active{background:var(--accent);transform:scale(1.35);}
+  .dot.answered{background:rgba(0,229,160,0.5);}
+  .dot.current{border-color:var(--accent);}
+  .result-screen{text-align:center;padding:50px 40px;}
+  .result-score{font-size:80px;font-weight:800;line-height:1;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+  .result-label{font-family:'Space Mono',monospace;color:var(--muted);font-size:13px;letter-spacing:2px;margin-top:8px;}
+  .result-msg{font-size:20px;font-weight:600;margin-top:24px;margin-bottom:32px;}
+  .result-list{display:flex;gap:8px;flex-direction:column;margin-bottom:32px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;}
+  .result-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);}
+  @media(max-width:560px){.card{padding:24px 20px;}.question{font-size:17px;}.nav-row{flex-wrap:wrap;}.btn-reset{order:-1;width:100%;justify-content:center;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">AWS Networking Prep</div>
+  <h1>Amazon <span>Route 53</span> Quiz</h1>
+  <p class="subtitle">// 30 questions &middot; DNS &middot; Routing Policies &middot; Records &middot; HA &middot; Advanced</p>
+</header>
+
+<div class="quiz-container">
+  <div class="legend">
+    <span class="legend-item tag-core">Core</span>
+    <span class="legend-item tag-dns">DNS</span>
+    <span class="legend-item tag-routing">Routing</span>
+    <span class="legend-item tag-ha">High Availability</span>
+    <span class="legend-item tag-record">Records</span>
+    <span class="legend-item tag-adv">Advanced</span>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">1 / 30</div>
+  </div>
+  <div id="quizArea"></div>
+  <div class="dots-nav" id="dotsNav"></div>
+</div>
+
+<script>
+var questions = [
+{q:"What is Amazon Route 53?",tag:"core",
+tip:"Named after port 53 — the standard DNS port (TCP/UDP).",
+options:["A managed VPN service that routes traffic securely between AWS regions and on-premises data centers","A scalable, highly available DNS web service that translates domain names to IP addresses, provides traffic routing policies, health checks, and domain registration","A content delivery network that caches static assets at edge locations to reduce latency","A load balancer service that distributes incoming HTTP traffic across multiple EC2 instances"],
+correct:1,
+explanation:"Route 53 is AWS's DNS service with three main capabilities: (1) DNS resolution — translates human-readable domain names (example.com) into machine-readable IP addresses. (2) Traffic routing — sophisticated policies to direct users to the right endpoint. (3) Health monitoring — checks endpoint health and reroutes traffic away from failures. It's named after port 53, the well-known port for DNS queries (both TCP and UDP). Route 53 is built on AWS's globally distributed DNS infrastructure, promising 100% availability SLA."},
+
+{q:"Why is the service called Route 53?",tag:"core",
+tip:"DNS standard: port 53 for both TCP and UDP queries.",
+options:["It was the 53rd AWS service launched, following an internal naming convention by AWS engineering","It references the 53 AWS regions where the DNS service is deployed globally","It is named after port 53, the standard network port used by the DNS protocol for both TCP and UDP queries","It refers to Route 53 highways in the US, symbolizing traffic routing across the country"],
+correct:2,
+explanation:"The name is a direct reference to port 53, the well-known port assigned by IANA for DNS. All DNS queries — whether looking up a website, sending email, or resolving any hostname — travel over port 53 using either UDP (for queries under 512 bytes) or TCP (for larger responses or zone transfers). AWS chose this name to reflect the service's core identity as a DNS service. It's a common interview question because it tests whether you understand DNS fundamentals beyond just knowing what Route 53 does."},
+
+{q:"What is DNS and how does it work?",tag:"dns",
+tip:"DNS = the internet's phonebook. Domain -> IP address translation.",
+options:["DNS is a database service that stores application configuration data for distributed systems","DNS (Domain Name System) is a hierarchical naming system that translates human-readable domain names into IP addresses, allowing browsers and apps to locate servers on the internet","DNS is a security protocol that encrypts traffic between clients and servers using digital certificates","DNS is an AWS-specific service for routing traffic between services inside a VPC"],
+correct:1,
+explanation:"DNS resolution process: (1) You type google.com in a browser. (2) Your OS checks its local cache. (3) If not cached, queries your ISP's recursive resolver. (4) Resolver queries a Root nameserver (.com TLD location). (5) Root directs to .com TLD nameserver. (6) TLD directs to Google's authoritative nameserver. (7) Authoritative nameserver returns the IP address. (8) Your browser connects to that IP. This whole process typically takes 20-120ms. Route 53 serves as the authoritative nameserver for your domains, answering the final step with the correct IP or endpoint."},
+
+{q:"What is a Hosted Zone in Route 53?",tag:"dns",
+tip:"Public hosted zone = internet. Private hosted zone = VPC only.",
+options:["A dedicated EC2 instance that runs a DNS server for your custom domain","A container for DNS records belonging to a domain — telling Route 53 how to respond to DNS queries for that domain and its subdomains","A CloudFront distribution zone that caches DNS responses at edge locations","An IAM permission boundary that restricts who can modify DNS records in your account"],
+correct:1,
+explanation:"A hosted zone is Route 53's organizational unit for DNS records. Think of it as a DNS zone file. When you create a hosted zone for example.com, Route 53 assigns four name servers (NS records) — you point your domain registrar to these NS records. The hosted zone then contains all your DNS records: A records (IPs), CNAME records (aliases), MX records (mail), etc. Two types: Public hosted zone (answers queries from the internet), Private hosted zone (answers queries from within one or more VPCs — used for internal service discovery). Cost: $0.50/month per hosted zone."},
+
+{q:"What are the common DNS record types in Route 53?",tag:"record",
+tip:"A=IPv4, AAAA=IPv6, CNAME=alias, MX=mail, TXT=verification, NS=nameserver",
+options:["Route 53 only supports A records — all other record types must be handled by a separate DNS provider","DNS records are only created automatically by AWS — you cannot create custom records in Route 53","DNS records define how traffic for a domain is routed: A (IPv4 address), AAAA (IPv6), CNAME (domain alias), MX (mail server), TXT (text/verification), NS (nameserver), SOA (authority), and AWS-specific Alias records","DNS records in Route 53 are identical to database table rows and follow SQL syntax for querying"],
+correct:2,
+explanation:"Key DNS record types: A Record — maps hostname to IPv4 address (example.com → 1.2.3.4). AAAA Record — maps hostname to IPv6 address. CNAME Record — maps hostname to another hostname (www.example.com → example.com). Cannot be used at root domain. MX Record — specifies mail servers (used by email). TXT Record — arbitrary text, used for domain verification (Google, SSL certificates) and SPF/DKIM email authentication. NS Record — nameserver records defining which DNS servers are authoritative for the domain. SOA — Start of Authority, contains zone metadata. AWS Alias — Route 53-specific, maps to AWS resources like ALB, CloudFront, S3. Free queries, works at root domain."},
+
+{q:"What is an A Record in Route 53?",tag:"record",
+tip:"example.com -> 192.168.1.1 (IPv4). Most fundamental DNS record type.",
+options:["An 'Admin' record that grants administrative access to modify the hosted zone configuration","An A record maps a domain name or subdomain directly to an IPv4 address, telling DNS resolvers which server IP to connect to","An 'Alias' record — Route 53's proprietary record type that points to AWS resources like load balancers","An 'Authorization' record that validates HTTPS certificate ownership for a domain"],
+correct:1,
+explanation:"The A record is the most fundamental DNS record. Format: Name (domain/subdomain), Type (A), Value (IPv4 address), TTL (cache duration). Examples: example.com -> 203.0.113.1, api.example.com -> 203.0.113.2, mail.example.com -> 203.0.113.3. When a browser looks up example.com, the DNS resolver ultimately returns the A record's IP address and the browser connects to that IP. You can have multiple A records for the same name (multiple IPs) — DNS will return all of them and the client picks one (typically used for basic DNS-level load distribution). TTL determines how long resolvers cache the result."},
+
+{q:"What is a CNAME Record and when would you use it?",tag:"record",
+tip:"CNAME cannot be used at root domain (example.com). Use Alias instead.",
+options:["A 'Canonical Name' record that maps one domain name to another domain name — the resolver follows the chain until it finds an A record with an IP address","A certificate record that stores SSL/TLS public key fingerprints for HTTPS validation","A compressed name record that reduces DNS response payload size for mobile clients","A country-name record that restricts a domain to only resolve for users in a specific country"],
+correct:0,
+explanation:"CNAME (Canonical Name) creates a hostname alias. When a resolver queries app.example.com and gets a CNAME pointing to example.com, it then queries example.com for its IP. Use cases: pointing multiple subdomains to the same server (www, app, store all pointing to one domain), pointing to third-party services (myshop.example.com -> myshop.shopify.com), load balancer DNS names (api.example.com -> my-alb-123.us-east-1.elb.amazonaws.com). Critical limitation: CNAME cannot be used at the zone apex (root domain like example.com itself) — use Route 53 Alias records instead. CNAME adds one extra DNS lookup."},
+
+{q:"What is TTL (Time To Live) in Route 53 and how does it affect DNS behaviour?",tag:"dns",
+tip:"Low TTL (60s) = fast changes, more queries. High TTL (86400s) = fast lookups, slow changes.",
+options:["TTL is the maximum number of requests per second a Route 53 record can handle before throttling","TTL defines how long in seconds DNS resolvers and clients cache a DNS response before querying Route 53 again for a fresh answer","TTL is the time Route 53 waits before health-checking an endpoint after it was previously marked unhealthy","TTL is the maximum age of a TLS certificate associated with a domain in Route 53"],
+correct:1,
+explanation:"TTL is a cache control mechanism. When Route 53 returns a DNS response, it includes the TTL value — resolvers and clients cache the answer for that many seconds. Trade-offs: Low TTL (60-300s) — DNS changes (new IP, failover) propagate quickly. Cost: more DNS queries = higher Route 53 query charges. Use before planned changes. High TTL (3600-86400s) — faster DNS resolution (answer cached locally). Cost: fewer queries. Use for stable records. Best practice: lower TTL 24-48 hours before any planned change (IP migration, region move), make the change, then raise TTL again after confirming success. Default in Route 53: 300 seconds for new records."},
+
+{q:"What is a Health Check in Route 53?",tag:"ha",
+tip:"Health check failure -> Route 53 stops routing to that endpoint automatically.",
+options:["A manual process where you periodically log into the AWS Console to verify your servers are running","Route 53 health checks continuously monitor endpoint health by sending requests to your resources — automatically removing unhealthy endpoints from DNS responses and restoring them when healthy again","A billing audit that checks whether your Route 53 usage is within AWS Free Tier limits","A compliance scan that checks DNS record configurations against AWS security best practices"],
+correct:1,
+explanation:"Route 53 health checks are distributed monitoring probes. Configuration: protocol (HTTP, HTTPS, TCP), path (e.g., /health), interval (10s or 30s), failure threshold (how many failures = unhealthy). Health checkers: Route 53 uses 15+ globally distributed health checker locations. An endpoint is marked unhealthy when the majority of checkers fail. Integration: associate health checks with routing records — when unhealthy, Route 53 removes that record from DNS responses. Types: Endpoint health checks (specific IP/domain), Calculated health checks (combine multiple), CloudWatch alarm checks (trigger on CW alarm state). Cost: $0.50-$1.00/month per health check."},
+
+{q:"What is a Routing Policy in Route 53?",tag:"routing",
+tip:"7 policies: Simple, Weighted, Latency, Failover, Geolocation, Geoproximity, Multi-Value",
+options:["A firewall rule that allows or blocks DNS queries based on the requester's IP address","Route 53's set of algorithms that determine how DNS queries are answered — which IP or endpoint is returned based on factors like user location, endpoint health, and configured weights","An IAM policy that controls who has permission to create and modify Route 53 records","A network routing table entry that directs traffic between VPCs and the internet gateway"],
+correct:1,
+explanation:"Routing policies are Route 53's intelligence layer — transforming DNS from a simple lookup into a sophisticated traffic management system. Each policy serves a different use case: Simple (one resource, no logic), Weighted (traffic splitting by percentage), Latency-based (route to fastest region), Failover (active-passive DR), Geolocation (route by country/continent), Geoproximity (route by geographic distance with bias), Multi-Value (return multiple healthy IPs). Combined with health checks, routing policies enable zero-downtime deployments, A/B testing, global failover, and regional compliance — all at the DNS layer without changing application code."},
+
+{q:"What is Simple Routing Policy?",tag:"routing",
+tip:"Simple: one record, one value. No health check integration, no advanced logic.",
+options:["A routing policy that routes only authenticated users with valid IAM credentials to the endpoint","A routing policy that sends traffic to a single resource — the most basic option with no weighted distribution, health checks, or geographic logic","A simplified version of weighted routing where traffic is split 50/50 between two endpoints","A policy that automatically selects the cheapest AWS resource to route traffic to based on on-demand pricing"],
+correct:1,
+explanation:"Simple routing is exactly what it sounds like — create a DNS record, point it to one resource, done. Characteristics: single record per name, no health check integration (even if the resource is down, Route 53 still returns its IP), no intelligent traffic routing. You CAN specify multiple values in a single simple record (multiple IPs) — Route 53 returns all of them randomly and the client picks one. Use cases: single-server websites, single endpoint APIs, any scenario where you have one resource and don't need failover or distribution. Upgrade path: switch to Weighted (with health checks) when you need reliability, Failover when you need DR."},
+
+{q:"What is Weighted Routing Policy?",tag:"routing",
+tip:"Weights: 0-255. Weight 0 = no traffic. All 0 = equal distribution.",
+options:["A routing policy that automatically adjusts traffic weights based on server CPU and memory utilization","Weighted routing distributes traffic across multiple resources based on configured numeric weights — enabling percentage-based traffic splitting for deployments, A/B testing, and gradual migrations","A policy that routes heavier (larger payload) requests to high-memory instances and lighter requests to smaller ones","A routing policy that prioritizes traffic based on the network weight (bandwidth) of the destination endpoint"],
+correct:1,
+explanation:"Weighted routing assigns a numeric weight (0-255) to each record with the same name. Route 53 calculates percentages: weight/total_weights. Examples: Blue-green deployment (new version: weight 10, old: weight 90 = 10% to new), A/B testing (variant A: 50, variant B: 50 = 50/50 split), Gradual migration (step from 0% to 10% to 50% to 100% over days). Combine with health checks: if a weighted endpoint fails health checks, Route 53 redistributes its traffic to healthy endpoints proportionally. Weight 0: removes record from rotation (useful for taking a server out of service without deleting the record). All weights equal = round-robin distribution."},
+
+{q:"What is Latency-Based Routing in Route 53?",tag:"routing",
+tip:"Route 53 uses real latency data between user regions and AWS regions, not geography.",
+options:["A routing policy that routes traffic only during low-latency time windows when network congestion is minimal","Latency-based routing directs each user's DNS query to the AWS region that provides the lowest network latency for that user — regardless of geographic proximity","A policy that limits the maximum response time of backends by routing away from slow endpoints","A routing policy that reduces DNS lookup latency by caching records at every Route 53 edge location"],
+correct:1,
+explanation:"Latency-based routing uses AWS's actual measured latency data between AWS regions and the user's approximate location (inferred from their DNS resolver's IP). Route 53 picks the region with the lowest latency for that user, not necessarily the geographically closest region. Example: a user in Southeast Asia might get routed to ap-southeast-1 (Singapore) instead of ap-south-1 (Mumbai) if Singapore has better connectivity at that moment. Configuration: create latency records for the same domain in multiple regions, each pointing to regional resources. Combine with health checks for automatic failover if the lowest-latency region becomes unhealthy."},
+
+{q:"What is Failover Routing Policy?",tag:"ha",
+tip:"Requires health check on PRIMARY. Secondary = passive standby until primary fails.",
+options:["A routing policy that fails over to a different DNS provider if Route 53 experiences an outage","Failover routing directs traffic to a primary endpoint when it is healthy, automatically switching to a secondary (standby) endpoint when the primary fails health checks — enabling active-passive disaster recovery","A routing policy that distributes failed requests across multiple retry endpoints for improved reliability","A policy that fails requests back to the requester with an error message if no healthy endpoints exist"],
+correct:1,
+explanation:"Failover routing implements active-passive disaster recovery at the DNS layer. Setup: create two records with the same name — one with Failover Type = PRIMARY (must have health check), one with Failover Type = SECONDARY. Behavior: while primary passes health checks, all traffic goes to primary. When primary fails, Route 53 automatically returns the secondary endpoint's IP. When primary recovers, traffic automatically shifts back. Use cases: primary region + DR region, primary database + read replica as DR, production server + static S3 error page as fallback. TTL: set low (60s) so clients pick up the failover quickly. Combine with CloudWatch alarms for visibility."},
+
+{q:"What is Geolocation Routing Policy?",tag:"routing",
+tip:"Geolocation = WHERE the user is. Geoproximity = DISTANCE to the resource.",
+options:["A routing policy that uses GPS coordinates from mobile devices to route to the nearest server","Geolocation routing directs traffic based on the geographic location of the DNS query source — routing users from specific countries or continents to designated regional endpoints","A routing policy that geolocates AWS data centers and routes to the physically nearest one","A policy that blocks traffic from specific countries based on IP geolocation for compliance"],
+correct:1,
+explanation:"Geolocation routing routes traffic based on WHERE the DNS query originates (inferred from the resolver's IP). You create records mapped to: continents (North America, Europe, Asia), countries (IN, US, GB, DE), or US states. Route 53 matches the most specific location first. Configuration: India users -> Mumbai ALB, US users -> Virginia ALB, Europe users -> Frankfurt ALB, Default record -> catch all other locations. Use cases: serving localized content (language, currency), data residency compliance (EU users must stay on EU servers), regional pricing, blocking or redirecting specific countries. Always create a default record — queries from unmapped locations fall back to it."},
+
+{q:"What is Geoproximity Routing Policy?",tag:"routing",
+tip:"Bias +1 to +99 expands region. Bias -1 to -99 shrinks region. Requires Traffic Flow.",
+options:["A routing policy identical to Geolocation routing but only available in AWS GovCloud regions","Geoproximity routing directs traffic based on geographic distance between users and resources, with an optional bias value that expands or shrinks the effective routing region — allowing fine-tuned traffic shifting between regions","A policy that routes based on the proximity of the user's device to the nearest Route 53 health checker location","A routing policy that measures network latency proximity (not geographic distance) to select the fastest endpoint"],
+correct:1,
+explanation:"Geoproximity routing is more nuanced than geolocation. It uses the actual geographic distance between the user and your resources (AWS regions or custom lat/long coordinates for non-AWS resources). The bias value (-99 to +99) adjusts the effective routing radius: positive bias (+50) expands the region's reach (attracts more distant traffic), negative bias (-50) shrinks it (pushes border traffic to other regions). Use case: you want to gradually shift traffic from us-east-1 to eu-west-1 for European users — increase eu-west-1 bias progressively. Requires Route 53 Traffic Flow (visual editor, $50/month per policy record)."},
+
+{q:"What is Multi-Value Answer Routing Policy?",tag:"routing",
+tip:"Multi-Value: up to 8 healthy IPs returned per query. Not a replacement for a load balancer.",
+options:["A routing policy that returns different answers based on whether the query uses IPv4 or IPv6","Multi-Value routing returns up to 8 healthy IP addresses in response to a DNS query, randomly selected from all healthy records — providing basic client-side load distribution while filtering out unhealthy endpoints","A policy that returns multiple DNS records of different types (A + CNAME + TXT) in a single response","A routing policy that answers queries with multiple routing policies applied simultaneously"],
+correct:1,
+explanation:"Multi-Value routing is a middle ground between simple (one IP) and load balancers (full traffic management). Configuration: create multiple records with the same name, each with a different IP, each with a health check. Response: Route 53 returns up to 8 randomly selected healthy IPs. The client's DNS resolver or browser picks one to connect to. Benefits over Simple: unhealthy endpoints are excluded from responses, providing basic resilience. Limitations vs. load balancer: client-side selection is random (no weighted distribution), no sticky sessions, no path-based routing. Use for: stateless services where any instance can handle any request, situations where you want some load distribution without an ALB/NLB cost."},
+
+{q:"What is an Alias Record in Route 53 and how does it differ from a CNAME?",tag:"record",
+tip:"Alias is free for queries. CNAME costs per query. Alias works at root domain.",
+options:["An Alias record is identical to a CNAME record but only works for subdomains, not root domains","An Alias record is a Route 53 extension that maps a domain directly to AWS resource endpoints (ALB, CloudFront, S3, etc.) — works at the root domain, is free for queries, and automatically tracks IP changes of the target","An Alias record stores an encrypted alias of sensitive data like account IDs to prevent exposure in DNS responses","An Alias record is used exclusively for Route 53 Private Hosted Zones and cannot be used in Public Hosted Zones"],
+correct:1,
+explanation:"Alias records solve two CNAME limitations. Problem 1: CNAME can't be at root domain — you can't have example.com CNAME to an ALB. Alias CAN (example.com -> my-alb.elb.amazonaws.com). Problem 2: CNAME costs money per query and adds a DNS lookup. Alias is FREE for queries to AWS resources and resolves to the target's IPs directly (no extra lookup). Alias targets: ALB/NLB/CLB, CloudFront distributions, S3 static website endpoints, API Gateway, Elastic Beanstalk, VPC interface endpoints, other Route 53 records in the same hosted zone. Route 53 automatically tracks IP changes of the target — if the ALB adds new IPs, the Alias record updates automatically."},
+
+{q:"What is the difference between an Alias Record and a CNAME Record?",tag:"record",
+tip:"Key exam point: Alias at root domain = YES. CNAME at root domain = NO.",
+options:["Alias records support IPv6 while CNAME records only support IPv4 address resolution","Alias records are AWS-specific, work at the zone apex (root domain), resolve for free, and point to AWS resources; CNAME records are standard DNS, cannot be at zone apex, cost per query, and point to any hostname","Alias records expire after 24 hours and must be renewed; CNAME records are permanent","Alias records require DNSSEC; CNAME records work without any security configuration"],
+correct:1,
+explanation:"Side-by-side comparison: Alias — AWS proprietary extension, works at zone apex (example.com), targets AWS resources only, queries are FREE, Route 53 resolves to final IPs directly (no extra lookup), automatically updates when target IPs change. CNAME — Standard DNS record type (works everywhere), CANNOT be at zone apex (www.example.com OK, example.com NOT OK), points to any hostname, costs per DNS query, requires an additional DNS lookup to resolve the CNAME target, static (won't auto-update if target changes IPs). Interview answer: always use Alias for AWS resources — it's faster, free, and works at the root domain. Use CNAME only for non-AWS external hostnames."},
+
+{q:"What is the Route 53 Resolver?",tag:"adv",
+tip:"Resolver Inbound Endpoint: on-prem -> AWS. Outbound Endpoint: AWS -> on-prem.",
+options:["A Route 53 feature that caches DNS responses at the VPC level to reduce query costs","Route 53 Resolver is the DNS resolver built into every VPC that handles DNS queries for EC2 instances, with Resolver Endpoints enabling hybrid DNS integration between on-premises networks and AWS VPCs","A dedicated DNS server you deploy in your VPC to replace the AWS default resolver","A Route 53 tool that resolves disputes between conflicting DNS records in the same hosted zone"],
+correct:1,
+explanation:"Every VPC has a built-in DNS resolver at the VPC CIDR +2 address (e.g., 10.0.0.2 for a 10.0.0.0/16 VPC). This resolver handles: AWS-provided DNS (ec2-hostname resolution), Private Hosted Zone queries, and public DNS forwarding. Resolver Endpoints enable hybrid DNS: Inbound Endpoint — create ENIs in your VPC; on-premises DNS servers can forward queries for your AWS domains (e.g., *.corp.internal) to these ENIs. Outbound Endpoint — Route 53 Resolver can forward queries from VPC instances to on-premises DNS servers for on-prem domain resolution. Resolver Rules define which domains are forwarded where. Essential for enterprise hybrid architectures using Direct Connect or VPN."},
+
+{q:"What is the difference between a Public and Private Hosted Zone?",tag:"dns",
+tip:"Public = resolves from internet. Private = resolves only within associated VPCs.",
+options:["Public hosted zones store A records only; Private hosted zones support all record types including CNAME and MX","Public hosted zones answer DNS queries from the internet; Private hosted zones answer queries only from within associated VPCs — used for internal service discovery and keeping backend services off the public DNS","Public hosted zones are free; Private hosted zones cost $1/month per zone regardless of query volume","Public hosted zones require domain verification via TXT record; Private hosted zones can be created without verification"],
+correct:1,
+explanation:"Public Hosted Zone: routes traffic for your domain on the public internet. Example: example.com -> your ALB's IP. Anyone querying DNS can resolve it. Private Hosted Zone: routes traffic within one or more VPCs. Example: database.internal -> 10.0.1.50 (private IP). Only EC2 instances, Lambda functions, and other resources inside the associated VPCs can resolve it. The same domain can exist in both (Split Horizon DNS) — internal users get private IPs, external users get public IPs. Setup: associate private hosted zone with one or more VPCs in any region. Must enable DNS hostnames and DNS resolution in VPC settings. Used for: internal APIs, databases, microservice discovery, secrets endpoints."},
+
+{q:"What is DNS Failover in Route 53?",tag:"ha",
+tip:"Fast failover: low TTL (60s) + 10s health check interval + threshold 1 failure.",
+options:["A disaster recovery plan for Route 53 itself in case the service experiences an outage","DNS Failover is Route 53's automatic mechanism for redirecting traffic from unhealthy resources to healthy standby resources based on health check status — requiring no manual intervention","A DNS caching feature that fails over to a secondary DNS resolver if the primary is unreachable","A Route 53 feature that automatically backs up DNS records to S3 if the hosted zone is accidentally deleted"],
+correct:1,
+explanation:"DNS Failover works through health check integration. When active-passive failover is configured: (1) Route 53 continuously health-checks the primary endpoint. (2) Primary answers DNS queries while healthy. (3) When health checks fail (based on threshold — e.g., 3 consecutive failures in 30 seconds), Route 53 stops returning the primary's IP. (4) Secondary record is returned instead — clients connect to the standby. (5) When primary recovers and health checks pass again, traffic automatically returns. Speed: for fastest failover, use 10-second health check interval, failure threshold of 1-2, and TTL of 60 seconds. Total detection + propagation: approximately 60-90 seconds."},
+
+{q:"How does Route 53 improve application availability?",tag:"ha",
+tip:"Health checks + routing policies = automatic traffic management without human intervention.",
+options:["Route 53 improves availability by replicating your EC2 instances to multiple regions automatically","Route 53 improves availability through health checks (monitoring endpoint health), routing policies (distributing traffic intelligently), and DNS failover (automatically rerouting from failed endpoints) — keeping applications available without manual intervention","Route 53 improves availability by increasing your EC2 instances' memory and CPU when it detects performance degradation","Route 53 stores application backups and restores them automatically when servers fail"],
+correct:1,
+explanation:"Route 53 is a key pillar of AWS high availability architecture. Three mechanisms: (1) Health Checks — constant monitoring of endpoints. Automatically remove unhealthy targets from DNS rotation. (2) Routing Policies — Failover routing (primary/secondary DR), Weighted (gradual deployments avoiding big-bang releases), Latency-based (route to fastest region, degraded regions get less traffic). (3) Anycast routing — Route 53 nameservers are globally distributed, so DNS queries always go to the nearest nameserver (not a single point of failure). Combined: a multi-region application with Route 53 health checks and failover routing can survive a complete regional outage within 60-90 seconds automatically."},
+
+{q:"How does Route 53 provide DNS-level load balancing?",tag:"ha",
+tip:"DNS load balancing complements but does not replace application-level load balancers.",
+options:["Route 53 integrates with EC2 Auto Scaling to automatically add instances and register them in DNS when load increases","Route 53 distributes traffic using Weighted routing (percentage-based), Latency-based routing (route to fastest region), and Multi-Value routing (return multiple IPs) — providing DNS-level distribution without requiring an additional load balancer","Route 53 uses the same algorithm as ALB for round-robin distribution across registered EC2 instances","Route 53 performs load balancing by monitoring CPU utilization and routing traffic away from overloaded instances"],
+correct:1,
+explanation:"Route 53 load balancing operates at the DNS layer (before TCP connections are established), unlike ALB/NLB which operate at Layer 4/7. DNS-level balancing: Weighted records (70/30 traffic split across two endpoints), Multi-Value (return 8 IPs, client picks randomly), Latency-based (different endpoints per region). Limitations vs. ALB: DNS-level has coarser control (no path-based routing, no cookie-based stickiness, TTL caching means changes are slower). Best practice: use Route 53 for cross-region routing (geolocation, latency, failover between regions) and ALB/NLB within a region for fine-grained request routing, health checking, and session management."},
+
+{q:"What is Domain Registration in Route 53?",tag:"core",
+tip:"Route 53 is both a DNS registrar AND a DNS hosting service — you can use it for both or just one.",
+options:["Domain registration in Route 53 means reserving a hostname within your VPC for internal DNS purposes","Route 53 acts as a domain registrar — allowing you to search for, purchase, and manage domain names directly in AWS, automatically creating a hosted zone and configuring nameservers","Domain registration is an IAM feature that registers your AWS account with AWS Organizations for consolidated billing","Route 53 domain registration only works for .aws and .amazon top-level domains exclusively"],
+correct:1,
+explanation:"Route 53 is an ICANN-accredited domain registrar. You can register .com, .net, .org, .io, .co and 200+ TLDs directly in the AWS Console. When you register a domain through Route 53: AWS registers the domain with the appropriate registry, automatically creates a public hosted zone, configures the hosted zone's nameservers as the domain's NS records. Price varies by TLD ($12/year for .com, $14/year for .net). You can also transfer existing domains from other registrars to Route 53. Alternatively: register elsewhere (GoDaddy, Namecheap) and just update the nameserver records to point to your Route 53 hosted zone — Route 53 only provides DNS hosting, not registration."},
+
+{q:"What is Split Horizon DNS in Route 53?",tag:"adv",
+tip:"Same domain, two hosted zones: public (internet) and private (VPC). Different answers.",
+options:["A DNS technique that splits large zone files horizontally across multiple Route 53 hosted zones for performance","Split Horizon DNS uses both a public and a private hosted zone for the same domain — returning different DNS responses to internal VPC clients vs. external internet clients","A Route 53 feature that splits high-volume DNS queries across multiple geographic regions to prevent overload","A failover technique that splits traffic between a primary DNS provider and Route 53 as backup"],
+correct:1,
+explanation:"Split Horizon (also called Split-Brain DNS) serves different answers for the same domain based on where the query originates. Setup: create a public hosted zone for example.com (returns public IPs or ALB DNS for internet traffic) AND a private hosted zone for example.com associated with your VPC (returns private IPs for internal traffic). EC2 instances inside the VPC query the private zone and get internal IPs (direct communication, no internet roundtrip). External users query the public zone and get the public endpoint. Use case: database.example.com could return 10.0.1.50 (private) internally and be unreachable (no public record) externally — keeping your database off the public internet while still using a friendly name internally."},
+
+{q:"What is DNS Propagation?",tag:"dns",
+tip:"Lower TTL before making changes. Full propagation can take up to 48 hours for old cached values.",
+options:["DNS propagation is the automatic replication of Route 53 hosted zones to all AWS regions when you create a new zone","DNS propagation is the time required for DNS record changes to spread across all DNS resolvers on the internet — influenced by TTL values and resolver caching behavior","DNS propagation is a Route 53 feature that automatically replicates records from a public zone to associated private zones","DNS propagation is the delay before new EC2 instances receive their Route 53 hostname assignment"],
+correct:1,
+explanation:"When you change a DNS record, the change applies immediately in Route 53's authoritative nameservers. However, the old record is cached by ISP resolvers, corporate DNS servers, and end-user computers for the TTL duration. Until those caches expire, some users still see old values. Propagation timeline: immediately visible to clients whose cache has expired, up to TTL seconds for all clients. At TTL=300s (5min), most clients see the change within 5-10 minutes. At TTL=86400 (24h), some may see the old value for up to 24 hours. Best practice before a migration: reduce TTL to 60 seconds 24-48 hours in advance, make the change, then increase TTL back after confirming success."},
+
+{q:"How does Route 53 integrate with CloudFront?",tag:"adv",
+tip:"Alias record: mysite.com -> d1234.cloudfront.net (free, works at root domain)",
+options:["Route 53 provides the SSL certificates that CloudFront uses for HTTPS distribution","Route 53 uses Alias records to map your domain (example.com) to a CloudFront distribution URL — routing users to the CDN which serves cached content from the nearest edge location","Route 53 monitors CloudFront cache hit rates and automatically adjusts routing policies","Route 53 and CloudFront share the same edge locations, so requests are processed by both services simultaneously"],
+correct:1,
+explanation:"The Route 53 + CloudFront integration is a foundational AWS architecture pattern. Setup: Create a CloudFront distribution with your S3 bucket or ALB as origin. CloudFront gives you a distribution domain (d1234abcd.cloudfront.net). Create an Alias record in Route 53: example.com -> d1234abcd.cloudfront.net (Alias, free). Users typing example.com get routed to CloudFront. CloudFront serves from the nearest of 400+ edge locations. Benefits: global low latency (content cached near users), DDoS protection (AWS Shield), HTTPS with ACM certificates, custom error pages. For apex domain (example.com): must use Alias (not CNAME). The Alias automatically tracks CloudFront's IPs — no manual updates needed when CloudFront changes."},
+
+{q:"How do you secure Route 53?",tag:"adv",
+tip:"DNSSEC prevents DNS spoofing. IAM prevents unauthorized config changes. Both are needed.",
+options:["Route 53 is automatically secured by AWS Shield and requires no additional security configuration","Secure Route 53 using IAM policies to control who can modify DNS records, DNSSEC to cryptographically sign DNS responses preventing spoofing, and VPC-only private hosted zones for internal resources","Route 53 security is handled entirely by enabling HTTPS on all DNS queries using TLS encryption","Securing Route 53 requires purchasing AWS Shield Advanced which includes automated DNS protection"],
+correct:1,
+explanation:"Route 53 security layers: (1) IAM Policies — control who can create, modify, or delete hosted zones and records. Use least privilege: developers can read, ops can create records, admins can manage zones. Enforce MFA for destructive operations. (2) DNSSEC (DNS Security Extensions) — cryptographically signs DNS records. Prevents DNS spoofing (attackers returning fake IPs for your domain). Route 53 supports DNSSEC signing for public hosted zones. (3) Private Hosted Zones — sensitive internal services (databases, internal APIs) only resolve inside VPCs. Never exposed to public DNS. (4) CloudTrail — logs all Route 53 API calls for auditing. (5) AWS Config — detects unauthorized changes to DNS configurations. (6) Least-TTL discipline — low TTL on critical records for faster failover."},
+
+{q:"Why should you use Route 53 for DNS and traffic routing?",tag:"core",
+tip:"100% SLA, global anycast, deep AWS integration — no other DNS service matches this combination.",
+options:["Route 53 is required by AWS for all services — you cannot use external DNS providers with AWS resources","Route 53 provides reliable, globally distributed DNS with 100% availability SLA, sophisticated routing policies, health monitoring, native AWS service integration, and domain registration — all in one managed service","Route 53 is only cost-effective for large enterprises with millions of DNS queries per month","Route 53 is the best choice because it is free for all queries, unlike other DNS providers that charge per query"],
+correct:1,
+explanation:"Route 53 value proposition: (1) 100% uptime SLA — globally distributed anycast DNS infrastructure with no single point of failure. (2) Routing intelligence — 7 routing policies enabling sophisticated global traffic management at the DNS layer. (3) Health monitoring — integrated health checks with automatic failover in ~60-90 seconds. (4) AWS integration — Alias records for zero-cost routing to ALB, CloudFront, S3, API Gateway with automatic IP tracking. (5) Domain registration — register and manage domains in the same console. (6) Resolver — hybrid DNS for on-premises integration. (7) DNSSEC support — cryptographic protection against DNS attacks. (8) Traffic Flow — visual editor for complex routing logic. Cost: $0.50/hosted zone/month, $0.40 per million queries."}
+];
+
+var current = 0;
+var answers = new Array(questions.length).fill(null);
+
+var tagMeta = {
+  core:    {label:'Core',             cls:'tag-core'},
+  dns:     {label:'DNS',              cls:'tag-dns'},
+  routing: {label:'Routing',          cls:'tag-routing'},
+  ha:      {label:'High Availability',cls:'tag-ha'},
+  record:  {label:'Records',          cls:'tag-record'},
+  adv:     {label:'Advanced',         cls:'tag-adv'}
+};
+
+function render(){
+  var q = questions[current];
+  var ans = answers[current];
+  var isAnswered = ans !== null;
+  var total = questions.length;
+  var tm = tagMeta[q.tag];
+
+  document.getElementById('progressFill').style.width = ((current+1)/total*100)+'%';
+  document.getElementById('progressText').textContent = (current+1)+' / '+total;
+
+  document.getElementById('dotsNav').innerHTML = questions.map(function(_,i){
+    var cls = 'dot';
+    if(i===current) cls += ' active current';
+    else if(answers[i]!==null) cls += ' answered';
+    return '<div class="'+cls+'" onclick="goTo('+i+')"></div>';
+  }).join('');
+
+  var tipHtml = q.tip
+    ? '<div class="tip-label">&#128161; Interview Tip</div><div class="tip-box">'+q.tip+'</div>'
+    : '';
+
+  var optionsHtml = q.options.map(function(opt,i){
+    var cls='option', tag='';
+    if(isAnswered){
+      cls+=' locked';
+      if(i===q.correct){ cls+=' correct'; tag='<span class="option-tag tag-correct">&#10003; CORRECT</span>'; }
+      else if(i===ans) { cls+=' wrong';   tag='<span class="option-tag tag-wrong">&#10007; WRONG</span>'; }
+    }
+    return '<div class="'+cls+'" onclick="selectAnswer('+i+')"><div class="option-dot"></div><span class="option-label">'+opt+'</span>'+tag+'</div>';
+  }).join('');
+
+  var explanationHtml = isAnswered
+    ? '<div class="explanation-box"><div class="explanation-title">&#9889; Explanation</div><div class="explanation-text">'+q.explanation+'</div></div>'
+    : '';
+
+  var isLast = current === total-1;
+  var allAnswered = answers.every(function(a){ return a!==null; });
+  var nextBtn = (isLast&&allAnswered)
+    ? '<button class="btn btn-next" onclick="showResults()">See Results &#8594;</button>'
+    : '<button class="btn btn-next" onclick="goNext()" '+((!isAnswered)?'disabled':'')+'>Next &#8594;</button>';
+
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card">'+
+      '<div class="q-number">Question '+(current+1)+' of '+total+' <span class="q-tag '+tm.cls+'">'+tm.label+'</span></div>'+
+      tipHtml+
+      '<div class="question">'+q.q+'</div>'+
+      '<div class="options">'+optionsHtml+'</div>'+
+      explanationHtml+
+      '<div class="nav-row">'+
+        '<button class="btn btn-back" onclick="goBack()" '+(current===0?'disabled':'')+'>&#8592; Back</button>'+
+        '<button class="btn btn-reset" onclick="resetQuiz()">&#8635; Reset</button>'+
+        nextBtn+
+      '</div>'+
+    '</div>';
+}
+
+function selectAnswer(i){ if(answers[current]!==null) return; answers[current]=i; render(); }
+function goNext(){ if(current<questions.length-1){ current++; render(); } }
+function goBack(){ if(current>0){ current--; render(); } }
+function goTo(i){ current=i; render(); }
+function resetQuiz(){ answers=new Array(questions.length).fill(null); current=0; render(); }
+
+function showResults(){
+  var score = answers.filter(function(a,i){ return a===questions[i].correct; }).length;
+  var pct = Math.round(score/questions.length*100);
+  var msg = pct===100?'&#127942; Perfect! DNS master!':pct>=70?'&#127919; Strong Route 53 knowledge!':'&#128218; Review explanations and retry!';
+  document.getElementById('quizArea').innerHTML =
+    '<div class="card result-screen">'+
+      '<div class="result-score">'+score+'/'+questions.length+'</div>'+
+      '<div class="result-label">FINAL SCORE &middot; '+pct+'%</div>'+
+      '<div class="result-msg">'+msg+'</div>'+
+      '<div class="result-list">'+
+        questions.map(function(q,i){
+          var icon = answers[i]===q.correct?'&#9989;':'&#10060;';
+          var label = q.q.length>46?q.q.slice(0,46)+'&hellip;':q.q;
+          return '<div class="result-item"><span style="font-size:15px">'+icon+'</span><span class="q-tag '+tagMeta[q.tag].cls+'" style="font-size:9px">'+tagMeta[q.tag].label+'</span>Q'+(i+1)+': '+label+'</div>';
+        }).join('')+
+      '</div>'+
+      '<button class="btn btn-next" style="margin:0 auto" onclick="reviewAnswers()">Review Answers</button>'+
+      '<button class="btn btn-reset" style="margin:12px auto 0" onclick="resetQuiz()">&#8635; Try Again</button>'+
+    '</div>';
+  document.getElementById('dotsNav').innerHTML='';
+  document.getElementById('progressFill').style.width='100%';
+  document.getElementById('progressText').textContent=score+' / '+questions.length+' correct';
+}
+
+function reviewAnswers(){ current=0; render(); }
+render();
+</script>
+</body>
+</html>

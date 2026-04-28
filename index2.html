@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Santosh Salunke | Sr. DevOps Engineer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* 🔵 BACKGROUND (match your site gradient tone) */
+  --bg:        #0b0f19;
+  --bg2:       #0b0f19;
+  --bg3:       #355f9e;
+
+  /* 🧊 SURFACE (glass look) */
+  --surface:   rgba(255,255,255,0.08);
+
+  /* 🔲 BORDERS */
+  --border:    rgba(255,255,255,0.15);
+  --border2:   rgba(173,214,255,0.35);
+
+  /* 🌟 ACCENTS (aligned with your UI) */
+  --accent:    #add6ff;   /* main blue */
+  --accent2:   #4facfe;   /* gradient blue */
+  --accent3:   #00ff9f;   /* highlight green */
+
+  /* 📝 TEXT */
+  --text:      #ffffff;
+  --muted:     #cbd5f5;
+  --faint:     rgba(255,255,255,0.4);
+
+  /* 🔤 FONTS */
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ─── NOISE OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── NAVBAR ─── */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: rgba(10,10,15,0.85);
+      border-bottom: 1px solid var(--border);
+    }
+
+    nav.navbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-brand {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    nav.navbar ul {
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    nav.navbar ul li a {
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-family: var(--font-mono);
+      letter-spacing: 0.03em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    nav.navbar ul li a:hover,
+    nav.navbar ul li a.active {
+      color: var(--text);
+      background: var(--bg3);
+    }
+
+    /* Dropdown */
+    .dropdown { position: relative; }
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 8px;
+      min-width: 200px;
+      z-index: 200;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    }
+
+    .dropdown:hover .dropdown-menu,
+    .dropdown-menu.open { display: block; }
+
+    .dropdown-menu li a {
+      display: block;
+      padding: 8px 12px !important;
+      border-radius: 6px;
+      font-size: 12px !important;
+    }
+
+    .dropdown-menu li a:hover {
+      background: var(--bg3) !important;
+      color: var(--accent) !important;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 100px 2rem 4rem;
+      overflow: hidden;
+    }
+
+    /* 🔥 REMOVE GRID → ADD SMOOTH GRADIENT */
+    .hero-bg-grid {
+      position: absolute;
+      inset: 0;
+    
+      background: radial-gradient(
+          circle at 30% 30%,
+          rgba(173,214,255,0.15),
+          transparent 40%
+        ),
+        radial-gradient(
+          circle at 70% 60%,
+          rgba(79,172,254,0.12),
+          transparent 50%
+        );
+    
+      pointer-events: none;
+    }
+
+   .hero-glow {
+     background: radial-gradient(
+       circle,
+       rgba(173,214,255,0.25) 0%,
+       transparent 70%
+     );
+   }
+   
+   .hero-glow2 {
+     background: radial-gradient(
+       circle,
+       rgba(79,172,254,0.2) 0%,
+       transparent 70%
+     );
+   }
+
+    .hero-content {
+      position: relative;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 4rem;
+    }
+
+    .hero-left { z-index: 1; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0,229,192,0.08);
+      border: 1px solid rgba(0,229,192,0.2);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 100px;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    .hero-name {
+      font-family: var(--font-head);
+      font-size: clamp(3rem, 6vw, 5.5rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .hero-name span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-title {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero-company {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent2);
+      letter-spacing: 0.05em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-desc {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 440px;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-desc strong { color: var(--text); font-weight: 500; }
+
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-item { text-align: left; }
+
+    .stat-number {
+      font-family: var(--font-head);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-top: 4px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent);
+      color: #0a0a0f;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 14px 28px;
+      border-radius: 8px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,229,192,0.25);
+    }
+
+    .hero-cta::after {
+      content: '→';
+      font-size: 16px;
+    }
+
+    /* Right card */
+    .hero-right {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .profile-card {
+      position: relative;
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      width: 320px;
+    }
+
+    .profile-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 21px;
+      background: linear-gradient(135deg, rgba(0,229,192,0.2), rgba(124,106,255,0.2), transparent);
+      z-index: -1;
+    }
+
+    .profile-img-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .profile-img-wrapper img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border2);
+    }
+
+    .profile-img-wrapper::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)) border-box;
+      -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: destination-out;
+      mask-composite: exclude;
+    }
+
+    .profile-name {
+      font-family: var(--font-head);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .profile-role {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .profile-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+    }
+
+    .tag {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    section { position: relative; z-index: 1; }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 3rem;
+    }
+
+    /* ─── DIVIDER LINE ─── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--faint), transparent);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ─── SKILLS SECTION ─── */
+    .skills-section { background: var(--bg2); }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+
+    .skill-card {
+      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem 1.25rem;
+      text-align: center;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+
+    .skill-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,229,192,0.04), transparent);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .skill-card:hover {
+      border-color: rgba(0,229,192,0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+
+    .skill-card:hover::before { opacity: 1; }
+
+    .skill-icon {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      filter: brightness(0.85) saturate(0.9);
+      transition: filter 0.2s;
+    }
+
+    .skill-card:hover .skill-icon { filter: brightness(1) saturate(1); }
+
+    .skill-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      line-height: 1.4;
+      transition: color 0.2s;
+    }
+
+    .skill-card:hover .skill-name { color: var(--text); }
+
+    .skill-arrow {
+      position: absolute;
+      top: 12px; right: 14px;
+      font-size: 12px;
+      color: var(--faint);
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .skill-card:hover .skill-arrow {
+      color: var(--accent);
+      transform: translate(2px, -2px);
+    }
+
+    /* ─── MCQ SECTION ─── */
+    .mcq-section { background: var(--bg); }
+
+    .mcq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .mcq-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .mcq-card:hover {
+      border-color: rgba(124,106,255,0.4);
+      background: rgba(124,106,255,0.06);
+      transform: translateX(4px);
+    }
+
+    .mcq-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    .mcq-label {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.03em;
+      transition: color 0.2s;
+    }
+
+    .mcq-card:hover .mcq-label { color: var(--text); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-copy {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .footer-tagline {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--faint);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-accent { color: var(--accent); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      .hero-right { display: none; }
+      .hero-desc { margin: 0 auto 2rem; }
+      .hero-stats { justify-content: center; }
+      nav.navbar { padding: 0 1rem; }
+      nav.navbar ul { gap: 0; }
+      nav.navbar ul li a { padding: 6px 8px; font-size: 11px; }
+      .footer-inner { justify-content: center; }
+    }
+
+    /* ─── SCROLL ANIMATIONS ─── */
+    [data-reveal] {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    [data-reveal].revealed {
+      opacity: 1;
+      transform: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAVBAR ── -->
+  <header>
+    <nav class="navbar">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="tambola.html">Tambola</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="ticket-generator.html">Ticket Gen</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+    <div class="hero-content">
+      <div class="hero-left">
+        <div class="hero-badge">Available for consultation</div>
+        <h1 class="hero-name">Santosh<br><span>Salunke</span></h1>
+        <p class="hero-title">SR. DEVOPS ENGINEER</p>
+        <p class="hero-company">@ Cybage Software Pvt. Ltd.</p>
+        <p class="hero-desc">
+          <strong>13+ years</strong> of experience building scalable, automated, and secure cloud solutions on AWS and Azure.
+        </p>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-number">13+</div>
+            <div class="stat-label">Years Exp</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">AWS</div>
+            <div class="stat-label">& Azure</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">∞</div>
+            <div class="stat-label">Pipelines</div>
+          </div>
+        </div>
+        <a href="about.html" class="hero-cta">Explore My Work</a>
+      </div>
+
+      <div class="hero-right">
+        <div class="profile-card">
+          <div class="profile-img-wrapper">
+            <img src="assets/profile.jpg" alt="Santosh Salunke">
+          </div>
+          <div class="profile-name">Santosh Salunke</div>
+          <div class="profile-role">Sr. DevOps Engineer</div>
+          <div class="profile-tags">
+            <span class="tag">AWS</span>
+            <span class="tag">Azure</span>
+            <span class="tag">Kubernetes</span>
+            <span class="tag">Terraform</span>
+            <span class="tag">CI/CD</span>
+            <span class="tag">Docker</span>
+            <span class="tag">Python</span>
+            <span class="tag">IaC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── SKILLS ── -->
+  <section class="skills-section">
+    <div class="section-inner">
+      <p class="section-label" data-reveal>Core Expertise</p>
+      <h2 class="section-title" data-reveal>Technologies I Work With</h2>
+
+      <div class="skills-grid">
+
+        <a class="skill-card" href="https://azure.microsoft.com/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure">
+          <span class="skill-name">Cloud: Azure</span>
+        </a>
+
+        <a class="skill-card" href="https://aws.amazon.com/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS">
+          <span class="skill-name">Cloud: AWS</span>
+        </a>
+
+        <a class="skill-card" href="https://www.docker.com/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker">
+          <span class="skill-name">Docker & Containers</span>
+        </a>
+
+        <a class="skill-card" href="cicd.html" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="CI/CD">
+          <span class="skill-name">CI/CD Pipelines</span>
+        </a>
+
+        <a class="skill-card" href="https://www.terraform.io/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform">
+          <span class="skill-name">IaC: Terraform & Terragrunt</span>
+        </a>
+
+        <a class="skill-card" href="https://www.python.org/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python">
+          <span class="skill-name">Python</span>
+        </a>
+
+        <a class="skill-card" href="https://www.gnu.org/software/bash/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Shell">
+          <span class="skill-name">Shell Scripting</span>
+        </a>
+
+        <a class="skill-card" href="https://aws.amazon.com/eks/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="EKS">
+          <span class="skill-name">Amazon EKS</span>
+        </a>
+
+        <a class="skill-card" href="https://azure.microsoft.com/en-us/products/kubernetes-service/" target="_blank" data-reveal>
+          <span class="skill-arrow">↗</span>
+          <img class="skill-icon" src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="AKS">
+          <span class="skill-name">Azure AKS</span>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- ── MCQ SECTION ── -->
+  <section class="mcq-section">
+    <div class="section-inner">
+      <p class="section-label" data-reveal>Practice Quizzes</p>
+      <h2 class="section-title" data-reveal>MCQ Study Hub</h2>
+
+      <div class="mcq-grid">
+        <a class="mcq-card" href="MCQ/ALB-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Load Balancers</span></a>
+        <a class="mcq-card" href="MCQ/EBS-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">EBS</span></a>
+        <a class="mcq-card" href="MCQ/EC2-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">EC2</span></a>
+        <a class="mcq-card" href="MCQ/Linux-Admin-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Linux Admin & Sar</span></a>
+        <a class="mcq-card" href="MCQ/DevOps-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">DevOps</span></a>
+        <a class="mcq-card" href="MCQ/IAM-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">IAM</span></a>
+        <a class="mcq-card" href="MCQ/VPC-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">VPC</span></a>
+        <a class="mcq-card" href="MCQ/S3-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">S3</span></a>
+        <a class="mcq-card" href="MCQ/Terraform-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Terraform</span></a>
+        <a class="mcq-card" href="MCQ/K8S-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Kubernetes</span></a>
+        <a class="mcq-card" href="MCQ/Helm-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Helm</span></a>
+        <a class="mcq-card" href="MCQ/API-Gateway-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">API Gateway</span></a>
+        <a class="mcq-card" href="MCQ/Lambda-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Lambda</span></a>
+        <a class="mcq-card" href="MCQ/Route53-MCQ-Cloude.html"><span class="mcq-dot"></span><span class="mcq-label">Route53</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2025 <span class="footer-accent">Santosh Salunke</span> · DevOps Engineer</p>
+      <p class="footer-tagline">Powered by GitHub Pages · Built with passion</p>
+    </div>
+  </footer>
+
+  <script>
+    // Dropdown toggle
+    document.querySelectorAll('.dropdown > a').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const menu = link.nextElementSibling;
+        const isOpen = menu.classList.contains('open');
+        document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
+        if (!isOpen) menu.classList.add('open');
+      });
+    });
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu.open').forEach(m => m.classList.remove('open'));
+      }
+    });
+
+    // Scroll reveal
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+      el.style.transitionDelay = (i % 4) * 0.08 + 's';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
