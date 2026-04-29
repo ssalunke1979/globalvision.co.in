@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAR System Monitor</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg-primary: #050b14;
+    --bg-secondary: #091220;
+    --bg-card: #0d1a2b;
+    --bg-card2: #0a1520;
+    --accent-cyan: #00e5ff;
+    --accent-green: #00ff88;
+    --accent-orange: #ff6b35;
+    --accent-purple: #b06aff;
+    --accent-yellow: #ffd700;
+    --accent-red: #ff3860;
+    --accent-teal: #00cfb4;
+    --text-primary: #e0f0ff;
+    --text-muted: #5a7a99;
+    --border: #1a3050;
+    --border-glow: rgba(0,229,255,0.3);
+    --grid-line: rgba(0,229,255,0.05);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Exo 2', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(90deg, #020912, #0d1f35, #020912);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 30px rgba(0,229,255,0.08);
+  }
+
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--accent-cyan);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 16px rgba(0,229,255,0.4);
+    animation: pulse-border 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 16px rgba(0,229,255,0.4); }
+    50% { box-shadow: 0 0 28px rgba(0,229,255,0.7); }
+  }
+
+  .logo-icon svg { width: 24px; height: 24px; fill: var(--accent-cyan); }
+
+  .header-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 20px rgba(0,229,255,0.5);
+  }
+
+  .header-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .header-status {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .status-dot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent-green);
+  }
+
+  .dot-live {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-green);
+    box-shadow: 0 0 8px var(--accent-green);
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .sys-clock {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* PARAMS PANEL */
+  .params-panel {
+    background: var(--bg-card2);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .params-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  .param-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .param-group label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--accent-cyan);
+    letter-spacing: 1px;
+  }
+
+  .param-input {
+    background: #0a1a2a;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--accent-green);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    padding: 5px 10px;
+    width: 60px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .param-input:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 10px rgba(0,229,255,0.2);
+  }
+
+  .param-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* MAIN LAYOUT */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 110px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--bg-secondary);
+    border-right: 1px solid var(--border);
+    padding: 20px 0;
+    overflow-y: auto;
+    position: sticky;
+    top: 110px;
+    height: calc(100vh - 110px);
+  }
+
+  .sidebar-section {
+    margin-bottom: 6px;
+  }
+
+  .sidebar-section-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    padding: 10px 20px 6px;
+    text-transform: uppercase;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+
+  .sidebar-section:first-child .sidebar-section-title {
+    border-top: none;
+    margin-top: 0;
+  }
+
+  .sar-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 11px 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sar-btn::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: transparent;
+    transition: background 0.18s;
+  }
+
+  .sar-btn:hover::before, .sar-btn.active::before {
+    background: var(--btn-accent);
+  }
+
+  .sar-btn:hover, .sar-btn.active {
+    background: rgba(0,229,255,0.05);
+  }
+
+  .sar-btn.active {
+    background: rgba(0,229,255,0.08);
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.95rem;
+    transition: box-shadow 0.18s;
+  }
+
+  .sar-btn:hover .btn-icon, .sar-btn.active .btn-icon {
+    box-shadow: 0 0 12px var(--btn-accent);
+  }
+
+  .btn-info { flex: 1; }
+
+  .btn-name {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.2;
+    display: block;
+  }
+
+  .btn-cmd {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .btn-loading-indicator {
+    display: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: var(--btn-accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+
+  .sar-btn.running .btn-loading-indicator { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CONTENT AREA */
+  .content-area {
+    padding: 28px;
+    overflow-y: auto;
+  }
+
+  /* WELCOME / EMPTY STATE */
+  .welcome-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .welcome-icon {
+    font-size: 4rem;
+    opacity: 0.3;
+  }
+
+  .welcome-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    letter-spacing: 3px;
+  }
+
+  .welcome-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    max-width: 360px;
+    line-height: 1.6;
+  }
+
+  /* RESULT CARD */
+  .result-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 24px;
+    animation: slide-in 0.3s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    background: linear-gradient(90deg, #091a2e, #0d1f35);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .result-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .result-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+
+  .result-cmd-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent-cyan);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+
+  .result-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .result-timestamp {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  .result-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color 0.2s;
+  }
+  .result-close:hover { color: var(--accent-red); }
+
+  /* TERMINAL OUTPUT */
+  .terminal-wrapper {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .terminal-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .terminal-output {
+    background: #030a12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.7;
+    color: #a8d4a8;
+    white-space: pre-wrap;
+    max-height: 320px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .terminal-output::-webkit-scrollbar { width: 5px; }
+  .terminal-output::-webkit-scrollbar-track { background: #030a12; }
+  .terminal-output::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .terminal-prompt {
+    color: var(--accent-cyan);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .terminal-error { color: var(--accent-red); }
+  .terminal-header-line { color: var(--accent-yellow); }
+  .terminal-data-line { color: #a8d4a8; }
+
+  /* CHART AREA */
+  .chart-wrapper {
+    padding: 20px;
+  }
+
+  .chart-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .chart-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .chart-container {
+    background: #030a12;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    height: 240px;
+    position: relative;
+  }
+
+  /* LOADING SPINNER IN CONTENT */
+  .loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    gap: 16px;
+  }
+
+  .loading-ring {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .loading-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+  }
+
+  /* QUICK STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .stat-mini {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-mini-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+  }
+
+  .stat-mini-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .stat-mini-sub {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a4060; }
+
+  /* CLEAR ALL BTN */
+  .clear-all-btn {
+    background: rgba(255,56,96,0.1);
+    border: 1px solid rgba(255,56,96,0.25);
+    color: var(--accent-red);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+	float: right;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.18s;
+    margin-bottom: 18px;
+    display: none;
+  }
+
+  .clear-all-btn:hover {
+    background: rgba(255,56,96,0.2);
+    box-shadow: 0 0 10px rgba(255,56,96,0.2);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 860px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 3h18v2H3zm0 4h12v2H3zm0 4h18v2H3zm0 4h10v2H3zm0 4h14v2H3z"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">SAR MONITOR</div>
+      <div class="header-sub">SYSTEM ACTIVITY REPORTER · LINUX PERFORMANCE TOOLKIT</div>
+    </div>
+  </div>
+  <div class="header-status">
+    <div class="status-dot"><span class="dot-live"></span> LIVE</div>
+    <div class="sys-clock" id="clock">--:--:--</div>
+  </div>
+</header>
+
+<!-- PARAMS PANEL -->
+<div class="params-panel">
+  <span class="params-label">⚙ COMMAND PARAMETERS:</span>
+  <div class="param-group">
+    <label>INTERVAL (sec)</label>
+    <input type="number" class="param-input" id="intervalVal" value="1" min="1" max="60">
+  </div>
+  <div class="param-group">
+    <label>COUNT (samples)</label>
+    <input type="number" class="param-input" id="countVal" value="5" min="1" max="60">
+  </div>
+  <span class="param-hint">// e.g. sar -u [INTERVAL] [COUNT] → sar -u 1 5</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">CPU Metrics</div>
+      <button class="sar-btn" style="--btn-accent:#00e5ff" onclick="runSar(this, '-u', 'CPU Usage', '🖥️', '#00e5ff')">
+        <div class="btn-icon" style="background:rgba(0,229,255,0.12);color:#00e5ff">🖥️</div>
+        <div class="btn-info">
+          <span class="btn-name">CPU Usage</span>
+          <span class="btn-cmd">sar -u [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#00ff88" onclick="runSar(this, '-P ALL', 'Per-Core CPU', '⚡', '#00ff88')">
+        <div class="btn-icon" style="background:rgba(0,255,136,0.12);color:#00ff88">⚡</div>
+        <div class="btn-info">
+          <span class="btn-name">Per-Core CPU</span>
+          <span class="btn-cmd">sar -P ALL [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ffd700" onclick="runSar(this, '-q', 'Load Average / Run Queue', '📊', '#ffd700')">
+        <div class="btn-icon" style="background:rgba(255,215,0,0.12);color:#ffd700">📊</div>
+        <div class="btn-info">
+          <span class="btn-name">Load Avg / Run Queue</span>
+          <span class="btn-cmd">sar -q [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Memory &amp; Swap</div>
+      <button class="sar-btn" style="--btn-accent:#b06aff" onclick="runSar(this, '-r', 'Memory Usage', '🧠', '#b06aff')">
+        <div class="btn-icon" style="background:rgba(176,106,255,0.12);color:#b06aff">🧠</div>
+        <div class="btn-info">
+          <span class="btn-name">Memory Usage</span>
+          <span class="btn-cmd">sar -r [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ff6b35" onclick="runSar(this, '-S', 'Swap Space Usage', '💾', '#ff6b35')">
+        <div class="btn-icon" style="background:rgba(255,107,53,0.12);color:#ff6b35">💾</div>
+        <div class="btn-info">
+          <span class="btn-name">Swap Space</span>
+          <span class="btn-cmd">sar -S [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#00cfb4" onclick="runSar(this, '-W', 'Swap In/Out Rate', '🔄', '#00cfb4')">
+        <div class="btn-icon" style="background:rgba(0,207,180,0.12);color:#00cfb4">🔄</div>
+        <div class="btn-info">
+          <span class="btn-name">Swap In/Out Rate</span>
+          <span class="btn-cmd">sar -W [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#b06aff" onclick="runSar(this, '-R', 'Memory Page Stats', '📋', '#b06aff')">
+        <div class="btn-icon" style="background:rgba(176,106,255,0.12);color:#b06aff">📋</div>
+        <div class="btn-info">
+          <span class="btn-name">Memory Page Stats</span>
+          <span class="btn-cmd">sar -R [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Disk &amp; I/O</div>
+      <button class="sar-btn" style="--btn-accent:#ff6b35" onclick="runSar(this, '-d', 'Disk I/O Activity', '💿', '#ff6b35')">
+        <div class="btn-icon" style="background:rgba(255,107,53,0.12);color:#ff6b35">💿</div>
+        <div class="btn-info">
+          <span class="btn-name">Disk I/O Activity</span>
+          <span class="btn-cmd">sar -d [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ffd700" onclick="runSar(this, '-b', 'I/O Transfer Rate', '📤', '#ffd700')">
+        <div class="btn-icon" style="background:rgba(255,215,0,0.12);color:#ffd700">📤</div>
+        <div class="btn-info">
+          <span class="btn-name">I/O Transfer Rate</span>
+          <span class="btn-cmd">sar -b [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Network</div>
+      <button class="sar-btn" style="--btn-accent:#00e5ff" onclick="runSar(this, '-n DEV', 'Network Interface Stats', '🌐', '#00e5ff')">
+        <div class="btn-icon" style="background:rgba(0,229,255,0.12);color:#00e5ff">🌐</div>
+        <div class="btn-info">
+          <span class="btn-name">Network Interfaces</span>
+          <span class="btn-cmd">sar -n DEV [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#00ff88" onclick="runSar(this, '-n EDEV', 'Network Errors', '⚠️', '#00ff88')">
+        <div class="btn-icon" style="background:rgba(0,255,136,0.12);color:#00ff88">⚠️</div>
+        <div class="btn-info">
+          <span class="btn-name">Network Errors</span>
+          <span class="btn-cmd">sar -n EDEV [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ff3860" onclick="runSar(this, '-n TCP', 'TCP Stats', '🔌', '#ff3860')">
+        <div class="btn-icon" style="background:rgba(255,56,96,0.12);color:#ff3860">🔌</div>
+        <div class="btn-info">
+          <span class="btn-name">TCP Statistics</span>
+          <span class="btn-cmd">sar -n TCP [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#b06aff" onclick="runSar(this, '-n SOCK', 'Socket Stats', '🔗', '#b06aff')">
+        <div class="btn-icon" style="background:rgba(176,106,255,0.12);color:#b06aff">🔗</div>
+        <div class="btn-info">
+          <span class="btn-name">Socket Statistics</span>
+          <span class="btn-cmd">sar -n SOCK [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Process &amp; Kernel</div>
+      <button class="sar-btn" style="--btn-accent:#00cfb4" onclick="runSar(this, '-w', 'Context Switches', '🔀', '#00cfb4')">
+        <div class="btn-icon" style="background:rgba(0,207,180,0.12);color:#00cfb4">🔀</div>
+        <div class="btn-info">
+          <span class="btn-name">Context Switches</span>
+          <span class="btn-cmd">sar -w [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ffd700" onclick="runSar(this, '-v', 'Kernel Tables (inode/file)', '🗂️', '#ffd700')">
+        <div class="btn-icon" style="background:rgba(255,215,0,0.12);color:#ffd700">🗂️</div>
+        <div class="btn-info">
+          <span class="btn-name">Kernel Tables</span>
+          <span class="btn-cmd">sar -v [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ff6b35" onclick="runSar(this, '-m CPU', 'CPU Frequency/Power', '⚡', '#ff6b35')">
+        <div class="btn-icon" style="background:rgba(255,107,53,0.12);color:#ff6b35">⚡</div>
+        <div class="btn-info">
+          <span class="btn-name">CPU Frequency</span>
+          <span class="btn-cmd">sar -m CPU [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#ff3860" onclick="runSar(this, '-m FAN', 'Fan Speed', '🌀', '#ff3860')">
+        <div class="btn-icon" style="background:rgba(255,56,96,0.12);color:#ff3860">🌀</div>
+        <div class="btn-info">
+          <span class="btn-name">Fan Speed</span>
+          <span class="btn-cmd">sar -m FAN [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#00e5ff" onclick="runSar(this, '-m TEMP', 'CPU Temperature', '🌡️', '#00e5ff')">
+        <div class="btn-icon" style="background:rgba(0,229,255,0.12);color:#00e5ff">🌡️</div>
+        <div class="btn-info">
+          <span class="btn-name">CPU Temperature</span>
+          <span class="btn-cmd">sar -m TEMP [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Filesystem</div>
+      <button class="sar-btn" style="--btn-accent:#00ff88" onclick="runSar(this, '-F', 'Filesystem Stats', '📁', '#00ff88')">
+        <div class="btn-icon" style="background:rgba(0,255,136,0.12);color:#00ff88">📁</div>
+        <div class="btn-info">
+          <span class="btn-name">Filesystem Stats</span>
+          <span class="btn-cmd">sar -F [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+      <button class="sar-btn" style="--btn-accent:#b06aff" onclick="runSar(this, '-I ALL', 'Interrupt Stats (All)', '🔔', '#b06aff')">
+        <div class="btn-icon" style="background:rgba(176,106,255,0.12);color:#b06aff">🔔</div>
+        <div class="btn-info">
+          <span class="btn-name">Interrupt Stats</span>
+          <span class="btn-cmd">sar -I ALL [i] [c]</span>
+        </div>
+        <div class="btn-loading-indicator"></div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENT AREA -->
+  <main class="content-area" id="contentArea">
+    <div class="welcome-state" id="welcomeState">
+      <div class="welcome-icon">⚡</div>
+      <div class="welcome-title">SELECT A METRIC TO MONITOR</div>
+      <div class="welcome-sub">Choose any SAR command from the sidebar. Results and charts will appear here. Adjust interval &amp; count parameters above.</div>
+    </div>
+    <button class="clear-all-btn" id="clearAllBtn" onclick="clearAll()">✕ CLEAR ALL RESULTS</button>
+    <div id="resultsContainer"></div>
+  </main>
+
+</div>
+
+<script>
+  // ─── Clock ────────────────────────────────────────────────────────────
+  function updateClock() {
+    document.getElementById('clock').textContent =
+      new Date().toLocaleTimeString('en-GB', { hour12: false });
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // ─── Chart registry (to destroy before re-render) ────────────────────
+  const chartRegistry = {};
+  let resultCount = 0;
+
+  // ─── Main SAR runner ─────────────────────────────────────────────────
+  function runSar(btn, flag, name, icon, color) {
+    const interval = parseInt(document.getElementById('intervalVal').value) || 1;
+    const count    = parseInt(document.getElementById('countVal').value)    || 5;
+    const cmd      = `sar ${flag} ${interval} ${count}`;
+
+    // UI state
+    btn.classList.add('running', 'active');
+    document.getElementById('welcomeState').style.display = 'none';
+    document.getElementById('clearAllBtn').style.display = 'block';
+
+    const cardId = `card_${++resultCount}`;
+    const chartId = `chart_${resultCount}`;
+
+    // Create result card with loading state
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.id = cardId;
+    card.innerHTML = `
+      <div class="result-header">
+        <div class="result-title-group">
+          <div class="result-badge" style="background:${color}22">${icon}</div>
+          <div>
+            <div class="result-title" style="color:${color}">${name.toUpperCase()}</div>
+          </div>
+        </div>
+        <div class="result-meta">
+          <span class="result-cmd-badge">${cmd}</span>
+          <span class="result-timestamp">${new Date().toLocaleTimeString()}</span>
+          <button class="result-close" onclick="removeCard('${cardId}', '${chartId}')">✕</button>
+        </div>
+      </div>
+      <div class="loading-overlay" id="loading_${cardId}">
+        <div class="loading-ring"></div>
+        <div class="loading-text">EXECUTING ${cmd.toUpperCase()} ...</div>
+      </div>
+    `;
+
+    // Prepend so newest is on top
+    const container = document.getElementById('resultsContainer');
+    container.prepend(card);
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Simulate execution (realistic SAR output generation)
+    setTimeout(() => {
+      btn.classList.remove('running');
+      const output = generateSarOutput(flag, interval, count);
+      renderResult(card, cardId, chartId, cmd, output, flag, color, icon);
+    }, 900 + Math.random() * 600);
+  }
+
+  // ─── Render result into card ──────────────────────────────────────────
+  function renderResult(card, cardId, chartId, cmd, output, flag, color, icon) {
+    const loadingEl = document.getElementById(`loading_${cardId}`);
+    if (loadingEl) loadingEl.remove();
+
+    // Terminal section
+    const termDiv = document.createElement('div');
+    termDiv.className = 'terminal-wrapper';
+    termDiv.innerHTML = `
+      <div class="terminal-label">TERMINAL OUTPUT</div>
+      <div class="terminal-output" id="term_${cardId}"></div>
+    `;
+    card.appendChild(termDiv);
+
+    // Colorize terminal output
+    const termEl = document.getElementById(`term_${cardId}`);
+    const promptLine = document.createElement('span');
+    promptLine.className = 'terminal-prompt';
+    promptLine.textContent = `$ ${cmd}`;
+    termEl.appendChild(promptLine);
+
+    output.lines.forEach((line, i) => {
+      const span = document.createElement('span');
+      if (i === 0) span.className = 'terminal-header-line';
+      else span.className = 'terminal-data-line';
+      span.textContent = line + '\n';
+      termEl.appendChild(span);
+    });
+
+    // Chart section
+    const chartDiv = document.createElement('div');
+    chartDiv.className = 'chart-wrapper';
+    chartDiv.innerHTML = `
+      <div class="chart-label">VISUALIZATION — ${output.chartTitle.toUpperCase()}</div>
+      <div class="chart-container">
+        <canvas id="${chartId}"></canvas>
+      </div>
+    `;
+    card.appendChild(chartDiv);
+
+    // Draw chart after DOM is ready
+    requestAnimationFrame(() => renderChart(chartId, output, color));
+  }
+
+  // ─── Chart renderer ───────────────────────────────────────────────────
+  function renderChart(chartId, output, color) {
+    if (chartRegistry[chartId]) {
+      chartRegistry[chartId].destroy();
+      delete chartRegistry[chartId];
+    }
+    const ctx = document.getElementById(chartId);
+    if (!ctx) return;
+
+    const hex2rgba = (hex, a) => {
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return `rgba(${r},${g},${b},${a})`;
+    };
+
+    const datasets = output.datasets.map((ds, idx) => {
+      const palette = [color, '#00ff88','#ffd700','#ff6b35','#b06aff','#ff3860','#00cfb4'];
+      const c = palette[idx % palette.length];
+      return {
+        label: ds.label,
+        data: ds.data,
+        backgroundColor: hex2rgba(c.replace(/[^#\w]/g,'') || '#00e5ff', 0.55),
+        borderColor: c,
+        borderWidth: 1.5,
+        borderRadius: 4,
+      };
+    });
+
+    const type = output.chartType || 'bar';
+    chartRegistry[chartId] = new Chart(ctx, {
+      type,
+      data: { labels: output.labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 600, easing: 'easeOutQuart' },
+        plugins: {
+          legend: {
+            labels: {
+              color: '#5a7a99',
+              font: { family: "'Share Tech Mono'", size: 10 },
+              boxWidth: 10,
+            }
+          },
+          tooltip: {
+            backgroundColor: '#091220',
+            borderColor: '#1a3050',
+            borderWidth: 1,
+            titleColor: '#00e5ff',
+            bodyColor: '#a8d4a8',
+            titleFont: { family: "'Share Tech Mono'", size: 11 },
+            bodyFont: { family: "'Share Tech Mono'", size: 10 },
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#5a7a99', font: { family: "'Share Tech Mono'", size: 9 } },
+            grid: { color: 'rgba(0,229,255,0.05)' },
+          },
+          y: {
+            ticks: { color: '#5a7a99', font: { family: "'Share Tech Mono'", size: 9 } },
+            grid: { color: 'rgba(0,229,255,0.05)' },
+          }
+        }
+      }
+    });
+  }
+
+  // ─── Remove a card ────────────────────────────────────────────────────
+  function removeCard(cardId, chartId) {
+    if (chartRegistry[chartId]) {
+      chartRegistry[chartId].destroy();
+      delete chartRegistry[chartId];
+    }
+    const card = document.getElementById(cardId);
+    if (card) card.remove();
+    if (!document.getElementById('resultsContainer').children.length) {
+      document.getElementById('welcomeState').style.display = 'flex';
+      document.getElementById('clearAllBtn').style.display = 'none';
+    }
+  }
+
+  function clearAll() {
+    Object.values(chartRegistry).forEach(c => c.destroy());
+    for (const k in chartRegistry) delete chartRegistry[k];
+    document.getElementById('resultsContainer').innerHTML = '';
+    document.getElementById('welcomeState').style.display = 'flex';
+    document.getElementById('clearAllBtn').style.display = 'none';
+    document.querySelectorAll('.sar-btn').forEach(b => b.classList.remove('active'));
+  }
+
+  // ─── SAR Output Generator ─────────────────────────────────────────────
+  function rnd(min, max, dec=2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(dec));
+  }
+
+  function makeTimestamps(count, interval) {
+    const stamps = [];
+    const now = new Date();
+    for (let i = count - 1; i >= 0; i--) {
+      const t = new Date(now - i * interval * 1000);
+      stamps.push(t.toTimeString().slice(0,8));
+    }
+    return stamps;
+  }
+
+  function generateSarOutput(flag, interval, count) {
+    const ts = makeTimestamps(count, interval);
+    const host = 'prod-server-01';
+    const kernel = 'Linux 5.15.0-91-generic';
+    const arch = 'x86_64';
+    const header = `${kernel} (${host})   ${new Date().toLocaleDateString('en-IN')}   _${arch}_   (${rnd(2,8,0)} CPU)`;
+
+    // Map flags to generators
+    const generators = {
+      '-u':       genCPU,
+      '-P ALL':   genPerCore,
+      '-q':       genLoadAvg,
+      '-r':       genMemory,
+      '-S':       genSwap,
+      '-W':       genSwapIO,
+      '-R':       genMemPage,
+      '-d':       genDisk,
+      '-b':       genIOTransfer,
+      '-n DEV':   genNetDev,
+      '-n EDEV':  genNetEDev,
+      '-n TCP':   genTCP,
+      '-n SOCK':  genSocket,
+      '-w':       genCtxSwitch,
+      '-v':       genKernelTables,
+      '-m CPU':   genCPUFreq,
+      '-m FAN':   genFan,
+      '-m TEMP':  genTemp,
+      '-F':       genFilesystem,
+      '-I ALL':   genInterrupts,
+    };
+
+    const gen = generators[flag] || genCPU;
+    const data = gen(ts, count);
+
+    return {
+      lines: [header, '', ...data.lines],
+      labels: ts,
+      datasets: data.datasets,
+      chartTitle: data.chartTitle,
+      chartType: data.chartType || 'bar',
+    };
+  }
+
+  // ── CPU Usage ─────────────────────────────────────────────────────────
+  function genCPU(ts, count) {
+    const header = 'Time             CPU     %user    %nice  %system  %iowait   %steal   %idle';
+    const rows = ts.map(t => {
+      const user = rnd(5,60); const sys = rnd(1,15); const io = rnd(0,8);
+      const idle = Math.max(0, 100 - user - sys - io).toFixed(2);
+      return `${t}        all    ${pad(user)}    0.00   ${pad(sys)}    ${pad(io)}     0.00   ${pad(idle)}`;
+    });
+    const users = ts.map(() => rnd(5,60));
+    const syss  = ts.map(() => rnd(1,15));
+    const ios   = ts.map(() => rnd(0,8));
+    return {
+      lines: [header, ...rows],
+      chartTitle: 'CPU Utilization %',
+      datasets: [
+        { label: '%user', data: users },
+        { label: '%system', data: syss },
+        { label: '%iowait', data: ios },
+      ]
+    };
+  }
+
+  // ── Per-Core CPU ──────────────────────────────────────────────────────
+  function genPerCore(ts, count) {
+    const cores = [0,1,2,3];
+    const lines = ['Time             CPU     %user  %system  %iowait   %idle'];
+    const datasets = cores.map(c => ({ label: `CPU${c}`, data: [] }));
+    ts.forEach(t => {
+      cores.forEach((c,i) => {
+        const u = rnd(5,70); const s = rnd(1,10); const io = rnd(0,5);
+        lines.push(`${t}        ${c}     ${pad(u)}   ${pad(s)}    ${pad(io)}   ${pad(Math.max(0,100-u-s-io).toFixed(2))}`);
+        datasets[i].data.push(u);
+      });
+    });
+    return { lines, chartTitle: 'Per-Core %user', datasets };
+  }
+
+  // ── Load Average ──────────────────────────────────────────────────────
+  function genLoadAvg(ts, count) {
+    const lines = ['Time          runq-sz  plist-sz   ldavg-1   ldavg-5  ldavg-15   blocked'];
+    const d1=[], d5=[], d15=[];
+    ts.forEach(t => {
+      const l1=rnd(0.1,4,2), l5=rnd(0.1,3,2), l15=rnd(0.1,2.5,2);
+      lines.push(`${t}       ${rnd(1,6,0)}      ${rnd(100,500,0)}     ${l1}     ${l5}      ${l15}         0`);
+      d1.push(l1); d5.push(l5); d15.push(l15);
+    });
+    return {
+      lines, chartTitle: 'Load Average',
+      datasets: [{ label: 'ldavg-1', data: d1 },{ label: 'ldavg-5', data: d5 },{ label: 'ldavg-15', data: d15 }],
+      chartType: 'line'
+    };
+  }
+
+  // ── Memory ────────────────────────────────────────────────────────────
+  function genMemory(ts, count) {
+    const total = 16384;
+    const lines = ['Time       kbmemfree  kbavail kbmemused  %memused kbbuffers  kbcached kbcommit   %commit  kbactive   kbinact   kbdirty'];
+    const usedPct=[];
+    ts.forEach(t => {
+      const used = rnd(4000,13000,0); const pct = (used/total*100).toFixed(2);
+      lines.push(`${t}   ${total-used}   ${rnd(2000,8000,0)}    ${used}    ${pct}   ${rnd(100,800,0)}   ${rnd(500,3000,0)}  ${rnd(1000,5000,0)}    ${rnd(10,60,2)}   ${rnd(2000,8000,0)}  ${rnd(500,2000,0)}    ${rnd(10,200,0)}`);
+      usedPct.push(parseFloat(pct));
+    });
+    return { lines, chartTitle: 'Memory Used %', datasets: [{ label: '%memused', data: usedPct }] };
+  }
+
+  // ── Swap ──────────────────────────────────────────────────────────────
+  function genSwap(ts, count) {
+    const lines = ['Time       kbswpfree kbswpused  %swpused  kbswpcad   %swpcad'];
+    const usedPct=[];
+    ts.forEach(t => {
+      const pct=rnd(0,30,2);
+      lines.push(`${t}   ${rnd(1000,8000,0)}   ${rnd(100,2000,0)}     ${pct}   ${rnd(50,500,0)}    ${rnd(0,5,2)}`);
+      usedPct.push(pct);
+    });
+    return { lines, chartTitle: 'Swap Used %', datasets: [{ label: '%swpused', data: usedPct }] };
+  }
+
+  // ── Swap I/O ──────────────────────────────────────────────────────────
+  function genSwapIO(ts, count) {
+    const lines = ['Time       pswpin/s pswpout/s'];
+    const inn=[], out=[];
+    ts.forEach(t => {
+      const i=rnd(0,5,2), o=rnd(0,8,2);
+      lines.push(`${t}   ${i}     ${o}`);
+      inn.push(i); out.push(o);
+    });
+    return { lines, chartTitle: 'Swap I/O (pages/s)', datasets: [{ label: 'pswpin/s', data: inn }, { label: 'pswpout/s', data: out }] };
+  }
+
+  // ── Memory Pages ──────────────────────────────────────────────────────
+  function genMemPage(ts, count) {
+    const lines = ['Time       frmpg/s bufpg/s campg/s'];
+    const frm=[], buf=[], cam=[];
+    ts.forEach(t => {
+      const f=rnd(-2,10,2), b=rnd(0,5,2), c=rnd(0,8,2);
+      lines.push(`${t}   ${f}   ${b}   ${c}`);
+      frm.push(f); buf.push(b); cam.push(c);
+    });
+    return { lines, chartTitle: 'Memory Pages/s', datasets: [{ label: 'frmpg/s', data: frm },{ label: 'bufpg/s', data: buf },{ label: 'campg/s', data: cam }] };
+  }
+
+  // ── Disk I/O ──────────────────────────────────────────────────────────
+  function genDisk(ts, count) {
+    const devs = ['sda','sdb','nvme0n1'];
+    const lines = ['Time          DEV   tps  rkB/s  wkB/s  dkB/s areq-sz  aqu-sz  await  svctm  %util'];
+    const datasets = devs.map(d => ({ label: `${d} %util`, data: [] }));
+    ts.forEach(t => {
+      devs.forEach((d,i) => {
+        const util=rnd(0,80,2);
+        lines.push(`${t}  ${d}  ${rnd(10,200,0)}  ${rnd(100,5000,0)}  ${rnd(50,3000,0)}  0.00  ${rnd(4,512,0)}  ${rnd(0,5,2)}  ${rnd(1,20,2)}  ${rnd(1,10,2)}  ${util}`);
+        datasets[i].data.push(util);
+      });
+    });
+    return { lines, chartTitle: 'Disk %util', datasets };
+  }
+
+  // ── I/O Transfer ──────────────────────────────────────────────────────
+  function genIOTransfer(ts, count) {
+    const lines = ['Time       tps      rtps      wtps      dtps   bread/s   bwrtn/s   bdscd/s'];
+    const bread=[], bwrtn=[];
+    ts.forEach(t => {
+      const r=rnd(100,8000,2), w=rnd(50,5000,2);
+      lines.push(`${t}   ${rnd(10,300,2)}   ${rnd(5,150,2)}   ${rnd(5,150,2)}   0.00   ${r}   ${w}   0.00`);
+      bread.push(r); bwrtn.push(w);
+    });
+    return { lines, chartTitle: 'Block I/O Rate (blocks/s)', datasets: [{ label: 'bread/s', data: bread },{ label: 'bwrtn/s', data: bwrtn }] };
+  }
+
+  // ── Network DEV ───────────────────────────────────────────────────────
+  function genNetDev(ts, count) {
+    const ifaces = ['eth0','lo'];
+    const lines = ['Time          IFACE   rxpck/s   txpck/s    rxkB/s    txkB/s   rxcmp/s   txcmp/s  rxmcst/s   %ifutil'];
+    const datasets = ifaces.map(i => ({ label: `${i} rxkB/s`, data: [] }));
+    ts.forEach(t => {
+      ifaces.forEach((iface,i) => {
+        const rx=rnd(10,5000,2);
+        lines.push(`${t}  ${iface}  ${rnd(10,2000,2)}  ${rnd(10,2000,2)}  ${rx}  ${rnd(10,3000,2)}  0.00  0.00  0.00  ${rnd(0,80,2)}`);
+        datasets[i].data.push(rx);
+      });
+    });
+    return { lines, chartTitle: 'Network rxkB/s', datasets };
+  }
+
+  // ── Network EDEV ──────────────────────────────────────────────────────
+  function genNetEDev(ts, count) {
+    const lines = ['Time          IFACE  rxerr/s  txerr/s coll/s rxdrop/s txdrop/s txcarr/s rxfram/s rxfifo/s txfifo/s'];
+    const rxerr=[], txerr=[];
+    ts.forEach(t => {
+      const r=rnd(0,5,2), tx=rnd(0,3,2);
+      lines.push(`${t}  eth0  ${r}  ${tx}  0.00  ${rnd(0,2,2)}  0.00  0.00  ${rnd(0,2,2)}  0.00  0.00`);
+      rxerr.push(r); txerr.push(tx);
+    });
+    return { lines, chartTitle: 'Network Errors/s', datasets: [{ label: 'rxerr/s', data: rxerr },{ label: 'txerr/s', data: txerr }] };
+  }
+
+  // ── TCP ───────────────────────────────────────────────────────────────
+  function genTCP(ts, count) {
+    const lines = ['Time       active/s passive/s    iseg/s    oseg/s'];
+    const act=[], pas=[];
+    ts.forEach(t => {
+      const a=rnd(0,50,2), p=rnd(0,30,2);
+      lines.push(`${t}  ${a}  ${p}  ${rnd(100,5000,2)}  ${rnd(100,5000,2)}`);
+      act.push(a); pas.push(p);
+    });
+    return { lines, chartTitle: 'TCP Connections/s', datasets: [{ label: 'active/s', data: act },{ label: 'passive/s', data: pas }] };
+  }
+
+  // ── Sockets ───────────────────────────────────────────────────────────
+  function genSocket(ts, count) {
+    const lines = ['Time       totsck  tcpsck  udpsck  rawsck  ip-frag  tcp-tw'];
+    const tcp=[], udp=[];
+    ts.forEach(t => {
+      const t2=rnd(100,2000,0), u=rnd(10,200,0);
+      lines.push(`${t}   ${rnd(200,3000,0)}  ${t2}  ${u}  0  0  ${rnd(0,100,0)}`);
+      tcp.push(t2); udp.push(u);
+    });
+    return { lines, chartTitle: 'Open Sockets', datasets: [{ label: 'TCP', data: tcp },{ label: 'UDP', data: udp }] };
+  }
+
+  // ── Context Switches ──────────────────────────────────────────────────
+  function genCtxSwitch(ts, count) {
+    const lines = ['Time        proc/s   cswch/s'];
+    const proc=[], csw=[];
+    ts.forEach(t => {
+      const p=rnd(1,50,2), c=rnd(500,15000,2);
+      lines.push(`${t}  ${p}  ${c}`);
+      proc.push(p); csw.push(c);
+    });
+    return { lines, chartTitle: 'Context Switches/s', datasets: [{ label: 'cswch/s', data: csw },{ label: 'proc/s', data: proc }] };
+  }
+
+  // ── Kernel Tables ─────────────────────────────────────────────────────
+  function genKernelTables(ts, count) {
+    const lines = ['Time        dentunusd   file-nr  inode-nr  pty-nr'];
+    const files=[], inodes=[];
+    ts.forEach(t => {
+      const f=rnd(1000,50000,0), i=rnd(5000,80000,0);
+      lines.push(`${t}  ${rnd(10000,80000,0)}  ${f}  ${i}  ${rnd(0,50,0)}`);
+      files.push(f); inodes.push(i);
+    });
+    return { lines, chartTitle: 'Kernel Table Entries', datasets: [{ label: 'file-nr', data: files },{ label: 'inode-nr', data: inodes }] };
+  }
+
+  // ── CPU Frequency ─────────────────────────────────────────────────────
+  function genCPUFreq(ts, count) {
+    const lines = ['Time          CPU    MHz'];
+    const freqs=[];
+    ts.forEach(t => {
+      const f=rnd(1200,4200,2);
+      lines.push(`${t}  all  ${f}`);
+      freqs.push(f);
+    });
+    return { lines, chartTitle: 'CPU Frequency (MHz)', datasets: [{ label: 'MHz', data: freqs }] };
+  }
+
+  // ── Fan Speed ─────────────────────────────────────────────────────────
+  function genFan(ts, count) {
+    const lines = ['Time          FAN  rpm  drpm'];
+    const rpms=[];
+    ts.forEach(t => {
+      const r=rnd(800,3200,0);
+      lines.push(`${t}  fan1  ${r}  ${rnd(-50,200,0)}`);
+      rpms.push(r);
+    });
+    return { lines, chartTitle: 'Fan Speed (RPM)', datasets: [{ label: 'rpm', data: rpms }] };
+  }
+
+  // ── Temperature ───────────────────────────────────────────────────────
+  function genTemp(ts, count) {
+    const lines = ['Time          TEMP  degC  %temp'];
+    const temps=[];
+    ts.forEach(t => {
+      const tmp=rnd(35,85,1);
+      lines.push(`${t}  core0  ${tmp}  ${(tmp/100).toFixed(2)}`);
+      temps.push(tmp);
+    });
+    return { lines, chartTitle: 'CPU Temperature (°C)', datasets: [{ label: '°C', data: temps }] };
+  }
+
+  // ── Filesystem ────────────────────────────────────────────────────────
+  function genFilesystem(ts, count) {
+    const lines = ['Time      MBfsfree  MBfsused  %fsused  %ufsused  Ifree  Iused  %Iused  Filesystem'];
+    const pct=[];
+    ts.forEach(t => {
+      const p=rnd(20,85,2);
+      lines.push(`${t}   ${rnd(10000,500000,0)}   ${rnd(5000,200000,0)}   ${p}   ${rnd(20,90,2)}   ${rnd(100000,500000,0)}   ${rnd(10000,200000,0)}   ${rnd(2,80,2)}   /`);
+      pct.push(p);
+    });
+    return { lines, chartTitle: 'Filesystem Used %', datasets: [{ label: '%fsused', data: pct }] };
+  }
+
+  // ── Interrupts ────────────────────────────────────────────────────────
+  function genInterrupts(ts, count) {
+    const irqs = ['0', '1', '9', '16'];
+    const lines = ['Time          INTR    intr/s'];
+    const datasets = irqs.map(i => ({ label: `IRQ${i}`, data: [] }));
+    ts.forEach(t => {
+      irqs.forEach((irq, i) => {
+        const v=rnd(0,5000,2);
+        lines.push(`${t}  ${irq}  ${v}`);
+        datasets[i].data.push(v);
+      });
+    });
+    return { lines, chartTitle: 'Interrupts/s by IRQ', datasets };
+  }
+
+  // ── Padding helper ────────────────────────────────────────────────────
+  function pad(val, width=8) {
+    return String(val).padStart(width);
+  }
+</script>
+</body>
+</html>
