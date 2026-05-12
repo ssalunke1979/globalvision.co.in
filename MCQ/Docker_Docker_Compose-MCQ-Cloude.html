@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker & Docker Compose — MCQ Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f2f4f8;
+  --surface: #ffffff;
+  --surface2: #f7f9fc;
+  --border: #d0d8e8;
+  --accent: #0a6cc4;
+  --accent2: #0550a0;
+  --accent3: #0c2340;
+  --whale: #1d94d2;
+  --compose: #e05a1a;
+  --compose2: #b84010;
+  --text: #111826;
+  --text-muted: #4a5770;
+  --correct: #1a7a4a;
+  --correct-bg: #edf7f2;
+  --wrong: #b83020;
+  --wrong-bg: #fdf0ee;
+  --option-hover: #e8f2fc;
+  --shadow: 0 4px 28px rgba(10,30,70,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); font-family: 'Crimson Pro', Georgia, serif; color: var(--text); min-height: 100vh; }
+
+/* ── HEADER ── */
+header {
+  background: var(--accent3);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+header::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -55deg,
+    transparent,
+    transparent 28px,
+    rgba(255,255,255,0.025) 28px,
+    rgba(255,255,255,0.025) 29px
+  );
+  pointer-events: none;
+}
+.header-inner {
+  position: relative;
+  z-index: 1;
+  padding: 48px 44px 36px;
+  display: flex;
+  align-items: flex-end;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.docker-whale {
+  font-size: 72px;
+  line-height: 1;
+  filter: drop-shadow(0 4px 18px rgba(29,148,210,0.5));
+  flex-shrink: 0;
+}
+.header-text .label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 8px;
+}
+.header-text h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(36px, 6vw, 72px);
+  letter-spacing: 2px;
+  color: #fff;
+  line-height: 0.95;
+}
+.header-text h1 span { color: var(--whale); }
+.header-text h1 em { color: var(--compose); font-style: normal; }
+.header-text p {
+  margin-top: 12px;
+  font-size: 15px;
+  color: rgba(255,255,255,0.6);
+  font-style: italic;
+}
+
+/* ── TABS ── */
+.tab-bar {
+  background: var(--accent3);
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  display: flex;
+  padding: 0 44px;
+  gap: 0;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.tab-btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  padding: 16px 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+  top: 2px;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.8); }
+.tab-btn.active-docker { color: var(--whale); border-bottom-color: var(--whale); }
+.tab-btn.active-compose { color: var(--compose); border-bottom-color: var(--compose); }
+.tab-btn .tab-count {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  margin-left: 8px;
+  background: rgba(255,255,255,0.1);
+}
+
+/* ── PROGRESS ── */
+.progress-wrap {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 44px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 10px rgba(10,30,70,0.06);
+}
+.progress-bar-bg {
+  flex: 1;
+  height: 5px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  width: 0%;
+}
+.fill-docker { background: linear-gradient(90deg, var(--accent2), var(--whale)); }
+.fill-compose { background: linear-gradient(90deg, var(--compose2), var(--compose)); }
+.progress-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.score-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1px;
+  padding: 4px 16px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.badge-docker { background: var(--accent3); color: var(--whale); }
+.badge-compose { background: var(--accent3); color: var(--compose); }
+
+/* ── MAIN ── */
+main { max-width: 860px; margin: 0 auto; padding: 44px 20px 80px; }
+
+.quiz-section { display: none; }
+.quiz-section.active { display: block; }
+
+/* ── CATEGORY DIVIDER ── */
+.category-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 44px 0 22px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+}
+.category-divider::before, .category-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.category-divider .cat-icon { font-size: 16px; }
+
+/* ── QUESTION CARD ── */
+.question-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 34px 36px 26px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  animation: cardIn 0.35s ease both;
+  display: none;
+  border-top: 4px solid var(--border);
+}
+.question-card.active { display: block; }
+.question-card.docker-card { border-top-color: var(--whale); }
+.question-card.compose-card { border-top-color: var(--compose); }
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.q-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.q-num { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); }
+.q-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.q-tag.basic { background: #e0ecff; color: #0a4a9c; }
+.q-tag.advanced { background: #ede0ff; color: #5b2fa0; }
+.q-tag.security { background: #ffe0e0; color: #a02020; }
+.q-tag.scenario { background: #fff3d6; color: #8a5500; }
+.q-tag.compose { background: #ffeadc; color: #b84010; }
+.q-tag.network { background: #dcf5e8; color: #0a5a30; }
+
+.question-text { font-size: 19px; line-height: 1.6; color: var(--text); margin-bottom: 6px; }
+
+.q-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  background: #0c1929;
+  color: #7dd3fc;
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin: 14px 0 4px;
+  border-left: 3px solid var(--whale);
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.75;
+}
+.q-code.compose-code { color: #fdba74; border-left-color: var(--compose); }
+
+/* ── OPTIONS ── */
+.options { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.option {
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--surface2);
+  transition: all 0.16s ease;
+  user-select: none;
+}
+.option:hover:not(.disabled) { border-color: var(--accent); background: var(--option-hover); transform: translateX(4px); }
+.option-key {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 1px;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  background: var(--border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.16s;
+}
+.option-text { font-size: 15.5px; line-height: 1.55; padding-top: 3px; }
+.option-code { font-family: 'IBM Plex Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; }
+
+.option.correct { border-color: var(--correct); background: var(--correct-bg); }
+.option.correct .option-key { background: var(--correct); color: #fff; }
+.option.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+.option.wrong .option-key { background: var(--wrong); color: #fff; }
+.option.disabled { cursor: default; transform: none !important; }
+
+/* ── EXPLANATION ── */
+.explanation {
+  display: none;
+  margin-top: 18px;
+  padding: 18px 20px;
+  border-radius: 8px;
+  animation: fadeUp 0.3s ease;
+}
+.explanation.show { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.exp-docker { border-left: 4px solid var(--whale); background: #e8f4fd; }
+.exp-compose { border-left: 4px solid var(--compose); background: #fdf0e8; }
+.explanation .ex-head {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 14px;
+  letter-spacing: 3px;
+  margin-bottom: 8px;
+}
+.exp-docker .ex-head { color: var(--accent2); }
+.exp-compose .ex-head { color: var(--compose2); }
+.explanation p { font-size: 14.5px; line-height: 1.72; color: #1a2840; }
+.explanation .correct-label {
+  display: inline-block;
+  color: #fff;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.exp-docker .correct-label { background: var(--correct); }
+.exp-compose .correct-label { background: var(--compose2); }
+.explanation .ex-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  background: #0c1929;
+  color: #7dd3fc;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  white-space: pre;
+  line-height: 1.7;
+}
+.exp-compose .ex-code { color: #fdba74; }
+
+/* ── NAV BUTTONS ── */
+.nav-btns { display: flex; gap: 12px; margin-top: 22px; justify-content: flex-end; }
+.btn {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 16px;
+  letter-spacing: 2px;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-docker { background: var(--accent3); color: var(--whale); }
+.btn-docker:hover { background: #0a1e38; transform: translateY(-1px); }
+.btn-compose { background: var(--compose2); color: #fff; }
+.btn-compose:hover { background: #8a2e0a; transform: translateY(-1px); }
+.btn-outline-docker { background: transparent; color: var(--accent2); border: 1.5px solid var(--accent2); }
+.btn-outline-docker:hover { background: var(--option-hover); }
+
+/* ── RESULT ── */
+.result-screen {
+  display: none;
+  text-align: center;
+  padding: 60px 20px 80px;
+  animation: cardIn 0.5s ease both;
+}
+.result-screen.show { display: block; }
+.result-icon { font-size: 60px; margin-bottom: 12px; }
+.result-score-big {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 90px;
+  line-height: 1;
+  letter-spacing: 3px;
+}
+.result-score-big span { font-size: 48px; }
+.result-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; margin: 14px 0 8px; }
+.result-subtitle { font-size: 17px; color: var(--text-muted); font-style: italic; margin-bottom: 36px; }
+.result-stats { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 40px; }
+.stat-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 20px 28px; min-width: 130px; }
+.stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 40px; letter-spacing: 2px; }
+.stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── BOTH RESULTS PANEL ── */
+.both-results {
+  display: none;
+  max-width: 860px;
+  margin: 40px auto 80px;
+  padding: 0 20px;
+  animation: cardIn 0.5s ease both;
+}
+.both-results.show { display: block; }
+.both-results h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  letter-spacing: 3px;
+  text-align: center;
+  color: var(--accent3);
+  margin-bottom: 28px;
+}
+.results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.result-card {
+  border-radius: 12px;
+  padding: 28px;
+  text-align: center;
+}
+.result-card.docker-result { background: linear-gradient(135deg, var(--accent3), #1a3a5c); color: #fff; }
+.result-card.compose-result { background: linear-gradient(135deg, var(--compose2), #8a3010); color: #fff; }
+.result-card .rc-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.65; margin-bottom: 8px; }
+.result-card .rc-score { font-family: 'Bebas Neue', sans-serif; font-size: 64px; letter-spacing: 2px; line-height: 1; }
+.result-card .rc-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; margin-top: 10px; opacity: 0.9; }
+.result-card .rc-sub { font-size: 13px; opacity: 0.7; font-style: italic; margin-top: 6px; }
+.restart-row { text-align: center; margin-top: 32px; display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; }
+
+@media (max-width: 640px) {
+  .header-inner { padding: 32px 20px 24px; }
+  .tab-bar { padding: 0 16px; }
+  .progress-wrap { padding: 12px 16px; }
+  main { padding: 28px 12px 60px; }
+  .question-card { padding: 22px 16px 18px; }
+  .results-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="docker-whale">🐳</div>
+    <div class="header-text">
+      <div class="label">DevOps / SRE / Cloud Interview Prep</div>
+      <h1><span>Docker</span> &amp; <em>Compose</em><br>MCQ Quiz</h1>
+      <p>60 questions across two quiz sets · Basic to Advanced · With examples &amp; explanations</p>
+    </div>
+  </div>
+</header>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active-docker" id="tab-docker" onclick="switchTab('docker')">
+    🐳 Docker <span class="tab-count" id="count-docker">30 Q</span>
+  </button>
+  <button class="tab-btn" id="tab-compose" onclick="switchTab('compose')">
+    🔧 Docker Compose <span class="tab-count" id="count-compose">30 Q</span>
+  </button>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrap">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill fill-docker" id="progress-fill"></div>
+  </div>
+  <div class="progress-label" id="progress-label">0 / 30</div>
+  <div class="score-badge badge-docker" id="score-badge">Score: 0</div>
+</div>
+
+<main>
+  <!-- DOCKER SECTION -->
+  <div class="quiz-section active" id="section-docker"></div>
+  <!-- COMPOSE SECTION -->
+  <div class="quiz-section" id="section-compose"></div>
+
+  <!-- BOTH COMPLETE RESULTS -->
+  <div class="both-results" id="both-results">
+    <h2>🏁 Final Results</h2>
+    <div class="results-grid">
+      <div class="result-card docker-result">
+        <div class="rc-label">Docker Core</div>
+        <div class="rc-score" id="br-docker-score">—</div>
+        <div class="rc-title" id="br-docker-title"></div>
+        <div class="rc-sub" id="br-docker-sub"></div>
+      </div>
+      <div class="result-card compose-result">
+        <div class="rc-label">Docker Compose</div>
+        <div class="rc-score" id="br-compose-score">—</div>
+        <div class="rc-title" id="br-compose-title"></div>
+        <div class="rc-sub" id="br-compose-sub"></div>
+      </div>
+    </div>
+    <div class="restart-row">
+      <button class="btn btn-docker" onclick="restartAll()">Restart Both Quizzes</button>
+      <button class="btn btn-outline-docker" onclick="restartSection('docker')">Retry Docker</button>
+      <button class="btn btn-compose" onclick="restartSection('compose')">Retry Compose</button>
+    </div>
+  </div>
+</main>
+
+<script>
+// ════════════════════════════════════════════════════════════
+//  DATA
+// ════════════════════════════════════════════════════════════
+const dockerQuestions = [
+  // ── ARCHITECTURE & CORE ─────────────────────────────────
+  {
+    category:"Architecture & Core", catIcon:"🏗",
+    tag:"basic",
+    text:"What is the key difference between a Docker container and a Virtual Machine?",
+    options:["Containers include a full OS kernel; VMs do not","Containers share the host OS kernel; VMs have their own OS","Containers are slower than VMs","VMs can only run on Linux"],
+    answer:1,
+    explanation:"<strong>Containers</strong> share the host OS kernel and isolate processes using namespaces and cgroups — making them lightweight and fast to start. <strong>VMs</strong> virtualise full hardware stacks including separate OS kernels, making them heavier but more isolated.",
+    code:"# Container starts in milliseconds\ndocker run -d nginx\n\n# VM needs full OS boot — seconds to minutes\n# Container: ~15 MB overhead  |  VM: ~500 MB–several GB overhead"
+  },
+  {
+    category:"Architecture & Core", catIcon:"🏗",
+    tag:"basic",
+    text:"Which component is the heart of Docker — the daemon that manages images, containers, networks, and volumes?",
+    options:["Docker CLI","Docker Engine (dockerd)","Docker Hub","containerd"],
+    answer:1,
+    explanation:"<strong>Docker Engine (dockerd)</strong> is the long-running daemon process. The Docker CLI communicates with it via REST API. containerd is the lower-level container runtime that dockerd delegates to.",
+    code:"# Check Docker daemon status\nsystemctl status docker\n\n# Docker architecture layers:\n# docker CLI → dockerd → containerd → runc → container"
+  },
+  {
+    category:"Architecture & Core", catIcon:"🏗",
+    tag:"advanced",
+    text:"Which Linux kernel features does Docker primarily rely on for container isolation?",
+    options:["SELinux and AppArmor only","Namespaces and cgroups","Hypervisor and QEMU","iptables and nftables only"],
+    answer:1,
+    explanation:"<strong>Namespaces</strong> provide isolation (PID, NET, IPC, UTS, Mount, User namespaces). <strong>cgroups</strong> (control groups) limit and account for resource usage (CPU, memory, I/O). Together they make containers possible without a hypervisor.",
+    code:"# View namespaces of a running container\nlsns -p $(docker inspect --format='{{.State.Pid}}' mycontainer)\n\n# View cgroup limits\ncat /sys/fs/cgroup/memory/docker/<id>/memory.limit_in_bytes"
+  },
+  {
+    category:"Architecture & Core", catIcon:"🏗",
+    tag:"basic",
+    text:"What is a Docker image?",
+    options:["A running instance of an application","A read-only layered template used to create containers","A backup of a running container","A Docker Hub account snapshot"],
+    answer:1,
+    explanation:"A <strong>Docker image</strong> is a read-only, layered filesystem built from a Dockerfile. Each instruction creates a new layer. Containers are created by adding a writable layer on top of an image.",
+    code:"# Images are layered — each Dockerfile instruction = one layer\ndocker image history nginx\n# IMAGE    CREATED    CREATED BY                 SIZE\n# abc123   2 days ago /bin/sh -c apt-get install  52MB\n# ..."
+  },
+
+  // ── DOCKERFILE ──────────────────────────────────────────
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"basic",
+    text:"What is the difference between <code class='option-code'>CMD</code> and <code class='option-code'>ENTRYPOINT</code> in a Dockerfile?",
+    options:[
+      "They are identical — either can be used interchangeably",
+      "ENTRYPOINT sets the fixed executable; CMD provides default arguments that can be overridden",
+      "CMD sets the fixed executable; ENTRYPOINT provides overridable defaults",
+      "ENTRYPOINT runs at build time; CMD runs at container start"
+    ],
+    answer:1,
+    explanation:"<strong>ENTRYPOINT</strong> defines the main command that always runs. <strong>CMD</strong> provides default arguments to ENTRYPOINT (or a default command if ENTRYPOINT is absent). CMD is easily overridden at <code>docker run</code>; ENTRYPOINT requires <code>--entrypoint</code> to override.",
+    code:"# Dockerfile\nENTRYPOINT [\"python\", \"app.py\"]\nCMD [\"--port\", \"8080\"]         # default arg\n\n# docker run myimage              → python app.py --port 8080\n# docker run myimage --port 9090  → python app.py --port 9090"
+  },
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"basic",
+    text:"What is the difference between <code class='option-code'>COPY</code> and <code class='option-code'>ADD</code> in a Dockerfile?",
+    options:[
+      "COPY is for remote URLs; ADD is for local files",
+      "COPY only copies local files; ADD also supports URLs and auto-extracts tar archives",
+      "ADD is deprecated — never use it",
+      "There is no difference — they are aliases"
+    ],
+    answer:1,
+    explanation:"<strong>COPY</strong> is simple and predictable — copies local files/directories. <strong>ADD</strong> has extra powers: can fetch remote URLs and auto-extracts .tar.gz archives. Best practice: prefer COPY unless you specifically need ADD's extra features.",
+    code:"# Preferred — explicit and fast\nCOPY app.py /app/\n\n# Use ADD only when you need auto-extract:\nADD https://example.com/data.tar.gz /data/\n# ↑ extracts tar.gz automatically"
+  },
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"advanced",
+    text:"What is a multi-stage build in Docker and why is it used?",
+    options:[
+      "Running multiple containers in a single build command",
+      "Using multiple FROM instructions to reduce final image size by copying only needed artifacts",
+      "Building images in parallel across multiple hosts",
+      "A Dockerfile with more than 10 RUN instructions"
+    ],
+    answer:1,
+    explanation:"<strong>Multi-stage builds</strong> use multiple FROM instructions. Build tools (compilers, test frameworks) stay in early stages; only the compiled binary is copied to the final lean image. This dramatically reduces image size and attack surface.",
+    code:"# Build stage — includes compiler (heavy)\nFROM golang:1.21 AS builder\nWORKDIR /app\nCOPY . .\nRUN go build -o server .\n\n# Final stage — only the binary (tiny)\nFROM alpine:3.18\nCOPY --from=builder /app/server /usr/local/bin/\nCMD [\"server\"]\n# Result: ~10MB instead of ~1GB"
+  },
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"advanced",
+    text:"Why does layer caching matter, and which Dockerfile pattern best exploits it?",
+    options:[
+      "Copy source code first, then install dependencies",
+      "Install dependencies (requirements.txt) before copying source code",
+      "Use RUN as few times as possible",
+      "Layer caching only applies to the FROM instruction"
+    ],
+    answer:1,
+    explanation:"Docker re-uses cached layers until a layer changes. Since <code>requirements.txt</code> changes less often than source code, installing dependencies first means the heavy install step is cached. Changing only <code>app.py</code> won't invalidate the dependency layer.",
+    code:"# ✅ Good — dependencies cached independently\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .          # changes here won't bust pip cache\n\n# ❌ Bad — any code change invalidates pip install\nCOPY . .\nRUN pip install -r requirements.txt"
+  },
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"basic",
+    text:"What does the <code class='option-code'>EXPOSE</code> instruction do in a Dockerfile?",
+    options:[
+      "Automatically publishes the port to the host machine",
+      "Documents which port the container listens on — does not actually publish it",
+      "Opens a firewall rule for the specified port",
+      "Maps the port to a random host port"
+    ],
+    answer:1,
+    explanation:"<strong>EXPOSE</strong> is documentation — it tells humans and tools which port the app listens on. It does NOT publish the port. Actual publishing requires <code>-p host:container</code> in <code>docker run</code>.",
+    code:"# Dockerfile\nEXPOSE 8080         # documentation only\n\n# To actually publish:\ndocker run -p 3000:8080 myimage\n# ↑ host:3000 → container:8080\n\n# -P publishes all EXPOSEd ports to random host ports\ndocker run -P myimage"
+  },
+  {
+    category:"Dockerfile", catIcon:"📄",
+    tag:"security",
+    text:"Why should containers avoid running as the <code class='option-code'>root</code> user?",
+    options:[
+      "Root containers use more CPU",
+      "If the container is compromised, root inside can potentially escape and damage the host",
+      "Docker forbids root containers by default",
+      "Root containers cannot access the network"
+    ],
+    answer:1,
+    explanation:"Running as root inside a container is a major security risk. A container escape vulnerability combined with root privileges could allow an attacker to gain root on the host. Always create and use a non-root user.",
+    code:"# Dockerfile — run as non-root\nRUN groupadd -r appuser && useradd -r -g appuser appuser\nUSER appuser\n\n# Verify at runtime\ndocker run myimage whoami\n# appuser   ← not root ✅\n\n# Check user of running container\ndocker exec mycontainer whoami"
+  },
+
+  // ── NETWORKING ──────────────────────────────────────────
+  {
+    category:"Networking", catIcon:"🌐",
+    tag:"basic",
+    text:"What is the default network driver when you run a container without specifying a network?",
+    options:["host","overlay","none","bridge"],
+    answer:3,
+    explanation:"The <strong>bridge</strong> network is Docker's default. Each container gets a private IP on a virtual bridge (<code>docker0</code>). Containers on the same bridge can talk to each other; external access requires port mapping.",
+    code:"# Default bridge network\ndocker run -d nginx                    # uses docker0 bridge\n\n# List networks\ndocker network ls\n# bridge   bridge  local\n# host     host    local\n# none     null    local\n\n# Inspect bridge\ndocker network inspect bridge"
+  },
+  {
+    category:"Networking", catIcon:"🌐",
+    tag:"basic",
+    text:"What is the difference between the <code class='option-code'>host</code> network mode and <code class='option-code'>bridge</code> mode?",
+    options:[
+      "Host mode is slower; bridge mode is faster",
+      "Host mode shares the host's network stack directly (no isolation); bridge mode creates an isolated virtual network",
+      "Bridge mode shares the host network; host mode is isolated",
+      "They are identical on Linux systems"
+    ],
+    answer:1,
+    explanation:"<strong>Host mode</strong>: container shares the host's network namespace — no NAT, best performance, but no port isolation. <strong>Bridge mode</strong>: container gets its own network namespace with a virtual interface — isolated but requires port mapping for external access.",
+    code:"# Bridge mode (default) — needs -p for external access\ndocker run -p 80:80 nginx\n\n# Host mode — container uses host ports directly\ndocker run --network=host nginx\n# nginx now listens on host's port 80 directly"
+  },
+  {
+    category:"Networking", catIcon:"🌐",
+    tag:"advanced",
+    text:"What is an overlay network in Docker and when is it used?",
+    options:[
+      "A network that overlays the bridge network for extra security",
+      "A distributed network that connects containers across multiple Docker hosts — used with Swarm/Kubernetes",
+      "A network that overlays IPv6 onto IPv4",
+      "A debugging network that shows all traffic in plain text"
+    ],
+    answer:1,
+    explanation:"<strong>Overlay networks</strong> use VXLAN tunnelling to create a virtual L2 network spanning multiple Docker hosts. Required for Docker Swarm multi-host container communication. Kubernetes uses its own CNI plugins that work similarly.",
+    code:"# Create overlay network (requires Swarm)\ndocker network create --driver overlay myoverlay\n\n# Deploy service on overlay\ndocker service create \\\n  --network myoverlay \\\n  --replicas 3 \\\n  nginx"
+  },
+  {
+    category:"Networking", catIcon:"🌐",
+    tag:"practical",
+    text:"Container A needs to communicate with Container B by name. What is required?",
+    options:[
+      "They must use --network=host",
+      "They must be on the same user-defined bridge network — Docker's DNS resolves container names automatically",
+      "You must manually add each container's IP to /etc/hosts",
+      "Container names only work in Kubernetes, not plain Docker"
+    ],
+    answer:1,
+    explanation:"On <strong>user-defined bridge networks</strong>, Docker provides automatic DNS resolution — containers can reach each other by container name or service name. The default <code>docker0</code> bridge does NOT have this feature.",
+    code:"# Create custom network\ndocker network create mynet\n\n# Run containers on it\ndocker run -d --name db --network mynet postgres\ndocker run -d --name app --network mynet myapp\n\n# Now 'app' can reach 'db' by name:\n# psql -h db -U postgres     ← works!"
+  },
+
+  // ── VOLUMES & STORAGE ───────────────────────────────────
+  {
+    category:"Volumes & Storage", catIcon:"💾",
+    tag:"basic",
+    text:"What happens to data written inside a container's writable layer when the container is deleted?",
+    options:[
+      "Data is automatically backed up to Docker Hub",
+      "Data is lost — the writable layer is deleted with the container",
+      "Data persists on disk in /var/lib/docker",
+      "Data is moved to the host's /tmp directory"
+    ],
+    answer:1,
+    explanation:"A container's writable layer is <strong>ephemeral</strong> — it exists only as long as the container. Deleting the container destroys that layer and all data in it. Use volumes or bind mounts to persist data.",
+    code:"# Data lost when container removed:\ndocker run --rm ubuntu bash -c 'echo hello > /data.txt'\n# /data.txt gone after container exits\n\n# Data persisted with volume:\ndocker run -v myvolume:/data ubuntu bash -c 'echo hello > /data/file.txt'\n# /data/file.txt survives container deletion"
+  },
+  {
+    category:"Volumes & Storage", catIcon:"💾",
+    tag:"basic",
+    text:"What is the difference between a Docker volume and a bind mount?",
+    options:[
+      "Volumes are faster; bind mounts are portable",
+      "Volumes are managed by Docker under /var/lib/docker/volumes; bind mounts map a specific host path into the container",
+      "Bind mounts are managed by Docker; volumes map host paths",
+      "They are identical — just different syntax"
+    ],
+    answer:1,
+    explanation:"<strong>Volumes</strong> are fully managed by Docker, stored in <code>/var/lib/docker/volumes/</code>, portable, and the recommended way. <strong>Bind mounts</strong> map any host filesystem path — great for development (live code reload) but tied to host directory structure.",
+    code:"# Named volume (recommended for production)\ndocker run -v mydata:/app/data nginx\n\n# Bind mount (good for dev — live reload)\ndocker run -v $(pwd)/src:/app/src node:18\n\n# tmpfs mount (in-memory, not persisted)\ndocker run --tmpfs /tmp nginx"
+  },
+  {
+    category:"Volumes & Storage", catIcon:"💾",
+    tag:"practical",
+    text:"How do you share data between two running containers?",
+    options:[
+      "Use docker cp between them",
+      "Mount the same named volume into both containers",
+      "Containers cannot share data directly",
+      "Use docker link (modern approach)"
+    ],
+    answer:1,
+    explanation:"Mounting the same <strong>named volume</strong> into multiple containers is the standard way to share data. Both containers read/write to the same underlying storage. Useful for sidecar patterns (e.g., log collector reading app logs).",
+    code:"docker volume create shared-data\n\n# Container 1 writes\ndocker run -d -v shared-data:/app/logs writer-app\n\n# Container 2 reads\ndocker run -d -v shared-data:/logs:ro log-collector\n# :ro = read-only for the second container"
+  },
+  {
+    category:"Volumes & Storage", catIcon:"💾",
+    tag:"practical",
+    text:"Which command shows Docker's disk usage — images, containers, volumes, and build cache?",
+    options:["docker info --disk","docker stats --disk","docker system df","df -h /var/lib/docker"],
+    answer:2,
+    explanation:"<strong>docker system df</strong> gives a clean breakdown of disk usage across images, containers, local volumes, and build cache — including reclaimable space.",
+    code:"docker system df\n# TYPE            TOTAL  ACTIVE  SIZE      RECLAIMABLE\n# Images          15     3       4.2GB     3.1GB (73%)\n# Containers      4      2       120MB     80MB\n# Local Volumes   8      3       2.1GB     500MB\n# Build Cache     -      -       800MB     800MB\n\n# Clean everything unused:\ndocker system prune -a --volumes"
+  },
+
+  // ── COMMANDS ────────────────────────────────────────────
+  {
+    category:"Key Commands", catIcon:"⌨",
+    tag:"basic",
+    text:"How do you get an interactive shell inside a running container?",
+    options:[
+      "docker run -it mycontainer",
+      "docker exec -it <container_id> /bin/bash",
+      "docker attach --shell <container_id>",
+      "docker login <container_id>"
+    ],
+    answer:1,
+    explanation:"<strong>docker exec -it</strong> runs a new process inside an already-running container. <code>-i</code> keeps STDIN open, <code>-t</code> allocates a pseudo-TTY. Use <code>sh</code> instead of <code>bash</code> for Alpine-based images.",
+    code:"# Enter running container\ndocker exec -it mycontainer /bin/bash\n\n# Alpine images use sh\ndocker exec -it mycontainer /bin/sh\n\n# Run a one-off command\ndocker exec mycontainer env\ndocker exec mycontainer cat /etc/nginx/nginx.conf"
+  },
+  {
+    category:"Key Commands", catIcon:"⌨",
+    tag:"basic",
+    text:"Which command copies a file from a container to the host?",
+    options:[
+      "docker pull container:/path ./local",
+      "docker cp <container>:/path/in/container ./host/path",
+      "docker export --file container:/path",
+      "docker fetch container:/path"
+    ],
+    answer:1,
+    explanation:"<strong>docker cp</strong> copies files between a container and the local filesystem. Works in both directions and works even on stopped containers.",
+    code:"# Container → Host\ndocker cp mycontainer:/app/config.json ./config.json\n\n# Host → Container\ndocker cp ./newconfig.json mycontainer:/app/config.json\n\n# Works on stopped containers too:\ndocker cp stopped-db:/var/lib/postgresql/data ./backup/"
+  },
+  {
+    category:"Key Commands", catIcon:"⌨",
+    tag:"basic",
+    text:"What does <code class='option-code'>docker stats</code> show?",
+    options:[
+      "Static resource limits configured for each container",
+      "Live CPU, memory, network I/O, and block I/O usage for running containers",
+      "Historical performance data for the past 24 hours",
+      "Storage usage per image layer"
+    ],
+    answer:1,
+    explanation:"<strong>docker stats</strong> streams real-time metrics. Useful for spotting which container is consuming excessive resources.",
+    code:"docker stats\n# CONTAINER   CPU %  MEM USAGE/LIMIT   MEM %  NET I/O      BLOCK I/O\n# web         0.5%   45MB / 2GB        2.2%   1.2GB/800MB  10MB/5MB\n# db          12.3%  1.2GB / 2GB       60%    200MB/300MB  50GB/30GB\n\n# Single container\ndocker stats mycontainer --no-stream"
+  },
+  {
+    category:"Key Commands", catIcon:"⌨",
+    tag:"scenario",
+    text:"A container exits immediately after <code class='option-code'>docker run</code>. Which command helps you debug why?",
+    options:[
+      "docker inspect --exit-code mycontainer",
+      "docker logs mycontainer",
+      "docker debug mycontainer",
+      "docker history mycontainer"
+    ],
+    answer:1,
+    explanation:"<strong>docker logs</strong> shows STDOUT/STDERR output from the container — including any error messages printed before it crashed. Combined with <code>docker inspect</code> for the exit code.",
+    code:"# Check logs\ndocker logs mycontainer\n\n# Follow logs live\ndocker logs -f mycontainer\n\n# Check exit code\ndocker inspect mycontainer --format='{{.State.ExitCode}}'\n# ExitCode 1 = general error\n# ExitCode 137 = killed (OOM or SIGKILL)\n# ExitCode 0 = clean exit (CMD finished)"
+  },
+
+  // ── SECURITY ────────────────────────────────────────────
+  {
+    category:"Security", catIcon:"🔒",
+    tag:"security",
+    text:"What does Docker Content Trust (DCT) do?",
+    options:[
+      "Encrypts all data inside containers at rest",
+      "Enables cryptographic signing and verification of images before pull/run",
+      "Restricts which users can create containers",
+      "Scans images for CVEs automatically on push"
+    ],
+    answer:1,
+    explanation:"<strong>Docker Content Trust</strong> uses Notary (The Update Framework) to sign images on push and verify signatures on pull. When enabled, Docker refuses to run unsigned images.",
+    code:"# Enable Content Trust\nexport DOCKER_CONTENT_TRUST=1\n\n# Now push signs the image\ndocker push myrepo/myimage:latest\n\n# Pull verifies signature\ndocker pull myrepo/myimage:latest\n\n# Scan for vulnerabilities (Docker Scout)\ndocker scout cves myimage"
+  },
+  {
+    category:"Security", catIcon:"🔒",
+    tag:"security",
+    text:"How do you limit a container to use at most 512MB of memory and 1 CPU?",
+    options:[
+      "docker run --max-mem=512m --max-cpu=1 myimage",
+      "docker run --memory=512m --cpus=1 myimage",
+      "docker run -r memory=512 -r cpu=1 myimage",
+      "Set limits in /etc/docker/daemon.json only"
+    ],
+    answer:1,
+    explanation:"<strong>--memory</strong> sets a hard memory limit (container is killed if exceeded — OOM). <strong>--cpus</strong> limits CPU shares. These map directly to cgroup limits in the kernel.",
+    code:"docker run -d \\\n  --memory=512m \\\n  --memory-swap=512m \\\n  --cpus=1 \\\n  --name limited-app \\\n  myimage\n\n# Verify limits\ndocker inspect limited-app | grep -i memory\ndocker stats limited-app --no-stream"
+  },
+  {
+    category:"Security", catIcon:"🔒",
+    tag:"security",
+    text:"What are Linux capabilities in the Docker context?",
+    options:[
+      "Docker plugins that extend container features",
+      "Fine-grained privileges that can be added/dropped from containers instead of running full root",
+      "CPU performance tiers assigned to containers",
+      "Network bandwidth limits for containers"
+    ],
+    answer:1,
+    explanation:"Linux <strong>capabilities</strong> break root's all-or-nothing model into granular permissions (e.g., CAP_NET_BIND_SERVICE to bind port <1024, CAP_SYS_TIME to set clock). Drop all and add only what's needed.",
+    code:"# Drop ALL capabilities, add only needed ones\ndocker run \\\n  --cap-drop=ALL \\\n  --cap-add=NET_BIND_SERVICE \\\n  myimage\n\n# Run fully unprivileged (most secure)\ndocker run --cap-drop=ALL --security-opt=no-new-privileges myimage\n\n# List default capabilities:\nman capabilities"
+  },
+
+  // ── SCENARIO ────────────────────────────────────────────
+  {
+    category:"Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"You start a container with <code class='option-code'>docker run -p 8080:80 nginx</code> but get 'port already in use'. How do you resolve it?",
+    options:[
+      "Restart Docker daemon",
+      "Use lsof -i :8080 or ss -tlnp to find the process, kill it or choose a different host port",
+      "Delete and recreate the nginx image",
+      "Add --force flag to docker run"
+    ],
+    answer:1,
+    explanation:"Port 8080 is already bound on the host. Find which process holds it, kill it if appropriate, or map nginx to a different host port.",
+    code:"# Find what's using port 8080\nlsof -i :8080\n# or\nss -tlnp | grep 8080\n\n# Kill the process (if safe)\nkill -9 $(lsof -t -i :8080)\n\n# Or use a different host port\ndocker run -p 9090:80 nginx\n# ↑ host:9090 → container:80"
+  },
+  {
+    category:"Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"A container is consuming 100% CPU. What is your debugging approach?",
+    options:[
+      "Immediately delete and recreate the container",
+      "Use docker stats to identify the container, docker exec to inspect inside, and check app logs",
+      "Reboot the Docker host",
+      "Increase container CPU limit in Dockerfile"
+    ],
+    answer:1,
+    explanation:"Systematic approach: identify the container with <code>docker stats</code>, inspect the process tree inside, check logs, then decide whether to restart, scale, or fix the application.",
+    code:"# 1. Identify high-CPU container\ndocker stats --no-stream\n\n# 2. Look at processes inside\ndocker exec -it mycontainer top\n\n# 3. Check recent logs\ndocker logs --tail=100 mycontainer\n\n# 4. Limit CPU to prevent host impact\ndocker update --cpus=0.5 mycontainer\n\n# 5. Restart gracefully\ndocker restart mycontainer"
+  },
+  {
+    category:"Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"Your application works fine locally but fails inside Docker with a 'module not found' error. What is the MOST likely cause?",
+    options:[
+      "Docker is incompatible with that programming language",
+      "The dependency was not installed in the image — COPY/RUN steps missing or cache stale",
+      "The container has no internet access",
+      "The Dockerfile EXPOSE instruction is wrong"
+    ],
+    answer:1,
+    explanation:"The most common cause is the dependency not being installed in the image — either missing from requirements.txt/package.json, incorrect COPY order, or using a stale cached layer that doesn't include the new module.",
+    code:"# Rebuild without cache to get fresh layers\ndocker build --no-cache -t myapp .\n\n# Enter the image to verify dependencies\ndocker run -it myapp /bin/sh\n# ls node_modules/   or   pip list\n\n# Ensure requirements are copied and installed BEFORE source:\nCOPY package.json .\nRUN npm install\nCOPY . .          # ← correct order"
+  },
+
+  // ── ADVANCED INTERNALS ──────────────────────────────────
+  {
+    category:"Advanced Internals", catIcon:"⚙",
+    tag:"advanced",
+    text:"What is the OCI (Open Container Initiative) and why does it matter?",
+    options:[
+      "A Docker security scanner",
+      "An open standard for container image format and runtime — ensures containers work across different runtimes",
+      "Oracle's container infrastructure product",
+      "A monitoring tool for containers"
+    ],
+    answer:1,
+    explanation:"<strong>OCI</strong> standardises the container image format (image-spec) and runtime (runtime-spec). This means an image built with Docker can run on containerd, podman, or any OCI-compliant runtime without modification.",
+    code:"# OCI-compliant runtimes:\n# - runc (Docker's default, reference implementation)\n# - containerd (Docker uses this internally)\n# - podman (daemonless, rootless)\n# - cri-o (Kubernetes default runtime)\n\n# Build OCI image with buildkit\ndocker buildx build --output type=oci,dest=image.tar ."
+  },
+  {
+    category:"Advanced Internals", catIcon:"⚙",
+    tag:"advanced",
+    text:"What is BuildKit and how does it improve Docker builds?",
+    options:[
+      "A Docker plugin for monitoring build performance",
+      "A next-gen build engine with parallel layer builds, better caching, secret mounts, and smaller images",
+      "An external CI tool that replaces Dockerfile",
+      "A Kubernetes operator for building images"
+    ],
+    answer:1,
+    explanation:"<strong>BuildKit</strong> is Docker's modern build backend. Key improvements: parallel execution of independent stages, better layer caching, secret mounts (secrets never baked into layers), SSH forwarding, and cross-platform builds.",
+    code:"# Enable BuildKit\nexport DOCKER_BUILDKIT=1\ndocker build -t myimage .\n\n# Or use buildx (always uses BuildKit)\ndocker buildx build -t myimage .\n\n# Secret mount (never stored in image layer)\nRUN --mount=type=secret,id=mysecret \\\n    cat /run/secrets/mysecret\n\ndocker buildx build --secret id=mysecret,src=./secret.txt ."
+  },
+  {
+    category:"Advanced Internals", catIcon:"⚙",
+    tag:"advanced",
+    text:"What is rootless Docker and what problem does it solve?",
+    options:[
+      "Docker running without any OS — uses bare metal directly",
+      "Running Docker daemon and containers as a non-root user, reducing host compromise risk",
+      "Containers without a filesystem root directory",
+      "Docker with all Linux capabilities dropped"
+    ],
+    answer:1,
+    explanation:"<strong>Rootless Docker</strong> runs both the daemon and containers as an unprivileged user. Even if a container is fully compromised, the attacker only gets a regular user's privileges on the host — significantly reducing blast radius.",
+    code:"# Install rootless Docker\ndockerd-rootless-setuptool.sh install\n\n# Run as non-root user\nexport DOCKER_HOST=unix:///run/user/1000/docker.sock\ndocker run hello-world\n\n# Verify\ndocker info | grep rootless\n# rootlesskit: true"
+  },
+
+  // ── CI/CD & PRODUCTION ──────────────────────────────────
+  {
+    category:"CI/CD & Production", catIcon:"🚀",
+    tag:"practical",
+    text:"What is the correct workflow for zero-downtime container deployment in production?",
+    options:[
+      "docker stop old && docker run new (causes downtime)",
+      "Start new container, verify health, switch traffic (via load balancer/Swarm rolling update), then stop old",
+      "Replace the image tag without restarting any containers",
+      "Use docker restart which automatically applies image updates"
+    ],
+    answer:1,
+    explanation:"Zero-downtime requires: start new version → health check passes → load balancer routes traffic to new → stop old. Docker Swarm's rolling updates automate this. In Kubernetes it's a standard rolling deployment.",
+    code:"# Docker Swarm rolling update (zero downtime)\ndocker service update \\\n  --image myapp:v2 \\\n  --update-parallelism 1 \\\n  --update-delay 10s \\\n  myservice\n\n# Rollback if needed\ndocker service rollback myservice"
+  }
+];
+
+const composeQuestions = [
+  // ── COMPOSE BASICS ──────────────────────────────────────
+  {
+    category:"Compose Basics", catIcon:"📦",
+    tag:"compose",
+    text:"What is Docker Compose used for?",
+    options:[
+      "Building Docker images faster with parallel layers",
+      "Defining and running multi-container applications using a single YAML file",
+      "Orchestrating containers across multiple servers (like Kubernetes)",
+      "Compressing Docker images for faster distribution"
+    ],
+    answer:1,
+    explanation:"<strong>Docker Compose</strong> lets you define all your services, networks, and volumes in a single <code>docker-compose.yml</code> file and manage them with simple commands. Perfect for local development and single-host deployments.",
+    code:"# One command starts everything:\ndocker compose up -d\n\n# Brings up:\n# - web service (frontend)\n# - api service (backend)\n# - db service (postgres)\n# - redis service (cache)\n# All on the same network, in correct order"
+  },
+  {
+    category:"Compose Basics", catIcon:"📦",
+    tag:"compose",
+    text:"What is the difference between <code class='option-code'>docker compose up</code> and <code class='option-code'>docker compose start</code>?",
+    options:[
+      "They are identical — just different syntax versions",
+      "up creates and starts containers (builds if needed); start only starts existing stopped containers",
+      "start builds images; up only runs pre-built images",
+      "up runs in foreground only; start runs detached only"
+    ],
+    answer:1,
+    explanation:"<strong>up</strong> = create networks/volumes + pull/build images if needed + create + start containers. <strong>start</strong> = only start containers that already exist but are stopped. Use <code>up</code> when setting up fresh.",
+    code:"# First time or after changes to docker-compose.yml:\ndocker compose up -d\n\n# After docker compose stop (containers exist but stopped):\ndocker compose start\n\n# Rebuild and restart:\ndocker compose up -d --build\n\n# Force recreate even if config unchanged:\ndocker compose up -d --force-recreate"
+  },
+  {
+    category:"Compose Basics", catIcon:"📦",
+    tag:"compose",
+    text:"What does <code class='option-code'>docker compose down</code> do compared to <code class='option-code'>docker compose stop</code>?",
+    options:[
+      "They do the same thing",
+      "stop pauses containers; down stops and removes containers, networks, and optionally volumes",
+      "down only removes images; stop removes containers",
+      "stop removes volumes; down only stops services"
+    ],
+    answer:1,
+    explanation:"<strong>stop</strong> stops running containers but leaves them (and networks) in place — like pressing pause. <strong>down</strong> stops AND removes containers and networks (add <code>-v</code> to also remove volumes).",
+    code:"# Pause everything (containers preserved)\ndocker compose stop\n\n# Tear down containers + networks\ndocker compose down\n\n# Full cleanup including volumes (⚠ data loss!)\ndocker compose down -v\n\n# Also remove images\ndocker compose down --rmi all -v"
+  },
+  {
+    category:"Compose Basics", catIcon:"📦",
+    tag:"compose",
+    text:"What is the default network behaviour when using Docker Compose?",
+    options:[
+      "All containers join the host network by default",
+      "Compose creates a single default bridge network and joins all services to it — enabling DNS name resolution by service name",
+      "Each service gets its own isolated network with no inter-service communication",
+      "Services communicate only via the internet — no local networking"
+    ],
+    answer:1,
+    explanation:"Compose automatically creates a <strong>default bridge network</strong> named <code>&lt;project&gt;_default</code>. All services join it automatically and can reach each other by service name (Docker DNS). No manual network config needed for basic setups.",
+    code:"# docker-compose.yml\nservices:\n  web:\n    image: nginx\n  db:\n    image: postgres\n\n# Compose creates: myproject_default network\n# 'web' can reach 'db' via: psql -h db ...\n# 'db' can reach 'web' via: curl http://web\n\ndocker compose up -d\ndocker network ls   # shows myproject_default"
+  },
+
+  // ── COMPOSE YAML ────────────────────────────────────────
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"How do you define a dependency so that <code class='option-code'>web</code> starts after <code class='option-code'>db</code>?",
+    options:[
+      "start_after: db",
+      "depends_on:\\n  - db",
+      "requires: [db]",
+      "links: [db]"
+    ],
+    answer:1,
+    explanation:"<strong>depends_on</strong> controls startup order — Compose starts <code>db</code> before <code>web</code>. Important caveat: it only waits for the container to START, not for the app inside to be ready. Use <code>healthcheck</code> with <code>condition: service_healthy</code> for true readiness.",
+    code:"services:\n  web:\n    image: myapp\n    depends_on:\n      db:\n        condition: service_healthy  # wait for healthcheck\n  db:\n    image: postgres\n    healthcheck:\n      test: [\"CMD\", \"pg_isready\", \"-U\", \"postgres\"]\n      interval: 5s\n      retries: 5"
+  },
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"How do you define environment variables in a docker-compose.yml service?",
+    options:[
+      "Using ENV: key=value syntax (same as Dockerfile)",
+      "Using the environment: key or env_file: sections",
+      "Environment variables cannot be set in Compose — use Dockerfile only",
+      "Using CONFIG: section"
+    ],
+    answer:1,
+    explanation:"Two main ways: <strong>environment:</strong> for inline vars, <strong>env_file:</strong> to load from a file (great for secrets). The <code>.env</code> file in the project root is also automatically loaded for variable substitution.",
+    code:"services:\n  app:\n    image: myapp\n    environment:\n      - NODE_ENV=production\n      - PORT=3000\n    env_file:\n      - .env.production  # loaded from file\n\n# .env file (auto-loaded by Compose):\nDB_PASSWORD=secretpass\nAPI_KEY=abc123\n\n# Reference in compose:\n    environment:\n      - DB_PASSWORD=${DB_PASSWORD}"
+  },
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"What does <code class='option-code'>restart: always</code> do in a Compose service definition?",
+    options:[
+      "Rebuilds the image on every restart",
+      "Automatically restarts the container whenever it stops — including after Docker daemon restarts",
+      "Restarts the container every hour on a schedule",
+      "Only restarts on container crash, not on manual docker stop"
+    ],
+    answer:1,
+    explanation:"<strong>restart: always</strong> ensures the container is always restarted — on crash, on clean exit, and after host/daemon reboot. Use <code>unless-stopped</code> to restart automatically except when manually stopped.",
+    code:"services:\n  web:\n    image: nginx\n    restart: always        # restart always\n  db:\n    image: postgres\n    restart: unless-stopped # restart unless manually stopped\n  worker:\n    image: myworker\n    restart: on-failure:5  # restart up to 5 times on failure"
+  },
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"What is the difference between <code class='option-code'>build</code> and <code class='option-code'>image</code> in a Compose service?",
+    options:[
+      "build uses a pre-built image; image builds from Dockerfile",
+      "image pulls a pre-built image; build builds the image from a local Dockerfile",
+      "They are identical — just different field names",
+      "build is for Linux; image is for Windows containers"
+    ],
+    answer:1,
+    explanation:"<strong>image:</strong> pulls and uses an existing image (from registry or local). <strong>build:</strong> builds a new image from a Dockerfile before starting. You can use both — build the image and tag it with image: for caching.",
+    code:"services:\n  # Use pre-built image from registry\n  redis:\n    image: redis:7-alpine\n\n  # Build from local Dockerfile\n  api:\n    build:\n      context: ./api\n      dockerfile: Dockerfile.prod\n    image: mycompany/api:latest   # tag the built image\n\n# Build and start:\ndocker compose up -d --build"
+  },
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"How do you mount a named volume for a database service in docker-compose.yml?",
+    options:[
+      "volume: /db/data → dbdata",
+      "Define volume in service volumes: and declare it in top-level volumes:",
+      "Use --volume flag in the command: section",
+      "Volumes must be created with docker volume create first"
+    ],
+    answer:1,
+    explanation:"Volumes need to be declared in two places: under the service's <strong>volumes:</strong> (mount definition) and in the top-level <strong>volumes:</strong> section (tells Compose to manage it). Compose creates the volume if it doesn't exist.",
+    code:"services:\n  db:\n    image: postgres:15\n    volumes:\n      - pgdata:/var/lib/postgresql/data  # mount\n    environment:\n      POSTGRES_PASSWORD: secret\n\nvolumes:\n  pgdata:      # top-level declaration\n    # driver: local (default)\n\n# Data persists across: docker compose down && docker compose up"
+  },
+  {
+    category:"Compose YAML", catIcon:"📝",
+    tag:"compose",
+    text:"How do you define a healthcheck for a service in docker-compose.yml?",
+    options:[
+      "Using the health: section with a URL",
+      "Using the healthcheck: section with test, interval, timeout, and retries",
+      "Healthchecks are not supported in Compose — only in Swarm",
+      "Using check: [CMD, ...]"
+    ],
+    answer:1,
+    explanation:"<strong>healthcheck</strong> defines how Docker tests if the service is healthy. Combined with <code>depends_on: condition: service_healthy</code>, it ensures dependent services wait for true readiness — not just container start.",
+    code:"services:\n  db:\n    image: postgres:15\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U postgres\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n      start_period: 30s   # grace period on startup\n\n  web:\n    image: myapp\n    depends_on:\n      db:\n        condition: service_healthy  # waits for db healthcheck"
+  },
+
+  // ── NETWORKING IN COMPOSE ───────────────────────────────
+  {
+    category:"Networking in Compose", catIcon:"🌐",
+    tag:"network",
+    text:"How do you create custom networks with specific services in docker-compose.yml?",
+    options:[
+      "Add --network flags to the command: section of each service",
+      "Define networks: at top level and assign them per-service under networks:",
+      "Custom networks are automatic — just name your services",
+      "Use docker network create before running docker compose up"
+    ],
+    answer:1,
+    explanation:"Define named networks at the top-level <strong>networks:</strong> section, then assign services to them. This allows segmentation — e.g., frontend/backend/database tiers with controlled visibility.",
+    code:"services:\n  frontend:\n    image: nginx\n    networks: [frontend]\n  backend:\n    image: myapi\n    networks: [frontend, backend]  # bridge between tiers\n  db:\n    image: postgres\n    networks: [backend]            # not visible to frontend\n\nnetworks:\n  frontend:\n  backend:"
+  },
+  {
+    category:"Networking in Compose", catIcon:"🌐",
+    tag:"compose",
+    text:"How do you expose a service port to the host in docker-compose.yml?",
+    options:[
+      "expose: [\"80\"]  (same as -p flag)",
+      "ports: - \"3000:80\"  maps host port 3000 to container port 80",
+      "publish: 3000:80",
+      "map: host=3000 container=80"
+    ],
+    answer:1,
+    explanation:"<strong>ports:</strong> maps host ports to container ports (like <code>-p</code>). <strong>expose:</strong> only makes the port available to other containers on the same network, not to the host — it's documentation like EXPOSE in Dockerfile.",
+    code:"services:\n  web:\n    image: nginx\n    ports:\n      - \"80:80\"          # host:container\n      - \"443:443\"\n  api:\n    image: myapi\n    ports:\n      - \"127.0.0.1:3000:3000\"  # bind to localhost only\n    expose:\n      - \"3000\"          # only visible to other services"
+  },
+  {
+    category:"Networking in Compose", catIcon:"🌐",
+    tag:"scenario",
+    text:"Your app container starts before the database is ready and crashes. What is the proper fix in docker-compose.yml?",
+    options:[
+      "Add sleep 10 to the app's CMD",
+      "Add a healthcheck to db and use depends_on with condition: service_healthy in the app",
+      "Use restart: on-failure and hope the app retries",
+      "Start the db manually before running docker compose up"
+    ],
+    answer:1,
+    explanation:"This is a classic race condition. The correct solution combines a <strong>healthcheck</strong> on the database service with <code>depends_on: condition: service_healthy</code> on the app — Compose will wait until the db is truly ready.",
+    code:"services:\n  app:\n    image: myapp\n    depends_on:\n      db:\n        condition: service_healthy   # waits for real readiness\n\n  db:\n    image: postgres:15\n    environment:\n      POSTGRES_PASSWORD: secret\n    healthcheck:\n      test: [\"CMD\", \"pg_isready\", \"-U\", \"postgres\"]\n      interval: 5s\n      timeout: 3s\n      retries: 10"
+  },
+
+  // ── SCALING & PRODUCTION ────────────────────────────────
+  {
+    category:"Scaling & Production", catIcon:"📈",
+    tag:"compose",
+    text:"How do you scale a web service to 5 replicas using Docker Compose?",
+    options:[
+      "docker compose replicas web=5",
+      "docker compose up -d --scale web=5",
+      "docker compose scale --replicas=5 web",
+      "Add replicas: 5 to the service definition"
+    ],
+    answer:1,
+    explanation:"<strong>docker compose up --scale &lt;service&gt;=N</strong> starts N replicas of a service. Note: you cannot use host port mappings when scaling (causes port conflicts) — use a load balancer or expose without fixed host ports.",
+    code:"# Scale web service to 5 instances\ndocker compose up -d --scale web=5\n\n# In docker-compose.yml — use port range or no host port\nservices:\n  web:\n    image: myapp\n    ports:\n      - \"3000-3005:3000\"  # port range for scaled instances\n    # or let load balancer handle it:\n    expose:\n      - \"3000\""
+  },
+  {
+    category:"Scaling & Production", catIcon:"📈",
+    tag:"scenario",
+    text:"How do you update a single service in a Compose stack without restarting others?",
+    options:[
+      "docker compose restart &lt;service&gt; (always rebuilds)",
+      "docker compose up -d --no-deps --build &lt;service&gt;",
+      "docker compose update &lt;service&gt;",
+      "You must bring down the entire stack and restart"
+    ],
+    answer:1,
+    explanation:"<strong>--no-deps</strong> prevents Compose from restarting dependent services. <strong>--build</strong> rebuilds the image if needed. Together they update only the target service.",
+    code:"# Rebuild and restart only the 'api' service\ndocker compose up -d --no-deps --build api\n\n# Just restart (no rebuild)\ndocker compose restart api\n\n# Pull latest image and update\ndocker compose pull api\ndocker compose up -d --no-deps api"
+  },
+  {
+    category:"Scaling & Production", catIcon:"📈",
+    tag:"compose",
+    text:"How do you use different Compose files for development vs production environments?",
+    options:[
+      "Create a single docker-compose.yml with if/else blocks",
+      "Use a base docker-compose.yml and override with docker-compose.prod.yml using -f flags",
+      "Use different YAML files stored in different directories only",
+      "Compose only supports one file — use ENV variables for all differences"
+    ],
+    answer:1,
+    explanation:"Compose supports multiple <strong>-f</strong> files that are merged. A common pattern: base <code>docker-compose.yml</code> + <code>docker-compose.override.yml</code> (auto-applied in dev) + <code>docker-compose.prod.yml</code> for production.",
+    code:"# docker-compose.yml (base, shared)\nservices:\n  web:\n    image: myapp:${TAG:-latest}\n\n# docker-compose.prod.yml (production overrides)\nservices:\n  web:\n    restart: always\n    deploy:\n      replicas: 3\n\n# Run with production config:\ndocker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+  },
+
+  // ── SECRETS & CONFIG ────────────────────────────────────
+  {
+    category:"Secrets & Config", catIcon:"🔑",
+    tag:"security",
+    text:"How should you handle secrets (API keys, passwords) in Docker Compose?",
+    options:[
+      "Hardcode them in docker-compose.yml — it's version controlled anyway",
+      "Use .env files excluded from version control, Docker secrets, or external secret managers",
+      "Store secrets in Dockerfile ENV instructions",
+      "Base64 encode them and embed in the YAML"
+    ],
+    answer:1,
+    explanation:"Never hardcode secrets in YAML/Dockerfile (they end up in image layers and git history). Best practices: <code>.env</code> files (gitignore'd), Docker secrets (Swarm), or external managers like Vault/AWS Secrets Manager.",
+    code:"# .env file (NOT committed to git)\nDB_PASSWORD=supersecret\nAPI_KEY=abc123\n\n# .gitignore\n.env\n\n# docker-compose.yml uses variable substitution\nservices:\n  db:\n    image: postgres\n    environment:\n      POSTGRES_PASSWORD: ${DB_PASSWORD}\n\n# Docker secrets (Swarm mode)\nsecrets:\n  db_password:\n    file: ./db_password.txt"
+  },
+  {
+    category:"Secrets & Config", catIcon:"🔑",
+    tag:"compose",
+    text:"How do you view logs from all services in a running Compose stack?",
+    options:[
+      "docker logs compose --all",
+      "docker compose logs -f",
+      "docker compose output --all",
+      "docker events --compose"
+    ],
+    answer:1,
+    explanation:"<strong>docker compose logs</strong> aggregates logs from all services. <code>-f</code> streams them live. Optionally specify a service name to filter.",
+    code:"# All services — follow live\ndocker compose logs -f\n\n# Specific service only\ndocker compose logs -f api\n\n# Last 50 lines from each service\ndocker compose logs --tail=50\n\n# With timestamps\ndocker compose logs -f -t"
+  },
+
+  // ── ADVANCED COMPOSE ────────────────────────────────────
+  {
+    category:"Advanced Compose", catIcon:"⚙",
+    tag:"advanced",
+    text:"What is the purpose of the <code class='option-code'>profiles</code> feature in Docker Compose?",
+    options:[
+      "Sets the resource profile (CPU/memory) for each service",
+      "Allows selectively starting services — e.g., run debug tools or test services only when needed",
+      "Defines network profiles for firewall rules",
+      "Applies different Dockerfile instructions per environment"
+    ],
+    answer:1,
+    explanation:"<strong>Profiles</strong> let you tag services with a profile name. Only services without a profile (or matching the active profile) start. Useful for optional services like debug tools, admin UIs, or test databases.",
+    code:"services:\n  web:\n    image: nginx          # no profile — always starts\n\n  debug:\n    image: busybox\n    profiles: [debug]     # only starts with --profile debug\n\n  adminer:\n    image: adminer\n    profiles: [tools]\n\n# Normal start (web only)\ndocker compose up -d\n\n# With debug tools\ndocker compose --profile debug up -d"
+  },
+  {
+    category:"Advanced Compose", catIcon:"⚙",
+    tag:"advanced",
+    text:"How do you run a one-off command in a new container using Compose (e.g., database migrations)?",
+    options:[
+      "docker compose exec --once db migrate",
+      "docker compose run --rm app python manage.py migrate",
+      "docker compose start --command migrate app",
+      "docker compose one-off app migrate"
+    ],
+    answer:1,
+    explanation:"<strong>docker compose run</strong> starts a new one-off container from a service definition. <code>--rm</code> removes the container after the command finishes. Unlike <code>exec</code>, it doesn't require the service to already be running.",
+    code:"# Run Django migration\ndocker compose run --rm app python manage.py migrate\n\n# Open a shell in the app service context\ndocker compose run --rm app /bin/bash\n\n# Run tests\ndocker compose run --rm --service-ports app pytest\n\n# Override environment for one-off\ndocker compose run --rm -e DEBUG=true app python script.py"
+  },
+  {
+    category:"Advanced Compose", catIcon:"⚙",
+    tag:"advanced",
+    text:"How do you check the status of services in a running Compose stack?",
+    options:["docker compose list","docker compose ps","docker status compose","docker info --compose"],
+    answer:1,
+    explanation:"<strong>docker compose ps</strong> shows the state of all services in the current project — running, stopped, exit codes, and port bindings.",
+    code:"docker compose ps\n# NAME           IMAGE    COMMAND     STATUS          PORTS\n# project-web-1  nginx    ...         Up 2 hours      0.0.0.0:80->80/tcp\n# project-db-1   postgres ...        Up 2 hours      5432/tcp\n# project-worker Exited(1) ...       Exited (1) ...\n\n# Verbose\ndocker compose ps --all"
+  },
+  {
+    category:"Advanced Compose", catIcon:"⚙",
+    tag:"advanced",
+    text:"What does the <code class='option-code'>deploy</code> section in docker-compose.yml control?",
+    options:[
+      "Deployment to Docker Hub registry",
+      "Swarm-mode deployment configuration — replicas, resource limits, update strategy, placement",
+      "CI/CD pipeline triggers",
+      "It is ignored by Docker Compose — only used by Kubernetes"
+    ],
+    answer:1,
+    explanation:"The <strong>deploy:</strong> section is honoured in <strong>Docker Swarm mode</strong>. It configures replicas, resource limits, restart policies, and rolling update strategies. It is ignored by plain <code>docker compose</code> without Swarm.",
+    code:"services:\n  web:\n    image: myapp:latest\n    deploy:\n      replicas: 3\n      resources:\n        limits:\n          cpus: '0.5'\n          memory: 512M\n      update_config:\n        parallelism: 1\n        delay: 10s\n      restart_policy:\n        condition: on-failure\n        max_attempts: 3\n\n# Deploy to Swarm:\ndocker stack deploy -c docker-compose.yml mystack"
+  },
+
+  // ── SCENARIOS ───────────────────────────────────────────
+  {
+    category:"Compose Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"How do you persist PostgreSQL data across <code class='option-code'>docker compose down</code> and <code class='option-code'>docker compose up</code>?",
+    options:[
+      "Set restart: always on the db service",
+      "Mount a named volume to the PostgreSQL data directory in docker-compose.yml",
+      "Use docker compose down --keep-data flag",
+      "Data automatically persists — no configuration needed"
+    ],
+    answer:1,
+    explanation:"Mount a <strong>named volume</strong> to <code>/var/lib/postgresql/data</code>. Named volumes survive <code>docker compose down</code> but are deleted with <code>docker compose down -v</code>.",
+    code:"services:\n  db:\n    image: postgres:15\n    environment:\n      POSTGRES_PASSWORD: secret\n      POSTGRES_DB: mydb\n    volumes:\n      - pgdata:/var/lib/postgresql/data\n    # Also good practice:\n    healthcheck:\n      test: [\"CMD\", \"pg_isready\"]\n      interval: 10s\n\nvolumes:\n  pgdata:    # named volume — survives down/up"
+  },
+  {
+    category:"Compose Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"How do you connect a frontend (React), backend (Node API), and database (Postgres) in docker-compose.yml?",
+    options:[
+      "Use --link flags between services",
+      "Place all services on the same Compose network; frontend calls backend by service name, backend calls db by service name",
+      "Expose all ports to the host and use localhost between services",
+      "Services cannot communicate in Compose — use separate Docker networks"
+    ],
+    answer:1,
+    explanation:"Compose's default network gives all services DNS names matching their service names. Frontend fetches <code>http://api</code>, API connects to <code>postgres://db/mydb</code> — clean and portable.",
+    code:"services:\n  frontend:\n    build: ./frontend\n    ports: [\"3000:3000\"]\n    environment:\n      - REACT_APP_API_URL=http://api:4000  # service name!\n\n  api:\n    build: ./api\n    ports: [\"4000:4000\"]\n    environment:\n      - DATABASE_URL=postgres://user:pass@db:5432/mydb\n    depends_on:\n      db:\n        condition: service_healthy\n\n  db:\n    image: postgres:15\n    volumes: [pgdata:/var/lib/postgresql/data]\n    healthcheck:\n      test: [\"CMD\", \"pg_isready\"]\n      interval: 5s\n\nvolumes:\n  pgdata:"
+  },
+  {
+    category:"Compose Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"How do you use a <code class='option-code'>.env</code> file with Docker Compose to avoid hardcoding values?",
+    options:[
+      "Pass it via: docker compose --env-file .env up",
+      "Compose auto-loads .env from the project directory; reference vars as ${VAR_NAME} in docker-compose.yml",
+      "Use the envfile: directive in each service definition",
+      ".env files are only supported in Docker Swarm, not plain Compose"
+    ],
+    answer:1,
+    explanation:"Compose <strong>automatically loads</strong> a <code>.env</code> file in the same directory. Variables are available as <code>${VAR}</code> substitutions in the YAML. Add <code>.env</code> to <code>.gitignore</code> and provide a <code>.env.example</code> template.",
+    code:"# .env file (gitignored!)\nDB_PASSWORD=mypassword\nDB_NAME=myapp\nAPP_PORT=3000\nNODE_ENV=development\n\n# docker-compose.yml\nservices:\n  app:\n    image: myapp\n    ports:\n      - \"${APP_PORT}:3000\"\n    environment:\n      - NODE_ENV=${NODE_ENV}\n  db:\n    image: postgres\n    environment:\n      POSTGRES_PASSWORD: ${DB_PASSWORD}\n      POSTGRES_DB: ${DB_NAME}\n\n# .gitignore\n.env"
+  },
+  {
+    category:"Compose Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"Docker Compose networking: how does service <code class='option-code'>api</code> connect to service <code class='option-code'>redis</code>?",
+    options:[
+      "Using redis://127.0.0.1:6379 (localhost)",
+      "Using redis://redis:6379 (service name as hostname)",
+      "Using redis://redis.docker.internal:6379",
+      "Manually adding redis's container IP to api's /etc/hosts"
+    ],
+    answer:1,
+    explanation:"Compose's built-in DNS resolves <strong>service names to container IPs</strong> automatically. The api service should connect to <code>redis://redis:6379</code> — the hostname is the service name, not localhost or an IP.",
+    code:"services:\n  api:\n    build: ./api\n    environment:\n      # Use service name as hostname:\n      - REDIS_URL=redis://redis:6379\n      - DATABASE_URL=postgres://db:5432/myapp\n\n  redis:\n    image: redis:7-alpine\n\n  db:\n    image: postgres:15\n\n# Inside 'api' container:\n# redis-cli -h redis ping  → PONG ✅\n# psql -h db -U postgres   → works ✅"
+  },
+  {
+    category:"Compose Scenarios", catIcon:"🔧",
+    tag:"scenario",
+    text:"You want to rebuild only the <code class='option-code'>api</code> image and restart only that service without touching <code class='option-code'>db</code> or <code class='option-code'>redis</code>. Which command is correct?",
+    options:[
+      "docker compose restart api",
+      "docker compose up -d --build --no-deps api",
+      "docker compose rebuild api && docker compose up api",
+      "docker compose up -d --force-recreate api"
+    ],
+    answer:1,
+    explanation:"<strong>--build</strong> rebuilds the image, <strong>--no-deps</strong> prevents Compose from also restarting dependent services. Without <code>--no-deps</code>, Compose would also restart db and redis.",
+    code:"# Rebuild api image and restart api only\ndocker compose up -d --build --no-deps api\n\n# Verify only api was restarted:\ndocker compose ps\n\n# Check api logs after restart:\ndocker compose logs -f api"
+  },
+
+  // ── CI/CD ───────────────────────────────────────────────
+  {
+    category:"CI/CD with Compose", catIcon:"🚀",
+    tag:"practical",
+    text:"How is Docker Compose typically used in a CI/CD pipeline?",
+    options:[
+      "Compose is only for local development — never used in CI",
+      "Run the full test environment (app + db + dependencies) with one command, run tests, then tear down",
+      "Push images to registry using docker compose push only",
+      "CI/CD pipelines must use docker run directly — Compose is too slow"
+    ],
+    answer:1,
+    explanation:"Compose excels in CI — one command spins up the full stack (app, database, redis, mocks), tests run against it, then <code>docker compose down -v</code> cleans up. Reproducible, isolated, fast.",
+    code:"# .github/workflows/test.yml (GitHub Actions)\n- name: Run tests\n  run: |\n    docker compose -f docker-compose.test.yml up -d\n    docker compose -f docker-compose.test.yml run --rm app pytest\n    docker compose -f docker-compose.test.yml down -v\n\n# docker-compose.test.yml\nservices:\n  app:\n    build: .\n    depends_on: [db]\n  db:\n    image: postgres:15\n    environment:\n      POSTGRES_DB: testdb\n      POSTGRES_PASSWORD: test"
+  },
+  {
+    category:"CI/CD with Compose", catIcon:"🚀",
+    tag:"practical",
+    text:"Which Docker Compose command runs services in the background (detached mode)?",
+    options:["docker compose up --background","docker compose up -d","docker compose run --detach","docker compose start -b"],
+    answer:1,
+    explanation:"<strong>-d</strong> (--detach) starts all services in the background and returns the terminal prompt immediately. Use <code>docker compose logs -f</code> to follow output afterwards.",
+    code:"# Start in background\ndocker compose up -d\n\n# Verify running\ndocker compose ps\n\n# Follow logs after detach\ndocker compose logs -f\n\n# Stop background services\ndocker compose down"
+  }
+];
+
+// ════════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════════
+const state = {
+  docker:  { answered: 0, score: 0, current: 0 },
+  compose: { answered: 0, score: 0, current: 0 }
+};
+let activeTab = 'docker';
+
+// ════════════════════════════════════════════════════════════
+//  BUILD
+// ════════════════════════════════════════════════════════════
+function buildSection(qs, sectionId, tabType) {
+  const section = document.getElementById(sectionId);
+  section.innerHTML = '';
+  let lastCat = '';
+
+  qs.forEach((q, i) => {
+    if (q.category !== lastCat) {
+      const div = document.createElement('div');
+      div.className = 'category-divider';
+      div.id = `cat-${tabType}-${i}`;
+      div.innerHTML = `<span class="cat-icon">${q.catIcon}</span> ${q.category}`;
+      div.style.display = i === 0 ? 'flex' : 'none';
+      section.appendChild(div);
+      lastCat = q.category;
+    }
+
+    const card = document.createElement('div');
+    card.className = `question-card ${tabType}-card` + (i === 0 ? ' active' : '');
+    card.id = `q-${tabType}-${i}`;
+
+    const tagClass = q.tag === 'advanced' ? 'advanced' : q.tag === 'security' ? 'security' : q.tag === 'scenario' ? 'scenario' : q.tag === 'network' ? 'network' : q.tag === 'compose' ? 'compose' : 'basic';
+    const codeClass = tabType === 'compose' ? 'q-code compose-code' : 'q-code';
+    const expClass = tabType === 'compose' ? 'explanation exp-compose' : 'explanation exp-docker';
+    const btnClass = tabType === 'compose' ? 'btn btn-compose' : 'btn btn-docker';
+    const codeBlock = q.code ? `<div class="${codeClass}">${escHtml(q.code)}</div>` : '';
+    const opts = q.options.map((o,oi) => `
+      <div class="option" id="opt-${tabType}-${i}-${oi}" onclick="selectAnswer('${tabType}',${i},${oi})">
+        <div class="option-key">${'ABCD'[oi]}</div>
+        <div class="option-text">${o}</div>
+      </div>`).join('');
+    const total = qs.length;
+    const isLast = i === total - 1;
+
+    card.innerHTML = `
+      <div class="q-meta">
+        <span class="q-num">Q ${i+1} of ${total}</span>
+        <span class="q-tag ${tagClass}">${q.tag}</span>
+      </div>
+      <div class="question-text">${q.text}</div>
+      ${codeBlock}
+      <div class="options">${opts}</div>
+      <div class="${expClass}" id="exp-${tabType}-${i}">
+        <div class="ex-head">💡 Explanation</div>
+        <span class="correct-label">✓ ${q.options[q.answer]}</span>
+        <p>${q.explanation}</p>
+        ${q.code ? `<div class="ex-code">${escHtml(q.code)}</div>` : ''}
+      </div>
+      <div class="nav-btns" id="nav-${tabType}-${i}" style="display:none">
+        ${isLast
+          ? `<button class="${btnClass}" onclick="showSectionResult('${tabType}')">View Results 🎯</button>`
+          : `<button class="${btnClass}" onclick="nextQ('${tabType}',${i})">Next Question →</button>`}
+      </div>`;
+    section.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ════════════════════════════════════════════════════════════
+//  INTERACTION
+// ════════════════════════════════════════════════════════════
+function selectAnswer(tab, qi, oi) {
+  const q = (tab === 'docker' ? dockerQuestions : composeQuestions)[qi];
+  const opts = document.querySelectorAll(`[id^="opt-${tab}-${qi}-"]`);
+  opts.forEach(o => { o.classList.add('disabled'); o.onclick = null; });
+  if (oi === q.answer) { opts[oi].classList.add('correct'); state[tab].score++; }
+  else { opts[oi].classList.add('wrong'); opts[q.answer].classList.add('correct'); }
+  state[tab].answered++;
+  document.getElementById(`exp-${tab}-${qi}`).classList.add('show');
+  document.getElementById(`nav-${tab}-${qi}`).style.display = 'flex';
+  updateProgress();
+}
+
+function nextQ(tab, cur) {
+  document.getElementById(`q-${tab}-${cur}`).classList.remove('active');
+  const next = cur + 1;
+  const qs = tab === 'docker' ? dockerQuestions : composeQuestions;
+  if (next < qs.length) {
+    const cat = document.getElementById(`cat-${tab}-${next}`);
+    if (cat) cat.style.display = 'flex';
+    document.getElementById(`q-${tab}-${next}`).classList.add('active');
+    document.getElementById(`q-${tab}-${next}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('section-docker').classList.toggle('active', tab === 'docker');
+  document.getElementById('section-compose').classList.toggle('active', tab === 'compose');
+  document.getElementById('tab-docker').className = 'tab-btn' + (tab === 'docker' ? ' active-docker' : '');
+  document.getElementById('tab-compose').className = 'tab-btn' + (tab === 'compose' ? ' active-compose' : '');
+  updateProgress();
+}
+
+function updateProgress() {
+  const tab = activeTab;
+  const qs = tab === 'docker' ? dockerQuestions : composeQuestions;
+  const s = state[tab];
+  const pct = Math.round((s.answered / qs.length) * 100);
+  const fill = document.getElementById('progress-fill');
+  fill.style.width = pct + '%';
+  fill.className = `progress-bar-fill fill-${tab}`;
+  document.getElementById('progress-label').textContent = `${s.answered} / ${qs.length}`;
+  const badge = document.getElementById('score-badge');
+  badge.textContent = `Score: ${s.score}`;
+  badge.className = `score-badge badge-${tab}`;
+}
+
+function showSectionResult(tab) {
+  const qs = tab === 'docker' ? dockerQuestions : composeQuestions;
+  const s = state[tab];
+  const pct = Math.round((s.score / qs.length) * 100);
+  const label = tab === 'docker' ? 'Docker Core' : 'Docker Compose';
+  const scoreEl = document.getElementById(`br-${tab}-score`);
+  const titleEl = document.getElementById(`br-${tab}-title`);
+  const subEl   = document.getElementById(`br-${tab}-sub`);
+  scoreEl.textContent = `${s.score}/${qs.length}`;
+  let title, sub;
+  if (pct >= 90)      { title='Excellent'; sub='Production-ready skills!'; }
+  else if (pct >= 75) { title='Great Job'; sub='Solid foundation — review edge cases.'; }
+  else if (pct >= 55) { title='Good Start'; sub='Keep practising the scenarios.'; }
+  else                { title='Keep Going'; sub='Review explanations and retry.'; }
+  titleEl.textContent = title;
+  subEl.textContent = sub;
+
+  const bothDone = state.docker.answered === dockerQuestions.length && state.compose.answered === composeQuestions.length;
+  if (bothDone) {
+    document.getElementById('both-results').classList.add('show');
+    document.getElementById('both-results').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    // Prompt to switch tab
+    const otherTab = tab === 'docker' ? 'compose' : 'docker';
+    const otherName = tab === 'docker' ? 'Docker Compose' : 'Docker Core';
+    if (confirm(`${label} quiz complete! 🎉\n\nSwitch to the ${otherName} quiz now?`)) {
+      switchTab(otherTab);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      document.getElementById('both-results').classList.add('show');
+      document.getElementById('both-results').scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+}
+
+function restartAll() {
+  ['docker','compose'].forEach(t => { state[t] = { answered:0, score:0, current:0 }; });
+  document.getElementById('both-results').classList.remove('show');
+  buildSection(dockerQuestions, 'section-docker', 'docker');
+  buildSection(composeQuestions, 'section-compose', 'compose');
+  switchTab('docker');
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function restartSection(tab) {
+  state[tab] = { answered:0, score:0, current:0 };
+  document.getElementById('both-results').classList.remove('show');
+  document.getElementById(`br-${tab}-score`).textContent = '—';
+  document.getElementById(`br-${tab}-title`).textContent = '';
+  document.getElementById(`br-${tab}-sub`).textContent = '';
+  if (tab === 'docker') buildSection(dockerQuestions, 'section-docker', 'docker');
+  else buildSection(composeQuestions, 'section-compose', 'compose');
+  switchTab(tab);
+  updateProgress();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+// ════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════
+buildSection(dockerQuestions, 'section-docker', 'docker');
+buildSection(composeQuestions, 'section-compose', 'compose');
+updateProgress();
+</script>
+</body>
+</html>

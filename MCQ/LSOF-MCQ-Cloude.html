@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>lsof Interview MCQ Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4f0;
+    --surface: #fafffe;
+    --surface2: #f2faf5;
+    --border: #c8ddd0;
+    --accent: #1a7a4a;
+    --accent2: #0d5c38;
+    --accent3: #1b3a2d;
+    --text: #141c18;
+    --text-muted: #4a6357;
+    --correct: #1a7a4a;
+    --correct-bg: #edf7f2;
+    --wrong: #b83020;
+    --wrong-bg: #fdf0ee;
+    --option-hover: #e6f5ec;
+    --tag-bg: #d6e8dc;
+    --shadow: 0 4px 24px rgba(10,50,30,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Lora', Georgia, serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  header {
+    background: var(--accent3);
+    color: #fff;
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: 'lsof';
+    font-family: 'Syne', sans-serif;
+    font-size: 180px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.05);
+    position: absolute;
+    right: -10px;
+    top: -30px;
+    line-height: 1;
+    letter-spacing: -6px;
+    pointer-events: none;
+    user-select: none;
+  }
+  header .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(26px, 5vw, 50px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+  }
+  header h1 span { color: #6ddba0; }
+  header p {
+    margin-top: 14px;
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    font-style: italic;
+    max-width: 520px;
+  }
+
+  .progress-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(10,50,30,0.07);
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: right;
+  }
+  .score-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--accent3);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 36px 28px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    animation: cardIn 0.4s ease both;
+    display: none;
+  }
+  .question-card.active { display: block; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .q-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .q-tag.advanced { background: #ede8ff; color: #5b3fa0; }
+  .q-tag.scenario { background: #fff4e0; color: #8a5a00; }
+  .q-tag.practical { background: #e0eeff; color: #1a4a8c; }
+
+  .question-text {
+    font-size: 18px;
+    line-height: 1.65;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .q-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: #0f1f17;
+    color: #6ddba0;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 14px 0 4px;
+    border-left: 3px solid var(--accent);
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.7;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .option {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--surface2);
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+  .option:hover:not(.disabled) {
+    border-color: var(--accent);
+    background: var(--option-hover);
+    transform: translateX(3px);
+  }
+  .option-key {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .option-text {
+    font-size: 15px;
+    line-height: 1.55;
+    padding-top: 2px;
+  }
+  .option-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: rgba(0,0,0,0.07);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  .option.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .option.correct .option-key { background: var(--correct); color: #fff; }
+  .option.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+  .option.wrong .option-key { background: var(--wrong); color: #fff; }
+  .option.disabled { cursor: default; }
+
+  .explanation {
+    display: none;
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--accent);
+    background: #e8f7ef;
+    animation: fadeIn 0.3s ease;
+  }
+  .explanation.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .explanation .ex-head {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 8px;
+  }
+  .explanation p { font-size: 14px; line-height: 1.7; color: #1a3a28; }
+  .explanation .ex-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: #0f1f17;
+    color: #6ddba0;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-top: 10px;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.65;
+  }
+  .explanation .correct-label {
+    display: inline-block;
+    background: var(--correct);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .nav-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: flex-end;
+  }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.18s;
+  }
+  .btn-primary { background: var(--accent3); color: #fff; }
+  .btn-primary:hover { background: #0e2318; transform: translateY(-1px); }
+  .btn-secondary { background: transparent; color: var(--accent3); border: 1.5px solid var(--accent3); }
+  .btn-secondary:hover { background: #e8f7ef; }
+
+  #result-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: cardIn 0.5s ease both;
+  }
+  .result-icon { font-size: 64px; margin-bottom: 16px; }
+  .result-score-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    color: var(--accent3);
+    line-height: 1;
+  }
+  .result-score-big span { color: var(--accent); }
+  .result-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 700; margin: 16px 0 8px; }
+  .result-subtitle { font-size: 16px; color: var(--text-muted); font-style: italic; margin-bottom: 36px; }
+  .result-stats { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-bottom: 40px; }
+  .stat-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    min-width: 140px;
+  }
+  .stat-num { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; color: var(--accent3); }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
+
+  .category-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 40px 0 24px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .category-divider::before, .category-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  @media (max-width: 600px) {
+    header { padding: 36px 20px 28px; }
+    .progress-wrap { padding: 14px 16px; }
+    main { padding: 28px 12px 60px; }
+    .question-card { padding: 24px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Linux / DevOps / SRE Interview Prep</div>
+  <h1>lsof — List Open Files<br><span>MCQ Quiz</span></h1>
+  <p>30 multiple choice questions · Basic to Advanced · With real-world examples</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+  <div class="progress-label" id="progress-label">0 / 30</div>
+  <div class="score-badge" id="score-badge">Score: 0</div>
+</div>
+
+<main id="quiz-main"></main>
+
+<div id="result-screen">
+  <div class="result-icon" id="result-emoji">🎉</div>
+  <div class="result-score-big" id="result-score-big"></div>
+  <div class="result-title" id="result-title"></div>
+  <div class="result-subtitle" id="result-subtitle"></div>
+  <div class="result-stats">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-correct" style="color:var(--correct)"></div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-wrong" style="color:var(--wrong)"></div>
+      <div class="stat-label">Wrong</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-pct"></div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+</div>
+
+<script>
+const questions = [
+
+  // ── BASICS ─────────────────────────────────────────────────
+  {
+    category: "Basics",
+    tag: "basic",
+    text: "What does <code class='option-code'>lsof</code> stand for?",
+    options: ["List System Open Files","LiSt Open Files","Linux Socket Open Filesystem","List of Socket Operations Files"],
+    answer: 1,
+    explanation: "<strong>lsof</strong> stands for <strong>LiSt Open Files</strong>. Because Linux treats almost everything as a file — regular files, sockets, pipes, devices, and network connections — lsof is one of the most powerful diagnostic tools available.",
+    code: null
+  },
+  {
+    category: "Basics",
+    tag: "basic",
+    text: "Which of the following is NOT shown in lsof output by default?",
+    options: ["Process ID (PID)","Username","File path","CPU usage"],
+    answer: 3,
+    explanation: "<strong>lsof</strong> shows PID, user, file descriptor, file type, file path/address — but <strong>not CPU usage</strong>. For CPU stats use <code>top</code>, <code>htop</code>, or <code>ps</code>.",
+    code: "# Default lsof columns:\n# COMMAND  PID   USER   FD   TYPE  DEVICE  SIZE  NODE  NAME\n# nginx   1234   root  cwd   DIR    8,1    4096   128  /\n# nginx   1234   root    4u  IPv4  56789    0t0   TCP  *:80 (LISTEN)"
+  },
+  {
+    category: "Basics",
+    tag: "basic",
+    text: "Which command finds all open files on the entire system?",
+    options: ["lsof -a","lsof","lsof -all","lsof /"],
+    answer: 1,
+    explanation: "Running <strong>lsof</strong> without arguments lists ALL open files across all processes on the system. It can produce thousands of lines — pipe through <code>less</code> or use filters.",
+    code: "lsof | less\n# or count total open files:\nlsof | wc -l"
+  },
+  {
+    category: "Basics",
+    tag: "basic",
+    text: "What does the file descriptor <code class='option-code'>cwd</code> mean in lsof output?",
+    options: ["Closed write descriptor","Current working directory","Character write device","Connection write data"],
+    answer: 1,
+    explanation: "<strong>cwd</strong> stands for <em>Current Working Directory</em> — the directory the process was started from or has changed to. Other common FD values: <code>txt</code> (program text), <code>mem</code> (memory-mapped), <code>0u</code> stdin, <code>1u</code> stdout, <code>2u</code> stderr.",
+    code: "# Common file descriptors in lsof:\n# cwd → current working directory\n# txt → program text (code/data)\n# mem → memory-mapped file\n# 0u  → stdin\n# 1u  → stdout\n# 2u  → stderr\n# 3u  → first file opened by program"
+  },
+  {
+    category: "Basics",
+    tag: "basic",
+    text: "Which command checks what process is using a specific file?",
+    options: ["lsof -f /var/log/syslog","lsof /var/log/syslog","fuser -f /var/log/syslog","ls -lh /var/log/syslog"],
+    answer: 1,
+    explanation: "Passing a <strong>file path directly</strong> to lsof shows all processes that have that file open. This is extremely useful when a file is locked or you need to identify who is writing to a log.",
+    code: "lsof /var/log/syslog\n\n# Output example:\n# COMMAND  PID   USER  FD  TYPE DEVICE SIZE NODE NAME\n# rsyslogd 887   root   7w  REG  253,0  48K  1234 /var/log/syslog"
+  },
+
+  // ── NETWORK ────────────────────────────────────────────────
+  {
+    category: "Network & Ports",
+    tag: "basic",
+    text: "How do you find which process is listening on port 8080?",
+    options: ["lsof -port 8080","lsof -i :8080","lsof --port=8080","netstat lsof 8080"],
+    answer: 1,
+    explanation: "<strong>lsof -i :8080</strong> uses the <code>-i</code> (internet) flag with a colon-prefixed port number. This is the go-to command when you get a 'port already in use' error.",
+    code: "lsof -i :8080\n\n# Example output:\n# COMMAND  PID   USER  FD  TYPE  DEVICE  SIZE  NODE  NAME\n# java    1234   root  45u IPv4   12345   0t0   TCP  *:8080 (LISTEN)\n\n# Kill that process:\nkill -9 $(lsof -t -i :8080)"
+  },
+  {
+    category: "Network & Ports",
+    tag: "basic",
+    text: "Which command lists ALL listening ports without DNS resolution?",
+    options: ["lsof -i -P -n | grep LISTEN","lsof --listen --no-dns","lsof -l | grep LISTEN","lsof -ports"],
+    answer: 0,
+    explanation: "<code>-i</code> selects network files, <code>-P</code> shows raw port numbers (not service names), and <code>-n</code> skips DNS resolution for speed. The <code>grep LISTEN</code> filters only listening sockets.",
+    code: "lsof -i -P -n | grep LISTEN\n\n# Example output:\n# sshd    987  root  3u  IPv4  12000  0t0  TCP *:22 (LISTEN)\n# nginx  1234  root  6u  IPv4  13000  0t0  TCP *:80 (LISTEN)\n# mysqld 2345  mysql 22u IPv4  14000  0t0  TCP *:3306 (LISTEN)"
+  },
+  {
+    category: "Network & Ports",
+    tag: "basic",
+    text: "How do you check only TCP connections using lsof?",
+    options: ["lsof -protocol tcp","lsof -i TCP","lsof --tcp","lsof -t TCP"],
+    answer: 1,
+    explanation: "<strong>lsof -i TCP</strong> filters output to show only TCP-based connections and listening sockets. Use <code>lsof -i UDP</code> for UDP.",
+    code: "# TCP only\nlsof -i TCP\n\n# UDP only\nlsof -i UDP\n\n# TCP on specific port\nlsof -i TCP:443\n\n# Established TCP connections only\nlsof -i TCP -s TCP:ESTABLISHED"
+  },
+  {
+    category: "Network & Ports",
+    tag: "practical",
+    text: "How do you find processes connected TO a specific remote IP address?",
+    options: ["lsof -remote 192.168.1.10","lsof -i @192.168.1.10","lsof --ip=192.168.1.10","lsof -i 192.168.1.10"],
+    answer: 1,
+    explanation: "The <strong>@</strong> prefix in lsof's -i argument specifies a remote hostname or IP. This is useful for identifying which processes are communicating with a specific server.",
+    code: "# All connections to/from a remote IP\nlsof -i @192.168.1.10\n\n# Combine with TCP and port:\nlsof -i TCP@192.168.1.10:5432\n\n# All established connections to that IP:\nlsof -i @192.168.1.10 -s TCP:ESTABLISHED"
+  },
+  {
+    category: "Network & Ports",
+    tag: "practical",
+    text: "Which one-liner instantly kills the process occupying port 3000?",
+    options: [
+      "lsof -kill -i :3000",
+      "kill -9 $(lsof -t -i :3000)",
+      "lsof -i :3000 | kill",
+      "pkill lsof :3000"
+    ],
+    answer: 1,
+    explanation: "<code>lsof -t</code> outputs only the PID (terse mode), which can be passed directly to <code>kill -9</code> via command substitution. Clean and scriptable.",
+    code: "# Kill process on port 3000\nkill -9 $(lsof -t -i :3000)\n\n# Safer version — confirm PID first:\nlsof -t -i :3000          # see the PID\nkill -9 &lt;PID&gt;             # then kill it\n\n# Also works with fuser:\nfuser -k 3000/tcp"
+  },
+
+  // ── PROCESS & USER ─────────────────────────────────────────
+  {
+    category: "Process & User Filters",
+    tag: "basic",
+    text: "How do you list all open files for a specific process ID (e.g., PID 4567)?",
+    options: ["lsof --pid=4567","lsof -p 4567","lsof -P 4567","lsof /proc/4567"],
+    answer: 1,
+    explanation: "<strong>lsof -p &lt;PID&gt;</strong> lists all files, sockets, and descriptors held open by that process. Essential for debugging a misbehaving process.",
+    code: "lsof -p 4567\n\n# Count open file descriptors for a process:\nlsof -p 4567 | wc -l\n\n# Multiple PIDs:\nlsof -p 1234,5678\n\n# Exclude a PID:\nlsof -p ^1234"
+  },
+  {
+    category: "Process & User Filters",
+    tag: "basic",
+    text: "How do you see files opened by the user <code class='option-code'>www-data</code>?",
+    options: ["lsof --user www-data","lsof -u www-data","lsof -U www-data","lsof user=www-data"],
+    answer: 1,
+    explanation: "<strong>lsof -u &lt;username&gt;</strong> filters results to show files opened by a specific user. You can also use a UID number.",
+    code: "# By username\nlsof -u www-data\n\n# By UID\nlsof -u 33\n\n# Multiple users\nlsof -u nginx,apache\n\n# Exclude a user (^ = NOT)\nlsof -u ^root"
+  },
+  {
+    category: "Process & User Filters",
+    tag: "basic",
+    text: "What does the <code class='option-code'>^</code> symbol mean in <code class='option-code'>lsof -u ^root</code>?",
+    options: ["Show only root's files","Show files older than root","Exclude root (NOT operator)","Show root's home directory"],
+    answer: 2,
+    explanation: "In lsof, <strong>^</strong> is a negation/NOT operator. <code>lsof -u ^root</code> shows files opened by all users <em>except</em> root. This works for other filters too.",
+    code: "# Exclude root user\nlsof -u ^root\n\n# Exclude a specific PID\nlsof -p ^1\n\n# Combine: files by www-data excluding PID 999\nlsof -u www-data -p ^999"
+  },
+  {
+    category: "Process & User Filters",
+    tag: "basic",
+    text: "How do you list all open files for a command named <code class='option-code'>nginx</code>?",
+    options: ["lsof -name nginx","lsof -c nginx","lsof --cmd nginx","lsof /usr/sbin/nginx"],
+    answer: 1,
+    explanation: "<strong>lsof -c &lt;command&gt;</strong> matches processes whose command name begins with the given string. Great for investigating a specific application.",
+    code: "# All files opened by nginx processes\nlsof -c nginx\n\n# Case-insensitive match (regex)\nlsof -c /nginx/i\n\n# Combine with network filter:\nlsof -c nginx -i TCP"
+  },
+
+  // ── DISK & FILES ───────────────────────────────────────────
+  {
+    category: "Disk & File Investigation",
+    tag: "practical",
+    text: "Your disk is 100% full, but <code class='option-code'>du</code> and <code class='option-code'>ls</code> show no large files. What lsof command reveals the culprit?",
+    options: ["lsof -disk","lsof | grep deleted","lsof +D /","lsof -space"],
+    answer: 1,
+    explanation: "In Linux, deleting a file only removes its directory entry. If a process still has the file open, the <strong>inode and disk blocks are not freed</strong> until the process closes or is killed. <code>lsof | grep deleted</code> reveals these 'ghost' files.",
+    code: "lsof | grep deleted\n\n# Example output:\n# java  1234  app  10w  REG  8,1  5.2G  9876  /var/log/app.log (deleted)\n\n# Fix: restart or kill the process\nkill -HUP 1234   # graceful restart\n# or\nkill -9 1234     # force kill\n# Disk space is freed immediately after"
+  },
+  {
+    category: "Disk & File Investigation",
+    tag: "practical",
+    text: "Which command lists all open files recursively under <code class='option-code'>/var/log</code>?",
+    options: ["lsof +d /var/log","lsof +D /var/log","lsof -r /var/log","lsof --dir /var/log"],
+    answer: 1,
+    explanation: "<strong>lsof +D</strong> performs a <em>recursive</em> directory scan. <code>+d</code> (lowercase) only checks the top-level directory. Note: <code>+D</code> can be slow on large directory trees.",
+    code: "# Recursive (all subdirectories)\nlsof +D /var/log\n\n# Top directory only (faster)\nlsof +d /var/log\n\n# Summary of difference:\n# +d  → /var/log/* only\n# +D  → /var/log/**/* (recursive)"
+  },
+  {
+    category: "Disk & File Investigation",
+    tag: "practical",
+    text: "A filesystem cannot be unmounted. Which command identifies blocking processes?",
+    options: ["umount --force /data","lsof /data","fuser --check /data","df -h /data"],
+    answer: 1,
+    explanation: "<strong>lsof /mountpoint</strong> reveals every process that has a file or directory open on that filesystem. You must close or kill those processes before <code>umount</code> will succeed.",
+    code: "lsof /data\n\n# Example output:\n# bash    4321  user  cwd  DIR  8,2  4096  2  /data\n# vim     4399  user   4u  REG  8,2  1024  56 /data/config.txt\n\n# Kill all processes using /data:\nfuser -km /data\n\n# Then unmount:\numount /data"
+  },
+  {
+    category: "Disk & File Investigation",
+    tag: "advanced",
+    text: "How do you find processes using a deleted shared library (e.g., after a library upgrade)?",
+    options: ["lsof | grep DEL","lsof -lib","lsof +D /lib","lsof | grep .so"],
+    answer: 0,
+    explanation: "After upgrading a shared library, old processes still hold the old version open. <code>lsof | grep DEL</code> shows files with type DEL — these processes should be restarted to use the new library.",
+    code: "lsof | grep DEL\n\n# Example output:\n# nginx  1234  root  mem  DEL  REG  8,1       /lib/x86_64-linux-gnu/libssl.so.1.1\n\n# These processes need restart to use updated library:\nsystemctl restart nginx\n\n# Common after: apt upgrade openssl libssl-dev"
+  },
+
+  // ── ADVANCED OPTIONS ───────────────────────────────────────
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "What does <code class='option-code'>lsof -nP</code> do and why is it used?",
+    options: [
+      "Disables process listing",
+      "Skips DNS and port name resolution — making output faster",
+      "Shows only numeric PIDs",
+      "Filters network and pipe descriptors"
+    ],
+    answer: 1,
+    explanation: "<code>-n</code> skips DNS hostname resolution, <code>-P</code> shows numeric port numbers instead of service names (e.g., <code>8080</code> instead of <code>http-alt</code>). Together they make lsof significantly faster — critical on busy systems.",
+    code: "# Slow (default — does DNS + service name lookup)\nlsof -i\n\n# Fast (skip all resolution)\nlsof -nP -i\n\n# In practice, always add -nP for scripts and monitoring:\nlsof -nP -i | grep LISTEN"
+  },
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "How do you monitor open network connections live, refreshing every 2 seconds?",
+    options: ["lsof -i -loop 2","lsof -i -r 2","watch -n 2 lsof -i","Both B and C are correct"],
+    answer: 3,
+    explanation: "Both <code>lsof -i -r 2</code> (built-in repeat mode) and <code>watch -n 2 lsof -i</code> work for live monitoring. <code>lsof -r 2</code> is slightly more efficient as it avoids re-spawning the process.",
+    code: "# Option 1: lsof built-in repeat\nlsof -i -r 2\n\n# Option 2: watch wrapper\nwatch -n 2 'lsof -nP -i | grep LISTEN'\n\n# Option 3: loop only listening ports\nlsof -i -r 2 -nP | grep LISTEN"
+  },
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "What does the <code class='option-code'>-a</code> flag do in lsof?",
+    options: [
+      "Shows all files including hidden",
+      "ANDs multiple filter conditions together",
+      "Shows files in async mode",
+      "Lists files by access time"
+    ],
+    answer: 1,
+    explanation: "By default, lsof ORs multiple conditions. <strong>-a</strong> changes the logic to AND — all conditions must match simultaneously. Essential when combining filters like user AND port.",
+    code: "# Without -a: shows files by root OR on port 80\nlsof -u root -i :80\n\n# With -a: shows files by root AND on port 80\nlsof -u root -a -i :80\n\n# Another example: nginx process AND TCP connections\nlsof -c nginx -a -i TCP"
+  },
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "How do you combine filters to see only TCP connections opened by user <code class='option-code'>oracle</code> on port 1521?",
+    options: [
+      "lsof -u oracle -port 1521",
+      "lsof -u oracle -i TCP:1521",
+      "lsof -u oracle | grep 1521",
+      "lsof -u oracle -a -i TCP:1521"
+    ],
+    answer: 3,
+    explanation: "Use <strong>-a</strong> to AND the conditions. Without <code>-a</code>, lsof would show ALL files by oracle OR all processes using TCP:1521 — probably not what you want.",
+    code: "# Correct: oracle user AND TCP port 1521\nlsof -u oracle -a -i TCP:1521\n\n# Also useful for DB troubleshooting:\nlsof -u oracle -a -i TCP:1521 -s TCP:ESTABLISHED\n\n# Shows active Oracle DB connections only"
+  },
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "What does <code class='option-code'>lsof -t</code> output and why is it useful?",
+    options: [
+      "Outputs timestamps for each open file",
+      "Outputs only PIDs — terse mode, useful for scripting",
+      "Outputs file types only",
+      "Outputs TCP connections only"
+    ],
+    answer: 1,
+    explanation: "<strong>lsof -t</strong> outputs only PIDs (terse mode), making it perfect for shell scripting and piping to <code>kill</code> or <code>xargs</code>.",
+    code: "# Get PID of process using port 80\nlsof -t -i :80\n# Output: 1234\n\n# Kill all processes using port 80\nkill -9 $(lsof -t -i :80)\n\n# Kill all processes opened by a user\nkill -9 $(lsof -t -u baduser)\n\n# With xargs (safer for multiple PIDs)\nlsof -t -i :8080 | xargs kill -9"
+  },
+
+  // ── IPv4 / IPv6 ────────────────────────────────────────────
+  {
+    category: "Advanced Options",
+    tag: "advanced",
+    text: "How do you list only IPv4 network connections (excluding IPv6)?",
+    options: ["lsof -i ipv4","lsof -i4","lsof --ipv4","lsof -i -4"],
+    answer: 1,
+    explanation: "<strong>lsof -i4</strong> filters to IPv4 only. Similarly, <strong>lsof -i6</strong> shows IPv6 only. Useful on dual-stack systems where you need to isolate by protocol version.",
+    code: "# IPv4 connections only\nlsof -i4\n\n# IPv6 connections only\nlsof -i6\n\n# IPv4 + listening ports (clean output)\nlsof -i4 -nP | grep LISTEN"
+  },
+
+  // ── INTERNALS ──────────────────────────────────────────────
+  {
+    category: "How lsof Works",
+    tag: "advanced",
+    text: "Where does lsof primarily read its information from?",
+    options: ["/var/log/files","/proc filesystem and kernel file tables","/sys/open-files","/dev/fd"],
+    answer: 1,
+    explanation: "<strong>lsof</strong> reads the <code>/proc</code> virtual filesystem and kernel file descriptor tables to build its output. This is why it requires root to see other users' processes — <code>/proc/&lt;pid&gt;/</code> is permission-restricted.",
+    code: "# lsof essentially parses:\n/proc/<PID>/fd/         # file descriptors\n/proc/<PID>/fdinfo/     # fd metadata\n/proc/<PID>/maps        # memory maps\n/proc/<PID>/net/tcp     # TCP connections\n\n# You can verify manually:\nls -la /proc/1234/fd/"
+  },
+  {
+    category: "How lsof Works",
+    tag: "advanced",
+    text: "Why is lsof sometimes slow on busy systems?",
+    options: [
+      "It scans every block device by default",
+      "DNS resolution, large file counts, and recursive directory scans",
+      "It waits for open files to be closed before listing",
+      "It compiles a kernel module on first run"
+    ],
+    answer: 1,
+    explanation: "lsof can be slow due to: DNS resolution (use <code>-n</code>), port name lookups (use <code>-P</code>), inspecting millions of open files, or recursive <code>+D</code> scans. Always add <code>-nP</code> in scripts.",
+    code: "# Slow\nlsof -i\n\n# Fast — skip all resolution\nlsof -nP -i\n\n# Even faster — only show PIDs\nlsof -nP -t -i\n\n# Benchmark the difference:\ntime lsof -i > /dev/null\ntime lsof -nP -i > /dev/null"
+  },
+  {
+    category: "How lsof Works",
+    tag: "advanced",
+    text: "Why does Linux show sockets and pipes as files in lsof?",
+    options: [
+      "It is a bug in the Linux kernel",
+      "Linux follows the 'Everything is a file' philosophy",
+      "Only regular files are shown; sockets are listed separately",
+      "lsof converts socket data to file format for display"
+    ],
+    answer: 1,
+    explanation: "Linux follows the Unix philosophy: <strong>'Everything is a file'</strong>. Sockets, pipes, devices, and network connections are all represented as file descriptors in the kernel, which is why lsof can show all of them uniformly.",
+    code: "# File types shown by lsof (-TYPE column):\n# REG  → regular file\n# DIR  → directory\n# CHR  → character device\n# BLK  → block device\n# FIFO → pipe\n# IPv4 → IPv4 socket\n# IPv6 → IPv6 socket\n# unix → Unix domain socket\n# sock → unknown socket"
+  },
+
+  // ── SCENARIO-BASED ─────────────────────────────────────────
+  {
+    category: "Scenario-Based",
+    tag: "scenario",
+    text: "After deleting a 10GB log file, <code class='option-code'>df</code> still shows the space is used. What is the cause and fix?",
+    options: [
+      "df has a bug — reboot to refresh",
+      "A process still has the file open; kill or restart it to free space",
+      "The file is in the trash — empty it",
+      "The filesystem needs to be resized"
+    ],
+    answer: 1,
+    explanation: "Deleting a file in Linux removes its directory entry but not its inode if a process still holds it open. The disk blocks are only freed when the last file descriptor is closed — i.e., when you kill or restart the holding process.",
+    code: "# Find the process holding the deleted file\nlsof | grep deleted\n\n# Output:\n# app  5678  root 10w REG 8,1 10G 9999 /var/log/app.log (deleted)\n\n# Free the space\nkill -9 5678\n\n# Alternatively, truncate without killing:\n> /proc/5678/fd/10\n# (zero out the FD — space freed, process continues)"
+  },
+  {
+    category: "Scenario-Based",
+    tag: "scenario",
+    text: "An application fails to start with: <em>'Address already in use'</em> on port 5432. Which commands help resolve this?",
+    options: [
+      "netstat -l and reboot",
+      "lsof -i :5432 to find the PID, then kill -9 PID",
+      "iptables -D INPUT --dport 5432",
+      "systemctl restart networking"
+    ],
+    answer: 1,
+    explanation: "First identify the occupying process with <code>lsof -i :5432</code>, then decide whether to kill it or reconfigure your app to use a different port.",
+    code: "# Step 1: Identify who's using port 5432\nlsof -i :5432\n\n# Step 2: Kill it (if safe to do so)\nkill -9 $(lsof -t -i :5432)\n\n# Or one-liner:\nkill -9 $(lsof -t -i :5432)\n\n# Verify port is now free:\nlsof -i :5432   # should return nothing"
+  },
+  {
+    category: "Scenario-Based",
+    tag: "scenario",
+    text: "You suspect a user <code class='option-code'>devops</code> is running an unknown background process with network connections. Which command investigates both?",
+    options: [
+      "lsof -u devops",
+      "lsof -u devops -a -i TCP",
+      "ps aux | grep devops",
+      "netstat -u devops"
+    ],
+    answer: 1,
+    explanation: "Combining <code>-u devops</code> (user filter), <code>-a</code> (AND logic), and <code>-i TCP</code> (TCP network) shows only TCP connections opened by that specific user.",
+    code: "# devops user's TCP connections\nlsof -u devops -a -i TCP\n\n# All network activity by devops:\nlsof -u devops -a -i\n\n# Established connections only:\nlsof -u devops -a -i TCP -s TCP:ESTABLISHED\n\n# Summary of their open files:\nlsof -u devops | awk '{print $9}' | sort | uniq -c | sort -rn"
+  },
+  {
+    category: "Scenario-Based",
+    tag: "scenario",
+    text: "High outbound network traffic is observed. Which lsof command helps identify the responsible process?",
+    options: [
+      "lsof -i -nP",
+      "lsof -traffic",
+      "lsof -outbound",
+      "lsof /dev/net"
+    ],
+    answer: 0,
+    explanation: "<strong>lsof -i -nP</strong> lists all open network connections with numeric IPs and ports. Look for unexpected ESTABLISHED connections to external IPs. Combine with <code>nethogs</code> or <code>iftop</code> for bandwidth details.",
+    code: "# Show all network connections\nlsof -i -nP\n\n# Filter ESTABLISHED connections (active data transfer)\nlsof -i -nP -s TCP:ESTABLISHED\n\n# Show unique remote IPs\nlsof -i -nP | grep ESTABLISHED | awk '{print $9}' | sort | uniq\n\n# Pair with nethogs for per-process bandwidth:\nnethogs eth0"
+  },
+  {
+    category: "Scenario-Based",
+    tag: "scenario",
+    text: "After running <code class='option-code'>apt upgrade</code>, which lsof command shows services that need restarting to use updated libraries?",
+    options: [
+      "lsof | grep upgraded",
+      "lsof | grep DEL",
+      "lsof -u apt",
+      "lsof | grep .so.old"
+    ],
+    answer: 1,
+    explanation: "After library upgrades, old files are removed but still held open by running processes. <code>lsof | grep DEL</code> finds them. Tools like <code>needrestart</code> also automate this check.",
+    code: "# Find processes using deleted (upgraded) libraries\nlsof | grep DEL\n\n# Example output after openssl upgrade:\n# nginx 1234 root mem DEL REG 8,1  /lib/x86_64-linux-gnu/libssl.so.1.1\n\n# Restart affected services:\nsystemctl restart nginx php-fpm apache2\n\n# Or use needrestart tool:\nneedrestart    # automatically detects and suggests restarts"
+  },
+
+  // ── NFS LINK ───────────────────────────────────────────────
+  {
+    category: "lsof with NFS",
+    tag: "practical",
+    text: "Before unmounting an NFS share at <code class='option-code'>/mnt/nfs</code>, which command shows blocking processes?",
+    options: [
+      "umount -v /mnt/nfs",
+      "lsof /mnt/nfs",
+      "nfsstat /mnt/nfs",
+      "exportfs -v /mnt/nfs"
+    ],
+    answer: 1,
+    explanation: "<strong>lsof /mnt/nfs</strong> shows all processes with open files on the NFS mount. You must close or kill them before <code>umount</code> succeeds, or use <code>umount -l</code> (lazy unmount) as a last resort.",
+    code: "# Check what's using the NFS mount\nlsof /mnt/nfs\n\n# Kill all processes using it:\nfuser -km /mnt/nfs\n\n# Then unmount:\numount /mnt/nfs\n\n# Or lazy unmount (detaches immediately, cleans up later):\numount -l /mnt/nfs"
+  },
+
+  // ── PERMISSIONS ────────────────────────────────────────────
+  {
+    category: "Permissions & Limits",
+    tag: "basic",
+    text: "Why might a non-root user get incomplete output from lsof?",
+    options: [
+      "lsof only works as root",
+      "Non-root users can only see their own processes' open files",
+      "lsof requires sudo even for the current user's files",
+      "The lsof binary has the wrong permissions"
+    ],
+    answer: 1,
+    explanation: "Without root, lsof can only inspect files opened by processes running as the same user. Root (or sudo) is required to see ALL processes, kernel descriptors, and other users' files.",
+    code: "# As regular user — sees only own processes\nlsof -u $USER\n\n# As root — sees everything\nsudo lsof\n\n# Check open file limit for a process:\ncat /proc/<PID>/limits | grep 'open files'\n\n# System-wide open file limit:\ncat /proc/sys/fs/file-max"
+  },
+  {
+    category: "Permissions & Limits",
+    tag: "advanced",
+    text: "How do you check how many files a specific process currently has open?",
+    options: [
+      "lsof -p PID | count",
+      "lsof -p PID | wc -l",
+      "ls /proc/PID/fd | wc -l",
+      "Both B and C work"
+    ],
+    answer: 3,
+    explanation: "Both methods work: <code>lsof -p PID | wc -l</code> (minus 1 for header) and <code>ls /proc/PID/fd | wc -l</code> (direct proc filesystem). Useful for diagnosing 'too many open files' errors.",
+    code: "# Method 1: via lsof\nlsof -p 1234 | wc -l\n\n# Method 2: via /proc (faster)\nls /proc/1234/fd | wc -l\n\n# Check the limit for that process:\ncat /proc/1234/limits | grep 'open files'\n# Soft Limit: 1024\n\n# Increase system limit:\nulimit -n 65536"
+  }
+];
+
+let score = 0;
+let answered = 0;
+
+function buildQuiz() {
+  const main = document.getElementById('quiz-main');
+  main.innerHTML = '';
+  let lastCat = '';
+
+  questions.forEach((q, i) => {
+    if (q.category !== lastCat) {
+      const div = document.createElement('div');
+      div.className = 'category-divider';
+      div.id = `cat-${i}`;
+      div.textContent = q.category;
+      div.style.display = i === 0 ? 'flex' : 'none';
+      main.appendChild(div);
+      lastCat = q.category;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = `q-${i}`;
+
+    const tagClass = q.tag === 'advanced' ? 'advanced' : q.tag === 'scenario' ? 'scenario' : q.tag === 'practical' ? 'practical' : '';
+
+    const codeBlock = q.code ? `<div class="q-code">${escHtml(q.code)}</div>` : '';
+
+    const opts = q.options.map((o, oi) => `
+      <div class="option" id="opt-${i}-${oi}" onclick="selectAnswer(${i},${oi})">
+        <div class="option-key">${'ABCD'[oi]}</div>
+        <div class="option-text">${o}</div>
+      </div>`).join('');
+
+    card.innerHTML = `
+      <div class="q-meta">
+        <span class="q-num">Q ${i+1} of ${questions.length}</span>
+        <span class="q-tag ${tagClass}">${q.tag}</span>
+      </div>
+      <div class="question-text">${q.text}</div>
+      ${codeBlock}
+      <div class="options">${opts}</div>
+      <div class="explanation" id="exp-${i}">
+        <div class="ex-head">💡 Explanation</div>
+        <span class="correct-label">Correct: ${q.options[q.answer]}</span>
+        <p>${q.explanation}</p>
+        ${q.code ? `<div class="ex-code">${escHtml(q.code)}</div>` : ''}
+      </div>
+      <div class="nav-btns" id="nav-${i}" style="display:none">
+        ${i < questions.length - 1
+          ? `<button class="btn btn-primary" onclick="nextQ(${i})">Next Question →</button>`
+          : `<button class="btn btn-primary" onclick="showResult()">View Results 🎯</button>`}
+      </div>`;
+    main.appendChild(card);
+  });
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function selectAnswer(qi, oi) {
+  const q = questions[qi];
+  const opts = document.querySelectorAll(`[id^="opt-${qi}-"]`);
+  opts.forEach(o => { o.classList.add('disabled'); o.onclick = null; });
+  if (oi === q.answer) { opts[oi].classList.add('correct'); score++; }
+  else { opts[oi].classList.add('wrong'); opts[q.answer].classList.add('correct'); }
+  answered++;
+  document.getElementById(`exp-${qi}`).classList.add('show');
+  document.getElementById(`nav-${qi}`).style.display = 'flex';
+  updateProgress();
+}
+
+function nextQ(cur) {
+  document.getElementById(`q-${cur}`).classList.remove('active');
+  const next = cur + 1;
+  if (next < questions.length) {
+    const cat = document.getElementById(`cat-${next}`);
+    if (cat) cat.style.display = 'flex';
+    document.getElementById(`q-${next}`).classList.add('active');
+    document.getElementById(`q-${next}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function updateProgress() {
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${answered} / ${questions.length}`;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+}
+
+function showResult() {
+  document.getElementById('quiz-main').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('result-score-big').innerHTML = `${score}<span>/${questions.length}</span>`;
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = questions.length - score;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  let emoji, title, subtitle;
+  if (pct >= 90)      { emoji='🏆'; title='Outstanding!'; subtitle='You know lsof inside out. Senior SRE level.'; }
+  else if (pct >= 75) { emoji='🎯'; title='Great Work!'; subtitle='Solid understanding — review the trickier flags.'; }
+  else if (pct >= 55) { emoji='📚'; title='Good Progress!'; subtitle='Keep practicing the scenario-based questions.'; }
+  else                { emoji='💪'; title='Keep Going!'; subtitle='Read the explanations and try again!'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+  rs.scrollIntoView({ behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  score = 0; answered = 0;
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-main').style.display = 'block';
+  updateProgress();
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NFS Interview MCQ Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fffdf7;
+    --surface2: #fff8ee;
+    --border: #e0d5c0;
+    --accent: #c84b2f;
+    --accent2: #2e6b4f;
+    --accent3: #1a3a5c;
+    --text: #1c1a16;
+    --text-muted: #6b6252;
+    --correct: #2e6b4f;
+    --correct-bg: #edf7f1;
+    --wrong: #b83020;
+    --wrong-bg: #fdf0ee;
+    --option-hover: #fff3e6;
+    --tag-bg: #e8e0cc;
+    --shadow: 0 4px 24px rgba(60,40,10,0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Lora', Georgia, serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--accent3);
+    color: #fff;
+    padding: 48px 40px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: 'NFS';
+    font-family: 'Syne', sans-serif;
+    font-size: 200px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.05);
+    position: absolute;
+    right: -20px;
+    top: -40px;
+    line-height: 1;
+    letter-spacing: -8px;
+    pointer-events: none;
+    user-select: none;
+  }
+  header .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1px;
+  }
+  header h1 span { color: #f4b942; }
+  header p {
+    margin-top: 14px;
+    font-size: 15px;
+    color: rgba(255,255,255,0.72);
+    font-style: italic;
+    max-width: 500px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(60,40,10,0.07);
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    width: 0%;
+  }
+  .progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 80px;
+    text-align: right;
+  }
+  .score-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    background: var(--accent3);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 99px;
+    white-space: nowrap;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  /* QUESTION CARD */
+  .question-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 36px 28px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow);
+    animation: cardIn 0.4s ease both;
+    display: none;
+  }
+  .question-card.active { display: block; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .q-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .q-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .q-tag.advanced { background: #f0e8ff; color: #6b3fa0; }
+  .q-tag.security { background: #ffe8e8; color: #a03030; }
+  .q-tag.practical { background: #e8f4ff; color: #1a4e8c; }
+
+  .question-text {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.65;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  /* CODE BLOCK IN QUESTION */
+  .q-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: #1c1a16;
+    color: #f4d98e;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 14px 0 4px;
+    border-left: 3px solid var(--accent);
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.7;
+  }
+
+  /* OPTIONS */
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .option {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--surface2);
+    transition: all 0.18s ease;
+    user-select: none;
+  }
+  .option:hover:not(.disabled) {
+    border-color: var(--accent3);
+    background: var(--option-hover);
+    transform: translateX(3px);
+  }
+  .option-key {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    min-width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: var(--border);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .option-text {
+    font-size: 15px;
+    line-height: 1.55;
+    padding-top: 2px;
+  }
+  .option-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: rgba(0,0,0,0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* Correct / Wrong states */
+  .option.correct {
+    border-color: var(--correct);
+    background: var(--correct-bg);
+  }
+  .option.correct .option-key {
+    background: var(--correct);
+    color: #fff;
+  }
+  .option.wrong {
+    border-color: var(--wrong);
+    background: var(--wrong-bg);
+  }
+  .option.wrong .option-key {
+    background: var(--wrong);
+    color: #fff;
+  }
+  .option.disabled { cursor: default; }
+
+  /* EXPLANATION BOX */
+  .explanation {
+    display: none;
+    margin-top: 20px;
+    padding: 18px 20px;
+    border-radius: 10px;
+    border-left: 4px solid var(--accent3);
+    background: #eef4ff;
+    animation: fadeIn 0.3s ease;
+  }
+  .explanation.show { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .explanation .ex-head {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent3);
+    margin-bottom: 8px;
+  }
+  .explanation p {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #2a3a50;
+  }
+  .explanation .ex-code {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    background: #1c2a3a;
+    color: #a8d0f8;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-top: 10px;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.65;
+  }
+  .explanation .correct-label {
+    display: inline-block;
+    background: var(--correct);
+    color: #fff;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* NAV BUTTONS */
+  .nav-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: flex-end;
+  }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.18s;
+  }
+  .btn-primary {
+    background: var(--accent3);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #112a42; transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent3);
+    border: 1.5px solid var(--accent3);
+  }
+  .btn-secondary:hover { background: #eef4ff; }
+
+  /* RESULT SCREEN */
+  #result-screen {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    animation: cardIn 0.5s ease both;
+  }
+  .result-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+  }
+  .result-score-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 80px;
+    font-weight: 800;
+    color: var(--accent3);
+    line-height: 1;
+  }
+  .result-score-big span { color: var(--accent); }
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 16px 0 8px;
+  }
+  .result-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 36px;
+  }
+  .result-stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 28px;
+    min-width: 140px;
+  }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--accent3);
+  }
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* CATEGORY DIVIDER */
+  .category-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 40px 0 24px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .category-divider::before, .category-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    header { padding: 36px 20px 28px; }
+    .progress-wrap { padding: 14px 16px; }
+    main { padding: 28px 12px 60px; }
+    .question-card { padding: 24px 18px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Linux / DevOps Interview Prep</div>
+  <h1>Network File System<br><span>MCQ Quiz</span></h1>
+  <p>30 multiple choice questions · Beginner to Advanced · With explanations</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+  <div class="progress-label" id="progress-label">0 / 30</div>
+  <div class="score-badge" id="score-badge">Score: 0</div>
+</div>
+
+<main id="quiz-main">
+  <!-- Questions injected by JS -->
+</main>
+
+<div id="result-screen">
+  <div class="result-icon" id="result-emoji">🎉</div>
+  <div class="result-score-big" id="result-score-big"></div>
+  <div class="result-title" id="result-title"></div>
+  <div class="result-subtitle" id="result-subtitle"></div>
+  <div class="result-stats">
+    <div class="stat-box">
+      <div class="stat-num" id="stat-correct" style="color:var(--correct)"></div>
+      <div class="stat-label">Correct</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-wrong" style="color:var(--wrong)"></div>
+      <div class="stat-label">Wrong</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num" id="stat-pct"></div>
+      <div class="stat-label">Accuracy</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="restartQuiz()">Restart Quiz</button>
+</div>
+
+<script>
+const questions = [
+  // ── BASIC ──────────────────────────────────────────────────
+  {
+    category: "Basic Concepts",
+    tag: "basic",
+    text: "What does NFS stand for?",
+    options: ["Network File Server","Network File System","Network Filesystem Service","Node File System"],
+    answer: 1,
+    explanation: "NFS stands for <strong>Network File System</strong>. It is a distributed file system protocol developed by Sun Microsystems that allows a client machine to access files over a network as if they were stored locally.",
+    code: null
+  },
+  {
+    category: "Basic Concepts",
+    tag: "basic",
+    text: "Which port does the NFS service primarily use?",
+    options: ["Port 80","Port 443","Port 2049","Port 111"],
+    answer: 2,
+    explanation: "<strong>Port 2049</strong> is the dedicated port for NFS service. Port 111 is used by RPC/portmapper which helps NFS clients discover services.",
+    code: "# Verify NFS is listening on port 2049\nss -tlnp | grep 2049\n# or\nnmap -p 2049 <server-ip>"
+  },
+  {
+    category: "Basic Concepts",
+    tag: "basic",
+    text: "What is the main NFS exports configuration file?",
+    options: ["/etc/nfs.conf","/etc/exports","/etc/fstab","/etc/nfsconfig"],
+    answer: 1,
+    explanation: "<strong>/etc/exports</strong> is the primary NFS configuration file where you define which directories to share and with what permissions.<br><br>Example entry:<br><code style='font-family:monospace'>/shared 192.168.1.0/24(rw,sync,no_root_squash)</code>",
+    code: null
+  },
+  {
+    category: "Basic Concepts",
+    tag: "basic",
+    text: "Which command installs NFS utilities on a Red Hat / CentOS system?",
+    options: ["apt install nfs-kernel-server","yum install nfs-utils","dnf install nfs-server","zypper install nfs"],
+    answer: 1,
+    explanation: "On Red Hat / CentOS / RHEL systems, NFS utilities are installed with:<br><code style='font-family:monospace'>yum install nfs-utils</code><br><br>On Ubuntu/Debian you would use: <code style='font-family:monospace'>apt install nfs-kernel-server</code>",
+    code: null
+  },
+  {
+    category: "Basic Concepts",
+    tag: "basic",
+    text: "Which command shows all directories exported by an NFS server?",
+    options: ["nfsstat","rpcinfo -p","showmount -e <server>","exportfs -v"],
+    answer: 2,
+    explanation: "<strong>showmount -e &lt;server&gt;</strong> lists all exports available from an NFS server. It queries the server's mount daemon to retrieve the export list.",
+    code: "# On client\nshowmount -e 192.168.1.10\n\n# Example output:\nExport list for 192.168.1.10:\n/shared 192.168.1.0/24\n/data   *"
+  },
+
+  // ── CONFIGURATION ──────────────────────────────────────────
+  {
+    category: "Configuration",
+    tag: "basic",
+    text: "What does the <code class='option-code'>no_root_squash</code> export option do?",
+    options: [
+      "Prevents root from mounting the share",
+      "Allows remote root to act as local root",
+      "Maps all users to nobody",
+      "Disables squashing of all users"
+    ],
+    answer: 1,
+    explanation: "<strong>no_root_squash</strong> allows the remote root user to have the same privileges as the local root user on the NFS server. By default, <code>root_squash</code> is active, which maps root to the anonymous (nobody) user for security reasons.",
+    code: "# /etc/exports\n/shared *(rw,sync,no_root_squash)   # root keeps privileges\n/data   *(rw,sync,root_squash)      # root → nobody (safer)"
+  },
+  {
+    category: "Configuration",
+    tag: "basic",
+    text: "Which command reloads NFS exports without restarting the NFS service?",
+    options: ["systemctl reload nfs-server","exportfs -ra","nfsstat -r","showmount -r"],
+    answer: 1,
+    explanation: "<strong>exportfs -ra</strong> re-reads /etc/exports and refreshes all exports without a full service restart, minimising disruption to connected clients.",
+    code: "exportfs -ra\n# Flags:\n#  -r  re-export all directories\n#  -a  export all directories listed in /etc/exports\n#  -v  verbose (useful for debugging)"
+  },
+  {
+    category: "Configuration",
+    tag: "basic",
+    text: "How do you mount an NFS share on a Linux client?",
+    options: [
+      "nfsmount 192.168.1.10:/shared /mnt",
+      "mount -t nfs 192.168.1.10:/shared /mnt",
+      "mount --nfs 192.168.1.10:/shared /mnt",
+      "attach-nfs 192.168.1.10:/shared /mnt"
+    ],
+    answer: 1,
+    explanation: "The correct syntax uses <strong>mount -t nfs</strong> followed by the server:path and local mount point.",
+    code: "# One-time mount\nmount -t nfs 192.168.1.10:/shared /mnt\n\n# Persistent mount via /etc/fstab\n192.168.1.10:/shared  /mnt  nfs  defaults  0  0"
+  },
+  {
+    category: "Configuration",
+    tag: "practical",
+    text: "What entry in /etc/fstab makes an NFS share mount automatically after reboot?",
+    options: [
+      "192.168.1.10:/shared /mnt auto defaults 0 0",
+      "192.168.1.10:/shared /mnt nfs defaults 0 0",
+      "nfs://192.168.1.10/shared /mnt nfs defaults 0 0",
+      "192.168.1.10:/shared /mnt nfs4 defaults 0 0 (mandatory)"
+    ],
+    answer: 1,
+    explanation: "In <strong>/etc/fstab</strong>, the filesystem type field must be <code>nfs</code> (or <code>nfs4</code> for NFSv4 specifically). The two trailing zeros disable dump and fsck for NFS shares.",
+    code: "# /etc/fstab format:\n# <server>:<path>  <mountpt>  <fstype>  <options>  <dump>  <pass>\n192.168.1.10:/shared  /mnt/data  nfs  defaults,_netdev  0  0\n\n# _netdev = wait for network before mounting"
+  },
+  {
+    category: "Configuration",
+    tag: "basic",
+    text: "Which option in /etc/exports restricts NFS access to a specific subnet?",
+    options: [
+      "/shared *(rw)",
+      "/shared 192.168.1.0/24(rw,sync)",
+      "/shared -restrict=subnet",
+      "/shared subnet=192.168.1.0(rw)"
+    ],
+    answer: 1,
+    explanation: "Placing the IP/subnet directly before the options restricts which clients can mount the share. Using <strong>*</strong> allows all hosts — avoid this in production.",
+    code: "# /etc/exports examples\n/shared 192.168.1.0/24(rw,sync)    # Entire subnet\n/data   192.168.1.50(ro,sync)        # Single host (read-only)\n/home   *(rw,sync)                   # All hosts (⚠ avoid in prod)"
+  },
+
+  // ── SERVICES ───────────────────────────────────────────────
+  {
+    category: "Services & Daemons",
+    tag: "basic",
+    text: "Which command starts and enables the NFS server to survive reboots?",
+    options: [
+      "service nfs start",
+      "systemctl start nfs-server",
+      "systemctl enable --now nfs-server",
+      "nfsd --start --enable"
+    ],
+    answer: 2,
+    explanation: "<strong>systemctl enable --now nfs-server</strong> combines enabling (start on boot) and starting the service immediately in a single command.",
+    code: "systemctl enable --now nfs-server\n\n# Equivalent to:\nsystemctl enable nfs-server\nsystemctl start  nfs-server"
+  },
+  {
+    category: "Services & Daemons",
+    tag: "basic",
+    text: "What happens if the rpcbind service is stopped on an NFS server running NFSv3?",
+    options: [
+      "Clients lose write access only",
+      "No effect — NFSv3 does not need rpcbind",
+      "Clients may fail to discover NFS services",
+      "The NFS server automatically falls back to NFSv4"
+    ],
+    answer: 2,
+    explanation: "<strong>rpcbind</strong> (portmapper) maps RPC program numbers to network ports. NFSv3 relies heavily on it. If rpcbind is down, clients cannot find NFS-related services and mounts will fail.",
+    code: "# Check rpcbind\nsystemctl status rpcbind\n\n# List registered RPC services\nrpcinfo -p\n\n# Example output:\n#  program vers proto   port  service\n#   100000    4   tcp    111  portmapper\n#   100003    3   tcp   2049  nfs\n#   100021    4   tcp  36871  nlockmgr"
+  },
+  {
+    category: "Services & Daemons",
+    tag: "basic",
+    text: "Which command checks NFS server and client statistics?",
+    options: ["nfsdstat","nfsinfo","nfsstat","rpcstat"],
+    answer: 2,
+    explanation: "<strong>nfsstat</strong> displays NFS statistics including calls, retransmissions, and errors for both client and server sides.",
+    code: "nfsstat          # Show all stats\nnfsstat -s       # Server stats only\nnfsstat -c       # Client stats only\nnfsstat -m       # Show mounted NFS shares with version info\nnfsiostat        # I/O statistics per mount"
+  },
+
+  // ── VERSIONING ─────────────────────────────────────────────
+  {
+    category: "NFS Versions",
+    tag: "advanced",
+    text: "Which of these is a key advantage of NFSv4 over NFSv3?",
+    options: [
+      "NFSv4 uses multiple ports for flexibility",
+      "NFSv4 integrates file locking and is more firewall-friendly (mostly port 2049)",
+      "NFSv4 is stateless for better reliability",
+      "NFSv4 does not need rpcbind"
+    ],
+    answer: 1,
+    explanation: "<strong>NFSv4</strong> is stateful and integrates file locking directly (no separate lockd). It operates primarily over port 2049, making it far more firewall-friendly than NFSv3 which required multiple ports.",
+    code: null
+  },
+  {
+    category: "NFS Versions",
+    tag: "advanced",
+    text: "How do you identify which NFS version a client has mounted?",
+    options: [
+      "nfsver",
+      "nfsstat -m",
+      "showmount --version",
+      "rpcinfo --nfsver"
+    ],
+    answer: 1,
+    explanation: "<strong>nfsstat -m</strong> shows details of currently mounted NFS filesystems, including the NFS version negotiated.",
+    code: "nfsstat -m\n# Example output:\n# /mnt/data from 192.168.1.10:/shared\n#  Flags: rw,relatime,vers=4.2,rsize=131072,wsize=131072...\n\n# Alternatively:\nmount | grep nfs"
+  },
+
+  // ── TROUBLESHOOTING ────────────────────────────────────────
+  {
+    category: "Troubleshooting",
+    tag: "practical",
+    text: "A client gets 'Stale file handle' error on an NFS mount. What is the BEST first step?",
+    options: [
+      "Reinstall nfs-utils",
+      "Delete the mounted directory",
+      "Unmount with -f flag, then remount",
+      "Reboot the NFS server"
+    ],
+    answer: 2,
+    explanation: "A <strong>stale file handle</strong> occurs when the file/directory on the server no longer matches what the client cached (e.g. server remounted, file deleted, inode changed). Forcefully unmounting and remounting resolves it without rebooting.",
+    code: "# Fix stale file handle\numount -f /mnt/data\nmount -a\n\n# Or fully remount:\numount -l /mnt/data    # lazy unmount if -f fails\nmount -t nfs 192.168.1.10:/shared /mnt/data"
+  },
+  {
+    category: "Troubleshooting",
+    tag: "practical",
+    text: "A client can mount an NFS share but gets 'Permission denied' when writing. Which is NOT a likely cause?",
+    options: [
+      "Share mounted as read-only (ro)",
+      "root_squash is remapping root to nobody",
+      "The NFS server's kernel version is older",
+      "SELinux is blocking writes"
+    ],
+    answer: 2,
+    explanation: "The NFS server's kernel version difference is generally not a cause of 'Permission denied'. The typical causes are: read-only mount option, root_squash mapping, incorrect file system permissions, or SELinux/AppArmor policies.",
+    code: "# Diagnose write permission issues\nmount | grep nfs          # Check if 'ro' is in options\nexportfs -v               # Check export options on server\nls -la /shared            # Check directory permissions\ngetenforce                # Check SELinux mode\ngetsebool nfs_export_all_rw  # Check SELinux booleans"
+  },
+  {
+    category: "Troubleshooting",
+    tag: "practical",
+    text: "Which command helps verify if the NFS server's RPC services are registered and accessible?",
+    options: ["nfsping","showmount -a","rpcinfo -p <server>","netstat --nfs"],
+    answer: 2,
+    explanation: "<strong>rpcinfo -p &lt;server&gt;</strong> lists all RPC services registered with the portmapper on the target server. This is crucial for diagnosing NFS connectivity issues.",
+    code: "rpcinfo -p 192.168.1.10\n\n# Look for these essential entries:\n# portmapper (111), nfs (2049), mountd, nlockmgr\n\n# If you see nothing — rpcbind is likely down on the server"
+  },
+  {
+    category: "Troubleshooting",
+    tag: "practical",
+    text: "An NFS mount command hangs indefinitely. Which of the following is the LEAST likely cause?",
+    options: [
+      "Firewall blocking port 2049",
+      "NFS server is down",
+      "DNS resolution failure for the server hostname",
+      "The /etc/exports file has a comment on line 3"
+    ],
+    answer: 3,
+    explanation: "A comment (line starting with #) in /etc/exports is perfectly valid and would not cause a mount to hang. Common hang causes are firewall issues, server unavailability, or DNS failures.",
+    code: "# Quick NFS mount troubleshooting checklist\nping 192.168.1.10                  # 1. Network reachable?\ntelnet 192.168.1.10 2049           # 2. Port 2049 open?\nshowmount -e 192.168.1.10          # 3. Exports visible?\nrpcinfo -p 192.168.1.10            # 4. RPC services up?\njournalctl -xe | grep nfs          # 5. Any error logs?"
+  },
+  {
+    category: "Troubleshooting",
+    tag: "practical",
+    text: "Which command shows currently mounted NFS shares along with their type?",
+    options: ["lsblk -nfs","df -hT | grep nfs","showmount -a","nfsstat -s"],
+    answer: 1,
+    explanation: "<strong>df -hT</strong> shows all mounted filesystems with their type. Piping through grep nfs filters to show only NFS mounts with usage statistics.",
+    code: "df -hT | grep nfs\n\n# Example output:\n# Filesystem            Type  Size  Used Avail Use% Mounted on\n# 192.168.1.10:/shared  nfs4   50G   12G   38G  24% /mnt/data\n\n# Also useful:\nmount | grep nfs"
+  },
+
+  // ── SECURITY ───────────────────────────────────────────────
+  {
+    category: "Security",
+    tag: "security",
+    text: "What is the purpose of root squashing in NFS?",
+    options: [
+      "Compresses data sent over the network",
+      "Maps the remote root user to an unprivileged 'nobody' user",
+      "Prevents any user from having write access",
+      "Encrypts all NFS traffic automatically"
+    ],
+    answer: 1,
+    explanation: "<strong>Root squashing</strong> is a security feature. Without it, a remote user with root access could write files as root on the NFS server — a major security risk. With root_squash (the default), remote root is mapped to the 'nobody' (UID 65534) user.",
+    code: "# /etc/exports — Security best practices\n/data 10.0.0.0/8(rw,sync,root_squash)        # safe\n/data 10.0.0.0/8(rw,sync,no_root_squash)     # ⚠ dangerous\n\n# Check nobody UID\nid nobody\n# uid=65534(nobody) gid=65534(nobody)"
+  },
+  {
+    category: "Security",
+    tag: "security",
+    text: "Which NFS version supports Kerberos authentication for secure access?",
+    options: ["NFSv1","NFSv2","NFSv3","NFSv4"],
+    answer: 3,
+    explanation: "<strong>NFSv4</strong> has built-in support for Kerberos (RPCSEC_GSS security framework). With Kerberos, NFS traffic can be authenticated, integrity-checked, and even encrypted — critical for multi-tenant or sensitive environments.",
+    code: "# Mount with Kerberos auth (krb5)\nmount -t nfs4 -o sec=krb5 server:/share /mnt\n\n# Security modes:\n# sec=sys   → standard UNIX (default)\n# sec=krb5  → Kerberos auth only\n# sec=krb5i → auth + integrity\n# sec=krb5p → auth + integrity + privacy (encryption)"
+  },
+  {
+    category: "Security",
+    tag: "security",
+    text: "Which of the following BEST secures an NFS server in production?",
+    options: [
+      "Use no_root_squash and allow all IPs with *",
+      "Disable the firewall to avoid port blocking",
+      "Use NFSv4 with Kerberos, restrict client IPs, enable firewall rules",
+      "Use async writes and open permissions for performance"
+    ],
+    answer: 2,
+    explanation: "Production NFS security involves multiple layers: NFSv4 for better security model, Kerberos for authentication, firewall to restrict port 2049, and explicitly listing allowed client IPs in /etc/exports.",
+    code: "# Firewall rules for NFSv4\nfirewall-cmd --permanent --add-service=nfs\nfirewall-cmd --permanent --add-service=rpc-bind\nfirewall-cmd --reload\n\n# Verify\nfirewall-cmd --list-services"
+  },
+
+  // ── PERFORMANCE ────────────────────────────────────────────
+  {
+    category: "Performance",
+    tag: "advanced",
+    text: "Which mount options improve NFS read/write throughput?",
+    options: [
+      "ro,noatime",
+      "rsize=65536,wsize=65536",
+      "sync,hard,intr",
+      "nolock,tcp"
+    ],
+    answer: 1,
+    explanation: "<strong>rsize</strong> and <strong>wsize</strong> control the read/write buffer sizes in bytes. Larger values (up to 1MB) reduce round-trips and dramatically improve throughput on high-latency or high-bandwidth links.",
+    code: "# High-performance NFS mount\nmount -o rsize=65536,wsize=65536,hard,intr \\\n  192.168.1.10:/data /mnt/data\n\n# Or in /etc/fstab:\n192.168.1.10:/data /mnt/data nfs \\\n  rsize=65536,wsize=65536,hard,intr 0 0"
+  },
+  {
+    category: "Performance",
+    tag: "advanced",
+    text: "What is the risk of using the <code class='option-code'>async</code> export option?",
+    options: [
+      "Slower read speeds",
+      "Clients can't mount the share simultaneously",
+      "Data may be lost if the server crashes before writing to disk",
+      "Root squashing is automatically disabled"
+    ],
+    answer: 2,
+    explanation: "<strong>async</strong> allows the NFS server to acknowledge writes before they are committed to disk, which is faster but risks data loss on server crash. <strong>sync</strong> is safer — it only acknowledges after disk write is complete.",
+    code: "# /etc/exports\n/fast-data *(rw,async)   # ⚡ faster, ⚠ risk of data loss on crash\n/safe-data *(rw,sync)    # 🛡 safer, slightly slower\n\n# sync is the recommended default for production"
+  },
+
+  // ── MOUNT TYPES ────────────────────────────────────────────
+  {
+    category: "Mount Behaviour",
+    tag: "advanced",
+    text: "What is the key difference between a hard mount and a soft mount?",
+    options: [
+      "Hard mount uses UDP; soft mount uses TCP",
+      "Soft mount retries forever; hard mount times out quickly",
+      "Hard mount retries indefinitely; soft mount fails after timeout",
+      "There is no functional difference"
+    ],
+    answer: 2,
+    explanation: "A <strong>hard mount</strong> keeps retrying NFS operations indefinitely until the server responds — safer for data integrity. A <strong>soft mount</strong> returns an error after a timeout — faster failure but risks data corruption if writes are interrupted.",
+    code: "# Hard mount (recommended for production)\nmount -o hard,intr 192.168.1.10:/data /mnt\n# intr allows killing hung processes with Ctrl+C\n\n# Soft mount (use only when acceptable to fail fast)\nmount -o soft,timeo=30 192.168.1.10:/data /mnt"
+  },
+  {
+    category: "Mount Behaviour",
+    tag: "advanced",
+    text: "What is autofs (automount) used for in NFS environments?",
+    options: [
+      "Automatically configures NFS server exports",
+      "Mounts NFS shares on-demand when accessed and unmounts after idle",
+      "Automatically updates /etc/exports when files change",
+      "Auto-selects the fastest NFS version"
+    ],
+    answer: 1,
+    explanation: "<strong>autofs</strong> mounts NFS shares only when a user actually accesses them and automatically unmounts them after an idle period. This reduces boot time, saves resources, and handles transient network issues better than static /etc/fstab mounts.",
+    code: "# Install autofs\nyum install autofs\n\n# /etc/auto.master\n/mnt/nfs  /etc/auto.nfs\n\n# /etc/auto.nfs\ndata  -rw,soft  192.168.1.10:/shared\n\n# Start autofs\nsystemctl enable --now autofs\n\n# Access /mnt/nfs/data → auto-mounts!"
+  },
+
+  // ── KUBERNETES / DEVOPS ────────────────────────────────────
+  {
+    category: "DevOps / Kubernetes",
+    tag: "practical",
+    text: "How is NFS commonly used in Kubernetes environments?",
+    options: [
+      "As a container runtime",
+      "As Persistent Volumes (PV) for shared storage across pods",
+      "As a service mesh transport layer",
+      "As a network policy enforcement mechanism"
+    ],
+    answer: 1,
+    explanation: "In Kubernetes, NFS is used to create <strong>Persistent Volumes</strong> that can be shared across multiple pods (ReadWriteMany access mode). This is essential for stateful workloads that need shared storage.",
+    code: "# Kubernetes NFS PersistentVolume example\napiVersion: v1\nkind: PersistentVolume\nmetadata:\n  name: nfs-pv\nspec:\n  capacity:\n    storage: 10Gi\n  accessModes:\n    - ReadWriteMany        # Multiple pods can read/write\n  nfs:\n    server: 192.168.1.10\n    path: /shared"
+  },
+  {
+    category: "DevOps / Kubernetes",
+    tag: "practical",
+    text: "What is the primary difference between NFS and SMB/CIFS?",
+    options: [
+      "NFS is Windows-focused; SMB is Linux-focused",
+      "NFS has better Linux/Unix integration; SMB has better Windows integration",
+      "SMB only supports read-only shares",
+      "NFS requires a domain controller; SMB does not"
+    ],
+    answer: 1,
+    explanation: "<strong>NFS</strong> was designed for Unix/Linux environments and has lightweight overhead with POSIX semantics. <strong>SMB/CIFS</strong> (Samba) is the native Windows file sharing protocol with richer Windows-specific features. Linux can use both.",
+    code: null
+  },
+
+  // ── ADVANCED / SCENARIO ────────────────────────────────────
+  {
+    category: "Advanced Scenarios",
+    tag: "advanced",
+    text: "A developer runs a script as root on an NFS client and can't create files even though the share is rw. root_squash is active. What is happening?",
+    options: [
+      "The NFS server is down",
+      "root is being mapped to 'nobody' which lacks write permission on the server",
+      "The script must use sudo instead of root",
+      "NFSv4 doesn't allow scripted writes"
+    ],
+    answer: 1,
+    explanation: "With <strong>root_squash</strong> enabled (the default), the remote root user is mapped to the 'nobody' user on the server. If the target directory isn't writable by 'nobody', writes will fail. Solution: either grant permissions to nobody, use no_root_squash (⚠ security risk), or run as a non-root user with proper UID mapping.",
+    code: "# On NFS server — debug\nls -la /shared/\n# If owned by root and nobody can't write — that's the issue\n\n# Option 1: Change directory owner\nchown nobody:nobody /shared/\n\n# Option 2: Check what UID nobody is\nid nobody\n# uid=65534\n\n# Option 3 (risky): Disable squashing\n/shared *(rw,sync,no_root_squash)"
+  },
+  {
+    category: "Advanced Scenarios",
+    tag: "advanced",
+    text: "You need to capture NFS traffic for debugging. Which tool would you use?",
+    options: ["nfswatch only","tcpdump on port 2049","netstat -nfs","wireshark-nfs command"],
+    answer: 1,
+    explanation: "<strong>tcpdump</strong> can capture NFS packets on port 2049. Wireshark (GUI) can also decode NFS protocol in detail. Both are invaluable for debugging subtle NFS issues.",
+    code: "# Capture NFS traffic to a file\ntcpdump -i eth0 port 2049 -w /tmp/nfs-capture.pcap\n\n# Read and display captured traffic\ntcpdump -r /tmp/nfs-capture.pcap\n\n# Filter NFS4 operations\ntcpdump -i eth0 'tcp port 2049' -nn -v"
+  },
+  {
+    category: "Advanced Scenarios",
+    tag: "advanced",
+    text: "In NFSv4, what replaces the separate <code class='option-code'>rpc.lockd</code> and <code class='option-code'>rpc.statd</code> daemons?",
+    options: [
+      "A separate lockmanager service",
+      "File locking is integrated directly into the NFSv4 protocol",
+      "Kerberos handles all locking in NFSv4",
+      "NFSv4 does not support file locking"
+    ],
+    answer: 1,
+    explanation: "One of the major improvements in <strong>NFSv4</strong> is that file locking (previously handled by separate <code>rpc.lockd</code> and <code>rpc.statd</code> daemons) is built directly into the protocol. This simplifies configuration and improves firewall compatibility.",
+    code: "# NFSv3 requires these additional daemons:\nsystemctl status rpc-statd\nsystemctl status nfs-lock\n\n# NFSv4: locking is built-in — no extra daemons needed\n# Just:\nsystemctl status nfs-server"
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = 0;
+
+function buildQuiz() {
+  const main = document.getElementById('quiz-main');
+  main.innerHTML = '';
+
+  let lastCat = '';
+  questions.forEach((q, i) => {
+    if (q.category !== lastCat) {
+      const div = document.createElement('div');
+      div.className = 'category-divider';
+      div.id = `cat-${i}`;
+      div.textContent = q.category;
+      div.style.display = i === 0 ? 'flex' : 'none';
+      main.appendChild(div);
+      lastCat = q.category;
+    }
+
+    const card = document.createElement('div');
+    card.className = 'question-card' + (i === 0 ? ' active' : '');
+    card.id = `q-${i}`;
+
+    const tagClass = q.tag === 'advanced' ? 'advanced' : q.tag === 'security' ? 'security' : q.tag === 'practical' ? 'practical' : '';
+
+    let codeBlock = q.code
+      ? `<div class="q-code">${escHtml(q.code)}</div>`
+      : '';
+
+    let opts = q.options.map((o, oi) => `
+      <div class="option" id="opt-${i}-${oi}" onclick="selectAnswer(${i}, ${oi})">
+        <div class="option-key">${'ABCD'[oi]}</div>
+        <div class="option-text">${o}</div>
+      </div>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="q-meta">
+        <span class="q-num">Q ${i + 1} of ${questions.length}</span>
+        <span class="q-tag ${tagClass}">${q.tag}</span>
+      </div>
+      <div class="question-text">${q.text}</div>
+      ${codeBlock}
+      <div class="options">${opts}</div>
+      <div class="explanation" id="exp-${i}">
+        <div class="ex-head">💡 Explanation</div>
+        <span class="correct-label">Correct: ${q.options[q.answer]}</span>
+        <p>${q.explanation}</p>
+        ${q.code ? `<div class="ex-code">${escHtml(q.code)}</div>` : ''}
+      </div>
+      <div class="nav-btns" id="nav-${i}" style="display:none">
+        ${i < questions.length - 1
+          ? `<button class="btn btn-primary" onclick="nextQuestion(${i})">Next Question →</button>`
+          : `<button class="btn btn-primary" onclick="showResult()">View Results 🎯</button>`
+        }
+      </div>
+    `;
+    main.appendChild(card);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function selectAnswer(qIdx, optIdx) {
+  const q = questions[qIdx];
+  const opts = document.querySelectorAll(`[id^="opt-${qIdx}-"]`);
+  opts.forEach(o => {
+    o.classList.add('disabled');
+    o.onclick = null;
+  });
+
+  if (optIdx === q.answer) {
+    opts[optIdx].classList.add('correct');
+    score++;
+  } else {
+    opts[optIdx].classList.add('wrong');
+    opts[q.answer].classList.add('correct');
+  }
+
+  answered++;
+  document.getElementById(`exp-${qIdx}`).classList.add('show');
+  document.getElementById(`nav-${qIdx}`).style.display = 'flex';
+  updateProgress();
+}
+
+function nextQuestion(current) {
+  document.getElementById(`q-${current}`).classList.remove('active');
+
+  const next = current + 1;
+  if (next < questions.length) {
+    // Show category divider if needed
+    const catDiv = document.getElementById(`cat-${next}`);
+    if (catDiv) catDiv.style.display = 'flex';
+
+    document.getElementById(`q-${next}`).classList.add('active');
+    document.getElementById(`q-${next}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+function updateProgress() {
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `${answered} / ${questions.length}`;
+  document.getElementById('score-badge').textContent = `Score: ${score}`;
+}
+
+function showResult() {
+  document.getElementById('quiz-main').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById('result-score-big').innerHTML = `${score}<span>/${questions.length}</span>`;
+  document.getElementById('stat-correct').textContent = score;
+  document.getElementById('stat-wrong').textContent = questions.length - score;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  let emoji, title, subtitle;
+  if (pct >= 90) { emoji='🏆'; title='Outstanding!'; subtitle='You\'re ready for senior DevOps roles.'; }
+  else if (pct >= 75) { emoji='🎯'; title='Great Work!'; subtitle='Strong NFS fundamentals — brush up the edge cases.'; }
+  else if (pct >= 55) { emoji='📚'; title='Good Progress!'; subtitle='Review the advanced topics and try again.'; }
+  else { emoji='💪'; title='Keep Practicing!'; subtitle='Revisit the NFS basics and work through the explanations.'; }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-subtitle').textContent = subtitle;
+  rs.scrollIntoView({ behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  score = 0;
+  answered = 0;
+  currentQ = 0;
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-main').style.display = 'block';
+  updateProgress();
+  buildQuiz();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+buildQuiz();
+updateProgress();
+</script>
+</body>
+</html>
