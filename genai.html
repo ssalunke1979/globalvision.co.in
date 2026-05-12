@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GenAI Learning Resources — DevOps Engineer Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --bg2: #161b27;
+    --bg3: #1e2535;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8eaf0;
+    --muted: #7b8299;
+    --faint: #4a5068;
+    --blue: #4f8ef7;
+    --blue-bg: rgba(79,142,247,0.10);
+    --blue-border: rgba(79,142,247,0.25);
+    --green: #3ecf8e;
+    --green-bg: rgba(62,207,142,0.10);
+    --purple: #a78bfa;
+    --purple-bg: rgba(167,139,250,0.10);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.10);
+    --red: #f87171;
+    --red-bg: rgba(248,113,113,0.10);
+    --teal: #2dd4bf;
+    --teal-bg: rgba(45,212,191,0.10);
+    --coral: #fb7185;
+    --coral-bg: rgba(251,113,133,0.10);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 0 0;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner {
+    max-width: 860px; margin: 0 auto; padding: 0 1.5rem;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text h1 { font-size: 17px; font-weight: 600; color: var(--text); }
+  .logo-text p { font-size: 12px; color: var(--muted); margin-top: 1px; }
+
+  .stats { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+  .stat { text-align: right; }
+  .stat-num { font-size: 20px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .stat-lbl { font-size: 11px; color: var(--muted); }
+
+  /* Nav filters */
+  .nav-filters { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 1px; }
+  .nav-filters::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    font-size: 12px; font-weight: 500;
+    padding: 7px 14px; border-radius: 8px 8px 0 0;
+    border: 1px solid transparent; border-bottom: none;
+    cursor: pointer; white-space: nowrap;
+    background: transparent; color: var(--muted);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .filter-btn:hover { color: var(--text); background: var(--bg3); }
+  .filter-btn.active {
+    background: var(--bg); color: var(--text);
+    border-color: var(--border2);
+    border-bottom-color: var(--bg);
+    margin-bottom: -1px;
+  }
+
+  /* Main */
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* Highlight box */
+  .highlight-box {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-left: 3px solid var(--blue);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .highlight-title {
+    font-size: 13px; font-weight: 600; color: var(--blue);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .highlight-box p { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 0.5rem; }
+  .highlight-box p:last-child { margin-bottom: 0; }
+  .highlight-box strong { color: var(--text); font-weight: 500; }
+
+  /* Section heading */
+  .section-heading {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 1rem; margin-top: 2rem;
+  }
+  .section-heading:first-child { margin-top: 0; }
+  .phase-dot {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; flex-shrink: 0;
+  }
+  .section-heading h2 { font-size: 14px; font-weight: 600; color: var(--text); }
+  .section-heading span { font-size: 12px; color: var(--muted); }
+
+  /* Resource card */
+  .resource-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 0;
+    margin-bottom: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  }
+  .resource-card:hover {
+    border-color: var(--border2);
+    background: var(--bg3);
+    transform: translateY(-1px);
+  }
+  .resource-card:active { transform: translateY(0); }
+
+  .card-inner {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 0;
+    align-items: stretch;
+  }
+
+  .card-icon-col {
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.1rem 0;
+    border-right: 1px solid var(--border);
+  }
+  .card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  .card-body { padding: 1rem 1.1rem; }
+  .card-title-row { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+  .must-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    background: var(--amber-bg); color: var(--amber);
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 99px; white-space: nowrap;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .card-by { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: #9ba3bf; line-height: 1.55; margin-bottom: 8px; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .ctag {
+    font-size: 11px; font-weight: 500; padding: 2px 8px;
+    border-radius: 99px; border: 1px solid transparent;
+  }
+
+  .card-meta {
+    display: flex; flex-direction: column; align-items: flex-end;
+    justify-content: space-between;
+    padding: 1rem 1.1rem 1rem 0; gap: 8px;
+    flex-shrink: 0;
+  }
+  .dur { font-size: 11px; color: var(--faint); font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .open-icon { color: var(--faint); font-size: 16px; }
+  .card-phase-strip {
+    height: 3px;
+  }
+
+  /* Paid note */
+  .paid-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    background: var(--purple-bg); color: var(--purple);
+    border: 1px solid rgba(167,139,250,0.25);
+    border-radius: 99px; white-space: nowrap;
+  }
+
+  /* Tips section */
+  .tips-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 2rem;
+  }
+  .tips-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+  .tip-item { display: flex; gap: 10px; margin-bottom: 0.85rem; font-size: 13px; color: #9ba3bf; line-height: 1.6; }
+  .tip-item:last-child { margin-bottom: 0; }
+  .tip-num {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--bg3); color: var(--muted);
+    font-size: 11px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .tip-item strong { color: var(--text); font-weight: 500; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 3rem 1rem; color: var(--muted); font-size: 14px; }
+
+  /* Footer */
+  footer { text-align: center; padding: 2rem 1rem; font-size: 12px; color: var(--faint); border-top: 1px solid var(--border); margin-top: 2rem; }
+
+  @media (max-width: 600px) {
+    .card-inner { grid-template-columns: 48px 1fr; }
+    .card-meta { display: none; }
+    .stats { gap: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo">
+        <div class="logo-icon">🧠</div>
+        <div class="logo-text">
+          <h1>GenAI Learning Resources</h1>
+          <p>DevOps Engineer Edition — curated for your stack</p>
+        </div>
+      </div>
+      <div class="stats">
+        <div class="stat"><div class="stat-num">18</div><div class="stat-lbl">Resources</div></div>
+        <div class="stat"><div class="stat-num">12</div><div class="stat-lbl">Free</div></div>
+        <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">Must-watch</div></div>
+      </div>
+    </div>
+    <div class="nav-filters">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All phases</button>
+      <button class="filter-btn" onclick="setFilter('p1',this)">Phase 1 — Foundations</button>
+      <button class="filter-btn" onclick="setFilter('p2',this)">Phase 2 — RAG & Agents</button>
+      <button class="filter-btn" onclick="setFilter('p3',this)">Phase 3 — MLOps</button>
+      <button class="filter-btn" onclick="setFilter('p4',this)">Phase 4 — Advanced</button>
+      <button class="filter-btn" onclick="setFilter('must',this)">⭐ Must-watch only</button>
+      <button class="filter-btn" onclick="setFilter('free',this)">Free only</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Highlight box -->
+  <div class="highlight-box">
+    <div class="highlight-title">📌 How to use this guide</div>
+    <p>The <strong>6 must-watch picks</strong> (marked ⭐) are the resources that, if you only had limited time, would give you the most per hour invested. Start with <strong>Karpathy's Deep Dive</strong> (3.5 hrs) and <strong>Andrew Ng's Prompt Engineering</strong> course (1.5 hrs) — those two alone cover the conceptual and practical foundations that everything else builds on.</p>
+    <p><strong>DeepLearning.AI</strong> has 57+ short courses on GenAI topics — prompt engineering, RAG, agents, LLMOps, fine-tuning, and evaluation — nearly all <strong>free and 1–2 hours each</strong>. Treat each one as a targeted module you take right before building the corresponding project, not to binge upfront.</p>
+    <p><strong>Karpathy's Deep Dive</strong> is a 3.5 hr general-audience video covering the full training stack — pretraining, supervised fine-tuning, and RLHF — along with practical mental models for hallucinations, tool use, and memory. The closest thing to authoritative ground truth on how LLMs work.</p>
+    <p>For <strong>Phase 3 (your biggest edge as a DevOps engineer)</strong>, there's a hands-on course that covers containerizing LangChain agents, setting up CI/CD pipelines, and deploying production-grade GenAI systems — skills you already have, applied to AI workloads.</p>
+    <p>The one <strong>paid course worth considering</strong> is the Udemy LLM Engineering course by Ed Donner — 20+ models, RAG, QLoRA fine-tuning, agents, HuggingFace, LangChain, and Gradio. Goes on sale for ~$15 regularly. If you want one single structured path, this is it.</p>
+  </div>
+
+  <div id="cards-root"></div>
+
+  <!-- Tips section -->
+  <div class="tips-section">
+    <div class="tips-title">🎯 Strategy for mastery</div>
+    <div class="tip-item"><div class="tip-num">1</div><div><strong>Courses are inputs. Projects are outputs.</strong> Every week, spend more time building than watching. A half-finished project handling real data is worth more than all courses completed with nothing built.</div></div>
+    <div class="tip-item"><div class="tip-num">2</div><div><strong>Follow the phase sequence.</strong> Phase 1 → Phase 2 → Phase 3. Don't jump to agents before you've built a working RAG system. Each phase's projects create the pain that motivates the next phase's solutions.</div></div>
+    <div class="tip-item"><div class="tip-num">3</div><div><strong>Your DevOps stack is a superpower.</strong> Most GenAI learners struggle with CI/CD, Docker, monitoring, and cost. You already know these — go deeper on the AI-specific parts and skip the ops pain everyone else suffers through.</div></div>
+    <div class="tip-item"><div class="tip-num">4</div><div><strong>Pair courses with docs.</strong> After each short course, read the official docs for the main tool used (Anthropic docs, LangChain docs, HuggingFace docs). Courses teach the concept; docs teach the production API.</div></div>
+    <div class="tip-item"><div class="tip-num">5</div><div><strong>Journal daily.</strong> Write what you built, what confused you, and one question. This is the practice that converts short-term exposure into long-term retention. Don't skip it.</div></div>
+  </div>
+
+</main>
+
+<footer>
+  Built for your 16-week GenAI journey · Click any card to open the resource · All links open in a new tab
+</footer>
+
+<script>
+const data = [
+  // Phase 1
+  {phase:'p1', must:true, free:true, icon:'🎬', iconBg:'#1a2744', accentColor:'#4f8ef7', phaseColor:'#4f8ef7',
+   title:'Deep Dive into LLMs like ChatGPT', by:'Andrej Karpathy · YouTube',
+   desc:'The single best 3.5-hr video on how LLMs work — pretraining, RLHF, hallucinations, tool use, and the psychology of LLMs. Made for general audience but goes technically deep. Closest thing to authoritative ground truth on the field.',
+   dur:'3h 31m', url:'https://www.youtube.com/watch?v=7xTGNNLPyMI',
+   tags:[{l:'LLM internals',bg:'#1a2744',c:'#4f8ef7'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p1', must:true, free:true, icon:'🎓', iconBg:'#1d2640', accentColor:'#a78bfa', phaseColor:'#4f8ef7',
+   title:'ChatGPT Prompt Engineering for Developers', by:'DeepLearning.AI · Andrew Ng + OpenAI',
+   desc:'Non-negotiable starting point. Covers system prompts, few-shot, chain-of-thought, summarization, inferring, transforming, expanding. Interactive Jupyter notebooks included. Do this on Day 7 of your schedule.',
+   dur:'~1.5h', url:'https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/',
+   tags:[{l:'Prompt engineering',bg:'#1d2640',c:'#a78bfa'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p1', must:false, free:true, icon:'⚡', iconBg:'#1a2744', accentColor:'#4f8ef7', phaseColor:'#4f8ef7',
+   title:'Intro to Large Language Models', by:'Andrej Karpathy · YouTube',
+   desc:'Original 1-hr talk — covers LLM OS mental model, security, jailbreaks, and future directions. Older but still the best high-level map of the field. Combine with the Deep Dive for full coverage.',
+   dur:'1h 0m', url:'https://www.youtube.com/watch?v=zjkBMFhNj_g',
+   tags:[{l:'Foundations',bg:'#1a2744',c:'#4f8ef7'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p1', must:false, free:true, icon:'📘', iconBg:'#1a2744', accentColor:'#4f8ef7', phaseColor:'#4f8ef7',
+   title:'Generative AI with LLMs', by:'DeepLearning.AI + AWS · Coursera',
+   desc:'Full 3-week course. Covers LLM lifecycle end-to-end: pretraining, fine-tuning, RLHF, deployment, and evaluation. Great for going deeper after short courses. AWS Labs are hands-on bonus. Free to audit.',
+   dur:'~16h', url:'https://www.coursera.org/learn/generative-ai-with-llms',
+   tags:[{l:'LLM lifecycle',bg:'#1a2744',c:'#4f8ef7'},{l:'Fine-tuning',bg:'#122b20',c:'#3ecf8e'},{l:'Free audit',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p1', must:false, free:true, icon:'🏫', iconBg:'#2a1f10', accentColor:'#f59e0b', phaseColor:'#4f8ef7',
+   title:'Generative AI for Beginners', by:'Microsoft · GitHub (21-lesson course)',
+   desc:'21-lesson free course on GitHub. Covers GenAI fundamentals, prompt engineering, responsible AI, AI app lifecycle, and LLMOps. Each lesson: short video + written content + code examples. Self-paced.',
+   dur:'Self-paced', url:'https://github.com/microsoft/generative-ai-for-beginners',
+   tags:[{l:'Structured path',bg:'#2a1f10',c:'#f59e0b'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  // Phase 2
+  {phase:'p2', must:true, free:true, icon:'🔍', iconBg:'#122b20', accentColor:'#3ecf8e', phaseColor:'#3ecf8e',
+   title:'Retrieval Augmented Generation (RAG)', by:'DeepLearning.AI',
+   desc:'The definitive RAG short course. Covers architecture, chunking strategies, embedding models, retrieval, and production evaluation with RAGAS. Covers naive vs advanced RAG patterns — exactly what you need before Phase 2 builds.',
+   dur:'~2h', url:'https://learn.deeplearning.ai/courses/retrieval-augmented-generation',
+   tags:[{l:'RAG',bg:'#122b20',c:'#3ecf8e'},{l:'Evaluation',bg:'#122b20',c:'#3ecf8e'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p2', must:true, free:true, icon:'🧩', iconBg:'#1d2640', accentColor:'#a78bfa', phaseColor:'#3ecf8e',
+   title:'Functions, Tools and Agents with LangChain', by:'DeepLearning.AI',
+   desc:'Covers function calling, tool creation, ReAct agent pattern, and conversational agents. Direct bridge from prompt engineering to building autonomous tools. Take this right before the Day 9 build.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/functions-tools-agents-langchain/',
+   tags:[{l:'Tool use',bg:'#1d2640',c:'#a78bfa'},{l:'Agents',bg:'#122b20',c:'#3ecf8e'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p2', must:false, free:true, icon:'🤖', iconBg:'#1d2640', accentColor:'#a78bfa', phaseColor:'#3ecf8e',
+   title:'AI Agents in LangGraph', by:'DeepLearning.AI + LangChain',
+   desc:'Build agentic systems with LangGraph — state machines, tool use, multi-step planning, and human-in-the-loop workflows. Best agent course for developers right now. Follow up to Functions & Tools.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/ai-agents-in-langgraph/',
+   tags:[{l:'Agents',bg:'#1d2640',c:'#a78bfa'},{l:'LangGraph',bg:'#1d2640',c:'#a78bfa'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p2', must:false, free:true, icon:'📦', iconBg:'#122b20', accentColor:'#3ecf8e', phaseColor:'#3ecf8e',
+   title:'LangChain: Chat with Your Data', by:'DeepLearning.AI',
+   desc:'Deep dive into RAG with LangChain specifically. Document loaders, text splitters, vector stores, retrieval chains. Best follow-up after the RAG fundamentals course if you want to go deeper with LangChain.',
+   dur:'~1.5h', url:'https://www.deeplearning.ai/short-courses/langchain-chat-with-your-data/',
+   tags:[{l:'RAG',bg:'#122b20',c:'#3ecf8e'},{l:'LangChain',bg:'#1d2640',c:'#a78bfa'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p2', must:false, free:true, icon:'🧠', iconBg:'#1a2744', accentColor:'#4f8ef7', phaseColor:'#3ecf8e',
+   title:'Understanding and Applying Text Embeddings', by:'DeepLearning.AI + Google',
+   desc:'What embeddings are, how they are created, cosine similarity, and how to use them in RAG and semantic search. Best conceptual foundation before building a vector database pipeline.',
+   dur:'~1.5h', url:'https://www.deeplearning.ai/short-courses/google-cloud-vertex-ai/',
+   tags:[{l:'Embeddings',bg:'#1a2744',c:'#4f8ef7'},{l:'Vector search',bg:'#1a2744',c:'#4f8ef7'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p2', must:false, free:false, icon:'🚀', iconBg:'#2a1f10', accentColor:'#f59e0b', phaseColor:'#3ecf8e',
+   title:'LLM Engineering: Master AI & LLMs', by:'Ed Donner · Udemy',
+   desc:'8-week hands-on bootcamp. 20+ models, RAG, QLoRA fine-tuning, agents, and multi-modal. Best paid comprehensive course available — covers HuggingFace, LangChain, and Gradio. Goes on sale for ~$15 regularly.',
+   dur:'~40h', url:'https://www.udemy.com/course/llm-engineering-master-ai-and-large-language-models/',
+   tags:[{l:'Comprehensive',bg:'#2a1f10',c:'#f59e0b'},{l:'Paid ~$15',bg:'#1d2640',c:'#a78bfa'}]},
+
+  // Phase 3
+  {phase:'p3', must:true, free:true, icon:'⚙️', iconBg:'#2a1f10', accentColor:'#f59e0b', phaseColor:'#f59e0b',
+   title:'LLMOps (Short Course)', by:'DeepLearning.AI + Google',
+   desc:'Covers the full LLMOps pipeline — versioning, automated evaluation, CI/CD for LLMs, and deployment. Most directly relevant course for a DevOps engineer. Your existing GitHub Actions knowledge maps directly.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/llmops/',
+   tags:[{l:'LLMOps',bg:'#2a1f10',c:'#f59e0b'},{l:'CI/CD for AI',bg:'#2a1f10',c:'#f59e0b'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p3', must:false, free:true, icon:'📊', iconBg:'#122b20', accentColor:'#3ecf8e', phaseColor:'#f59e0b',
+   title:'Evaluating and Debugging Generative AI', by:'DeepLearning.AI + Weights & Biases',
+   desc:'Evaluation metrics, W&B tracing, debugging LLM outputs, and production monitoring. Directly maps to your existing Grafana/observability mindset — same discipline, different toolchain.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/evaluating-debugging-generative-ai/',
+   tags:[{l:'Evaluation',bg:'#122b20',c:'#3ecf8e'},{l:'Observability',bg:'#122b20',c:'#3ecf8e'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p3', must:false, free:true, icon:'🐋', iconBg:'#1a2744', accentColor:'#4f8ef7', phaseColor:'#f59e0b',
+   title:'Serving LLMs in Production (vLLM + Docker)', by:'NVIDIA Dev Blog + YouTube',
+   desc:'Search YouTube for "vLLM tutorial production", "Ollama Docker deploy", and "TGI HuggingFace". NVIDIA\'s blog has the best intro to LLM serving concepts. No single course — learn from practitioner videos on each tool.',
+   dur:'Various', url:'https://developer.nvidia.com/blog/mastering-llm-techniques-inference-optimization/',
+   tags:[{l:'Inference serving',bg:'#1a2744',c:'#4f8ef7'},{l:'Docker',bg:'#1a2744',c:'#4f8ef7'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p3', must:false, free:true, icon:'🏭', iconBg:'#2a1f10', accentColor:'#f59e0b', phaseColor:'#f59e0b',
+   title:'Production Agentic RAG with LLMOps', by:'DecodingML / Paul Iusztin',
+   desc:'Open-source free course. GPU-accelerated retrieval, containerization, Kubernetes deployment for scalable RAG agents, CI/CD integration, and monitoring hooks. Where toy agents become maintainable services.',
+   dur:'Self-paced', url:'https://www.decodingai.com/p/llmops-for-production-agentic-rag',
+   tags:[{l:'K8s + AI',bg:'#2a1f10',c:'#f59e0b'},{l:'Production RAG',bg:'#2a1f10',c:'#f59e0b'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  // Phase 4
+  {phase:'p4', must:true, free:true, icon:'👥', iconBg:'#1d2640', accentColor:'#a78bfa', phaseColor:'#a78bfa',
+   title:'Multi AI Agent Systems with CrewAI', by:'DeepLearning.AI + CrewAI',
+   desc:'Build multi-agent pipelines where specialized agents collaborate. Role assignment, task delegation, tool sharing, agent communication patterns. Best introduction to orchestrating multiple LLMs together.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/multi-ai-agent-systems-with-crewai/',
+   tags:[{l:'Multi-agent',bg:'#1d2640',c:'#a78bfa'},{l:'CrewAI',bg:'#1d2640',c:'#a78bfa'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p4', must:false, free:true, icon:'🔒', iconBg:'#2b1515', accentColor:'#f87171', phaseColor:'#a78bfa',
+   title:'Red Teaming LLM Applications', by:'DeepLearning.AI',
+   desc:'Prompt injection, jailbreaking, data leakage, PII exposure, and defense strategies. Essential for anyone deploying AI in a production/DevOps context — same security mindset as your existing infra work.',
+   dur:'~1.5h', url:'https://www.deeplearning.ai/short-courses/red-teaming-llm-applications/',
+   tags:[{l:'AI security',bg:'#2b1515',c:'#f87171'},{l:'Guardrails',bg:'#2b1515',c:'#f87171'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+
+  {phase:'p4', must:false, free:true, icon:'🦙', iconBg:'#122b20', accentColor:'#3ecf8e', phaseColor:'#a78bfa',
+   title:'Fine-tuning LLMs with LoRA & QLoRA', by:'DeepLearning.AI',
+   desc:'When and why to fine-tune vs RAG, LoRA technique, data preparation, training on HuggingFace, and evaluation. Practical and avoids unnecessary math. Take this after you\'ve shipped a working RAG system.',
+   dur:'~2h', url:'https://www.deeplearning.ai/short-courses/finetuning-large-language-models/',
+   tags:[{l:'Fine-tuning',bg:'#122b20',c:'#3ecf8e'},{l:'LoRA',bg:'#122b20',c:'#3ecf8e'},{l:'Free',bg:'#122b20',c:'#3ecf8e'}]},
+];
+
+const phaseLabels = {
+  p1:'Phase 1 — Foundations & LLM Basics',
+  p2:'Phase 2 — RAG, Agents & Embeddings',
+  p3:'Phase 3 — MLOps & GenAIOps',
+  p4:'Phase 4 — Production & Advanced'
+};
+const phaseColors = {p1:'#4f8ef7',p2:'#3ecf8e',p3:'#f59e0b',p4:'#a78bfa'};
+const phaseDotBg = {p1:'#1a2744',p2:'#122b20',p3:'#2a1f10',p4:'#1d2640'};
+
+let currentFilter = 'all';
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+function render() {
+  const root = document.getElementById('cards-root');
+  let filtered = data.filter(r => {
+    if (currentFilter === 'all') return true;
+    if (currentFilter === 'free') return r.free;
+    if (currentFilter === 'must') return r.must;
+    return r.phase === currentFilter;
+  });
+
+  if (filtered.length === 0) {
+    root.innerHTML = '<div class="empty">No resources match this filter.</div>';
+    return;
+  }
+
+  let html = '';
+  let lastPhase = null;
+  for (const r of filtered) {
+    if ((currentFilter === 'all' || currentFilter === 'free' || currentFilter === 'must') && r.phase !== lastPhase) {
+      lastPhase = r.phase;
+      const col = phaseColors[r.phase];
+      const dotBg = phaseDotBg[r.phase];
+      html += `<div class="section-heading">
+        <div class="phase-dot" style="background:${dotBg};color:${col}">
+          ${r.phase==='p1'?'1':r.phase==='p2'?'2':r.phase==='p3'?'3':'4'}
+        </div>
+        <h2>${phaseLabels[r.phase]}</h2>
+      </div>`;
+    }
+
+    const mustBadge = r.must ? '<span class="must-badge">⭐ Must-watch</span>' : '';
+    const paidBadge = !r.free ? '<span class="paid-badge">Paid</span>' : '';
+    const tagsHtml = r.tags.map(t=>`<span class="ctag" style="background:${t.bg};color:${t.c};border-color:${t.c}22">${t.l}</span>`).join('');
+
+    html += `
+    <a class="resource-card" href="${r.url}" target="_blank" rel="noopener">
+      <div class="card-phase-strip" style="background:${r.phaseColor};grid-column:1/-1"></div>
+      <div class="card-inner">
+        <div class="card-icon-col">
+          <div class="card-icon" style="background:${r.iconBg}">${r.icon}</div>
+        </div>
+        <div class="card-body">
+          <div class="card-title-row">
+            <span class="card-title">${r.title}</span>
+            ${mustBadge}${paidBadge}
+          </div>
+          <div class="card-by">${r.by}</div>
+          <div class="card-desc">${r.desc}</div>
+          <div class="card-tags">${tagsHtml}</div>
+        </div>
+        <div class="card-meta">
+          <svg class="open-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span class="dur">${r.dur}</span>
+        </div>
+      </div>
+    </a>`;
+  }
+
+  root.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
+HTMLEOF
+echo "Done"
