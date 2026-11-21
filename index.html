@@ -6,10 +6,10 @@
   <meta name="description" content="Santosh Salunke - Sr. DevOps Engineer with 13+ years of experience in AWS, Azure, Kubernetes, Terraform and CI/CD.">
   <title>Santosh Salunke | Sr. DevOps Engineer</title>
 
-  <!-- Google Fonts (single combined request) -->
+  <!-- Google Fonts (Cinzel was used in CSS but never loaded - now included) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
 </head>
@@ -49,13 +49,8 @@
           </ul>
         </li>
 
-        <!-- Wedding invitation dropdown (now its own <li>) -->
-        <li class="dropdown">
-          <a href="#" aria-haspopup="true">Wedding Invitation</a>
-          <ul class="dropdown-menu">
-            <li><a href="wedding-invitation.html">Wedding Invitation</a></li>
-          </ul>
-        </li>
+        <!-- Wedding Invitation: plain link (file is in the repo root) -->
+        <li><a href="wedding-invitation.html">Wedding Invitation</a></li>
       </ul>
     </nav>
   </header>
@@ -64,7 +59,7 @@
     <!-- Hero Section -->
     <section class="hero">
       <div class="hero-content">
-        <img src="assets/profile.jpg" alt="Santosh Salunke" width="200" height="200">
+        <img src="assets/profile.jpg" alt="Santosh Salunke" width="180" height="180">
         <h1>Santosh Salunke</h1>
         <h2>Sr. DevOps Engineer</h2>
         <h3>Cybage Software Pvt. Ltd.</h3>
@@ -78,57 +73,48 @@
       <h2>Core Expertise</h2>
       <div class="skills-grid">
 
-        <!-- Azure -->
         <a class="card" href="https://azure.microsoft.com/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure logo" height="72" loading="lazy">
           <span>Cloud: Azure</span>
         </a>
 
-        <!-- AWS -->
         <a class="card" href="https://aws.amazon.com/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS logo" height="72" loading="lazy">
           <span>Cloud: AWS</span>
         </a>
 
-        <!-- Docker (Wikimedia logo; docker.com hotlink was unreliable) -->
         <a class="card" href="https://www.docker.com/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker logo" height="72" loading="lazy">
           <span>Docker &amp; Containers</span>
         </a>
 
-        <!-- CI/CD (internal page, same tab) -->
         <a class="card" href="cicd.html">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="Jenkins logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="Jenkins logo" height="72" loading="lazy">
           <span>CI/CD Pipelines</span>
         </a>
 
-        <!-- Terraform (wide logo: fix height, let width scale) -->
         <a class="card" href="https://www.terraform.io/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform logo" height="72" style="width:auto;" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform logo" height="72" loading="lazy">
           <span>Infrastructure as Code (Terraform &amp; Terragrunt)</span>
         </a>
 
-        <!-- Python -->
         <a class="card" href="https://www.python.org/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python logo" height="72" loading="lazy">
           <span>Python</span>
         </a>
 
-        <!-- Shell -->
         <a class="card" href="https://www.gnu.org/software/bash/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Bash logo" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Bash logo" height="72" loading="lazy">
           <span>Shell Scripting</span>
         </a>
 
-        <!-- EKS -->
         <a class="card" href="https://aws.amazon.com/eks/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (EKS)" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (EKS)" height="72" loading="lazy">
           <span>Amazon Elastic Kubernetes Service (EKS)</span>
         </a>
 
-        <!-- AKS -->
         <a class="card" href="https://azure.microsoft.com/en-us/products/kubernetes-service/" target="_blank" rel="noopener noreferrer">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (AKS)" width="72" height="72" loading="lazy">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (AKS)" height="72" loading="lazy">
           <span>Azure Kubernetes Service (AKS)</span>
         </a>
 
@@ -142,7 +128,21 @@
   </footer>
 
   <script>
+    // Footer year
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Dropdown: tap/click to open (hover does not work on phones)
+    document.querySelectorAll('.dropdown > a').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        link.parentElement.classList.toggle('open');
+      });
+    });
+    document.addEventListener('click', function (e) {
+      document.querySelectorAll('.dropdown.open').forEach(function (d) {
+        if (!d.contains(e.target)) d.classList.remove('open');
+      });
+    });
   </script>
 </body>
 </html>
