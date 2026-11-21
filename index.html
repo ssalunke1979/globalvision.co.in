@@ -3,15 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Santosh Salunke - Sr. DevOps Engineer with 13+ years of experience in AWS, Azure, Kubernetes, Terraform and CI/CD.">
   <title>Santosh Salunke | Sr. DevOps Engineer</title>
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Google Fonts (single combined request) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@400;700&family=Roboto+Slab:wght@400;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Navbar -->
+  <!-- Navbar -->
   <header>
     <nav class="navbar">
       <ul>
@@ -56,83 +60,89 @@
     </nav>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <img src="assets/profile.jpg" alt="Santosh Salunke">
-	  <h1>Santosh Salunke</h1> 
-      <h2>Sr. DevOps Engineer</h2>
-      <h3>Cybage Software Pvt. Ltd.</h3>
-      <p>13+ years of experience in building scalable, automated, and secure cloud solutions.</p>
-      <a href="about.html" class="btn">Explore My Work</a>
-    </div>
- </section> 
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <img src="assets/profile.jpg" alt="Santosh Salunke" width="200" height="200">
+        <h1>Santosh Salunke</h1>
+        <h2>Sr. DevOps Engineer</h2>
+        <h3>Cybage Software Pvt. Ltd.</h3>
+        <p>13+ years of experience in building scalable, automated, and secure cloud solutions.</p>
+        <a href="about.html" class="btn">Explore My Work</a>
+      </div>
+    </section>
 
-<section class="skills">
-  <h2>Core Expertise</h2>
-  <div class="skills-grid">
-    
-    <!-- Azure -->
-    <button class="card" onclick="window.location.href='https://azure.microsoft.com/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure Logo" width="72" height="72">
-      Cloud: Azure
-    </button>
+    <!-- Skills Section -->
+    <section class="skills">
+      <h2>Core Expertise</h2>
+      <div class="skills-grid">
 
-    <!-- AWS -->
-    <button class="card" onclick="window.location.href='https://aws.amazon.com/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS Logo" width="72" height="72">
-      Cloud: AWS
-    </button>
+        <!-- Azure -->
+        <a class="card" href="https://azure.microsoft.com/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" alt="Azure logo" width="72" height="72" loading="lazy">
+          <span>Cloud: Azure</span>
+        </a>
 
-    <!-- Docker -->
-    <button class="card" onclick="window.location.href='https://www.docker.com/'">
-      <img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker Logo" width="72" height="72">
-      Docker & Containers
-    </button>
+        <!-- AWS -->
+        <a class="card" href="https://aws.amazon.com/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg" alt="AWS logo" width="72" height="72" loading="lazy">
+          <span>Cloud: AWS</span>
+        </a>
 
-    <!-- CI/CD -->
-    <button class="card" onclick="window.location.href='cicd.html'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="CI/CD Logo" width="72" height="72">
-      CI/CD Pipelines
-    </button>
+        <!-- Docker (Wikimedia logo; docker.com hotlink was unreliable) -->
+        <a class="card" href="https://www.docker.com/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Docker_%28container_engine%29_logo.svg" alt="Docker logo" width="72" height="72" loading="lazy">
+          <span>Docker &amp; Containers</span>
+        </a>
 
-    <!-- Terraform -->
-	<button class="card" onclick="window.location.href='https://www.terraform.io/'">
-	<img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform Logo" width="172" height="72">
-	Infrastructure as Code (Terraform & Terragrunt)
-	</button>
+        <!-- CI/CD (internal page, same tab) -->
+        <a class="card" href="cicd.html">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e9/Jenkins_logo.svg" alt="Jenkins logo" width="72" height="72" loading="lazy">
+          <span>CI/CD Pipelines</span>
+        </a>
 
+        <!-- Terraform (wide logo: fix height, let width scale) -->
+        <a class="card" href="https://www.terraform.io/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Terraform_Logo.svg" alt="Terraform logo" height="72" style="width:auto;" loading="lazy">
+          <span>Infrastructure as Code (Terraform &amp; Terragrunt)</span>
+        </a>
 
-    <!-- Python + Shell (separated logos) -->
-    <button class="card" onclick="window.location.href='https://www.python.org/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python Logo" width="72" height="72">
-      Python
-    </button>
-    <button class="card" onclick="window.location.href='https://www.gnu.org/software/bash/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Shell Logo" width="72" height="72">
-      Shell Scripting
-    </button>
+        <!-- Python -->
+        <a class="card" href="https://www.python.org/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Python logo" width="72" height="72" loading="lazy">
+          <span>Python</span>
+        </a>
 
-    <!-- EKS -->
-    <button class="card" onclick="window.location.href='https://aws.amazon.com/eks/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes Logo" width="72" height="72">
-      Amazon Elastic Kubernetes Service (EKS)
-    </button>
+        <!-- Shell -->
+        <a class="card" href="https://www.gnu.org/software/bash/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/4/4b/Bash_Logo_Colored.svg" alt="Bash logo" width="72" height="72" loading="lazy">
+          <span>Shell Scripting</span>
+        </a>
 
-    <!-- AKS -->
-    <button class="card" onclick="window.location.href='https://azure.microsoft.com/en-us/products/kubernetes-service/'">
-      <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes Logo" width="72" height="72">
-      Azure Kubernetes Service (AKS)
-    </button>
+        <!-- EKS -->
+        <a class="card" href="https://aws.amazon.com/eks/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (EKS)" width="72" height="72" loading="lazy">
+          <span>Amazon Elastic Kubernetes Service (EKS)</span>
+        </a>
 
-  </div>
-</section>
+        <!-- AKS -->
+        <a class="card" href="https://azure.microsoft.com/en-us/products/kubernetes-service/" target="_blank" rel="noopener noreferrer">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/39/Kubernetes_logo_without_workmark.svg" alt="Kubernetes logo (AKS)" width="72" height="72" loading="lazy">
+          <span>Azure Kubernetes Service (AKS)</span>
+        </a>
 
-
+      </div>
+    </section>
+  </main>
 
   <!-- Footer -->
   <footer>
-    <p>© 2025 Santosh Salunke | DevOps Engineer | Powered by GitHub Pages</p>
+    <p>&copy; <span id="year">2026</span> Santosh Salunke | DevOps Engineer | Powered by GitHub Pages</p>
   </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
